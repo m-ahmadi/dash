@@ -1,0 +1,19 @@
+{
+  "name": "dash",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@repo.ravanertebat.com:ahmadi/argus-dashboard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "sway": "github:m-ahmadi/sway"
+  }
+}
