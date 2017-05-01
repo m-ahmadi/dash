@@ -5,7 +5,10 @@ require.config({
 	}
 });
 
-require(["./mediator"], (page) => {
+require([
+	"./mediator"
+], (page) => {
+	
 	
 	page.beforeReady();
 	
