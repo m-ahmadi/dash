@@ -4,3 +4,4 @@ release/*
 dist/css/*
 dist/js/*
 dist/index.html
+src/lib/*/

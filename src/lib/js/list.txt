@@ -1,6 +1,0 @@
-jquery
-bootstrap
-fastclick
-nprogress
-custom
-@ handlebars.runtime
