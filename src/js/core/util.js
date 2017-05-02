@@ -1,4 +1,13 @@
-var util = (function () {
+(function (exported) {
+	if (typeof define === "function" && define.amd) { // AMD
+		define(exported);
+	} else if (typeof process !== "undefined" &&
+			   typeof process.versions.node !== "undefined") { // Node, CommonJS-like
+		module.exports = exported; 
+	} else {
+		window.util = exported;
+	}
+}((function () {
 	if (typeof Object.create !== 'function') {
 		Object.create = function (o) {
 			function F() {}
@@ -259,11 +268,4 @@ var util = (function () {
 		getFirstCommentInside: getFirstCommentInside,
 		getEls: getEls
 	};
-
-}());
-
-if (typeof define === 'function' && define.amd) {
-	define(util);
-} else if (typeof process !== "undefined" && typeof process.versions.node !== "undefined") {
-	module.exports = util;
-}
+}())));
