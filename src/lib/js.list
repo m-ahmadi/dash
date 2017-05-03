@@ -10,17 +10,5 @@ nprogress/nprogress
 
 Chart.js/dist/Chart
 
-Flot/jquery.flot
-Flot/jquery.flot.pie
-Flot/jquery.flot.time
-Flot/jquery.flot.stack
-Flot/jquery.flot.resize
-
-flot.orderbars/js/jquery.flot.orderBars
-flot-spline/js/jquery.flot.spline
-flot.curvedlines/curvedLines
-
-DateJS/build/date
-
 custom
 @ handlebars/handlebars.runtime
