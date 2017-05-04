@@ -183,8 +183,8 @@ $(document).ready(function () {
 		var elems = Array.prototype.slice.call(document.querySelectorAll('.js-switch'));
 		elems.forEach(function (html) {
 			var switchery = new Switchery(html, {
-					color: '#26B99A'
-				});
+				color: '#26B99A'
+			});
 		});
 	}
 });
@@ -2497,10 +2497,10 @@ function init_charts() {
 		};
 
 		var canvasDoughnut = new Chart(ctx, {
-				type: 'doughnut',
-				tooltipFillColor: "rgba(51, 51, 51, 0.55)",
-				data: data
-			});
+			type: 'doughnut',
+			tooltipFillColor: "rgba(51, 51, 51, 0.55)",
+			data: data
+		});
 
 	}
 
