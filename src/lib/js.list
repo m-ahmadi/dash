@@ -1,14 +1,16 @@
 jquery/dist/jquery
 moment/moment
+fastclick/lib/fastclick
+nprogress/nprogress
 
 bootstrap/dist/js/bootstrap
 bootstrap-progressbar/bootstrap-progressbar
 bootstrap-daterangepicker/daterangepicker
 
-fastclick/lib/fastclick
-nprogress/nprogress
+
 
 Chart.js/dist/Chart
+echarts/dist/echarts
 
 custom
 @ handlebars/handlebars.runtime

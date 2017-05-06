@@ -26,6 +26,7 @@
     "font-awesome": "^4.7.0",
     "chart.js": "2.0.2",
     "bootstrap-progressbar": "^0.9.0",
-    "moment": "^2.18.1"
+    "moment": "^2.18.1",
+    "echarts": "^3.5.4"
   }
 }
