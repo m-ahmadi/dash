@@ -12,5 +12,8 @@ bootstrap-daterangepicker/daterangepicker
 Chart.js/dist/Chart
 echarts/dist/echarts
 
-custom
+jQuery-Smart-Wizard/js/jquery.smartWizard
+iCheck/icheck
+
+// custom
 @ handlebars/handlebars.runtime
