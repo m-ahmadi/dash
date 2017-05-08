@@ -220,6 +220,7 @@
 	}
 	function getEls(root, obj) {
 		let o = {};
+		o.root = $(root);
 		$(root+" [data-el]").each((i, domEl) => {
 			let jEl = $(domEl);
 			o[ jEl.data("el") ] = jEl; 

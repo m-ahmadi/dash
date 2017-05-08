@@ -1,13 +1,12 @@
 define([
 	"core/util",
 	"core/pubsub",
-	"./smartresize",
+	"./globals/smartresize",
 	"./globals/main",
 	"./sidebar",
-	"./daterangepicker",
-	"./smartwizard",
+	"wizard/mediator",
 	"./templates"
-], (u, newPubSub, smartresize, globals, sidebar, daterangepicker, smartwizard) => {
+], (u, newPubSub, smartresize, globals, sidebar, wizard) => {
 	
 	const inst = u.extend( newPubSub() );
 	
@@ -21,8 +20,7 @@ define([
 	function onReady() {
 		sidebar.init();
 		globals();
-		daterangepicker.right();
-		smartwizard();
+		wizard.init();
 		
 		addCustomEvts();
 	}

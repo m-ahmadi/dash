@@ -1,0 +1,19 @@
+jquery/dist/jquery
+moment/moment
+fastclick/lib/fastclick
+nprogress/nprogress
+
+bootstrap/dist/js/bootstrap
+bootstrap-progressbar/bootstrap-progressbar
+bootstrap-daterangepicker/daterangepicker
+
+
+
+Chart.js/dist/Chart
+echarts/dist/echarts
+
+jQuery-Smart-Wizard/js/jquery.smartWizard
+iCheck/icheck
+
+// custom
+@ handlebars/handlebars.runtime
