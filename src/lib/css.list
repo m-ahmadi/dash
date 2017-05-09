@@ -1,13 +1,5 @@
 byekan-fontface
-
+materialize-color
 font-awesome/css/font-awesome
-
-bootstrap/dist/css/bootstrap
-
+uikit/dist/css/uikit
 nprogress/nprogress
-
-bootstrap-daterangepicker/daterangepicker
-
-iCheck/skins/flat/green
-
-custom

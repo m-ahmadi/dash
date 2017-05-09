@@ -1,14 +1,3 @@
-require.config({
-	baseUrl: "js/",
-	paths: {
-		lib: "../lib"
-	}
-});
-
-require(["./mediator"], (page) => {
-	page.beforeReady();
-	
-	function dummy() {
 var data = {
     labels: ["January", "February", "March", "April", "May", "June", "July"],
     datasets: [
@@ -77,10 +66,4 @@ scales: {
 	}]
 }
 }
-});
-	}
-	$(function () {
-		page.onReady();
-		dummy();
-	});
 });

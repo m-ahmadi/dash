@@ -1,32 +1,19 @@
 define([
-	"core/util",
-	"core/pubsub",
-	"./globals/smartresize",
-	"./globals/main",
-	"./sidebar",
-	"wizard/mediator",
-	"./templates"
-], (u, newPubSub, smartresize, globals, sidebar, wizard) => {
-	
+	"content/mediator",
+	"templates"
+], (content) => {
 	const inst = u.extend( newPubSub() );
 	
-	
-	function addCustomEvts() {
+	function customEvents() {
 		
 	}
-	function beforeReady() {
-		smartresize();
-	}
-	function onReady() {
-		sidebar.init();
-		globals();
-		wizard.init();
+	inst.beforeReady = () => {
 		
-		addCustomEvts();
-	}
-	
-	inst.beforeReady = beforeReady;
-	inst.onReady = onReady;
+	};
+	inst.onReady = () => {
+		content.init();
+		customEvents();
+	};
 	
 	return inst;
 });

@@ -1,7 +1,4 @@
-define([
-	"core/util",
-	"core/pubsub"
-], (u, newPubSub) => {
+define([], () => {
 	const inst = u.extend( newPubSub() );
 	
 	function init() {

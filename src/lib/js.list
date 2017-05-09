@@ -1,19 +1,15 @@
+util-ma/util-ma
+pubsub-ma/pubsub-ma
 jquery/dist/jquery
-moment/moment
+uikit/dist/js/uikit
+uikit/dist/js/uikit-icons
+
 fastclick/lib/fastclick
+
 nprogress/nprogress
 
-bootstrap/dist/js/bootstrap
-bootstrap-progressbar/bootstrap-progressbar
-bootstrap-daterangepicker/daterangepicker
+chart.js/dist/chart
+highcharts/highstock
+highcharts/modules/exporting
 
-
-
-Chart.js/dist/Chart
-echarts/dist/echarts
-
-jQuery-Smart-Wizard/js/jquery.smartWizard
-iCheck/icheck
-
-// custom
 @ handlebars/handlebars.runtime
