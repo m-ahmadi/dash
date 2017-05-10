@@ -1,0 +1,21 @@
+{
+  type: "graph-sensor" | "sla-violation-ratio" | "sla-violation-stats" | "map"
+  group: "ipbb" | "PSSwitch" | "CallCenter" | "Charging"
+  timeline: timestamp | "formated string"
+  device: ""
+  service: ""
+  sensor: ""
+  mapType: "topology" | "dta"
+}
+
+getComponents()
+addComponent()
+editComponent()
+removeComponent()
+
+
+
+???
+get device list for group
+get service list for a device
+get sensor list for a service
