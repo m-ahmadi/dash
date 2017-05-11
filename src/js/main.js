@@ -10,6 +10,5 @@ require(["./mediator"], (page) => {
 	
 	$(function () {
 		page.onReady();
-		
 	});
 });

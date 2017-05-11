@@ -24,14 +24,21 @@ define([
 	
 	let k = "";
 	k += "uk-width-1-1@s ";
-	k += "uk-width-1-2@m ";
+	k += "uk-width-1-1@m ";
 	k += "uk-width-1-2@l ";
 	k += "uk-width-1-2@xl ";
-	k += "uk-width-1-2@xll";
+	function viewport() {
+		const w = window.innerWidth;
+		return w > 0     && w < 640   ? 0 :
+			   w >= 640  && w <= 960  ? 0 :
+			   w >= 960  && w <= 1200 ? 1 :
+			   w >= 1200 && w <= 1600 ? 2 :
+			   w >= 1600 ? 3 : false;
+	}
+	
+	window.viewport = viewport;
 	function shrink(el) {
-		if ( el.hasClass(k) ) {
-			el.removeClass(k);
-		}
+		el.removeClass(k);
 	}
 	function expand(el) {
 		if ( !el.hasClass(k) ) {

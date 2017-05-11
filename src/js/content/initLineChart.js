@@ -1,6 +1,6 @@
 define(() => {
 	return (container) => {
-		var data = {
+		/* var data = {
 			labels: ["January", "February", "March", "April", "May", "June", "July"],
 			datasets: [
 				{
@@ -29,8 +29,9 @@ define(() => {
 		};
 		var myLineChart = new Chart(container, {
 			type: 'line',
-			data: data
-		});
+			data: data,
+			options: {responsive:  true}
+		}); */
 		
 		
 		
@@ -39,12 +40,59 @@ define(() => {
 		
 		
 		
-		/* var seriesOptions = [],
-			seriesCounter = 0,
-			names = ['MSFT', 'AAPL', 'GOOG'];
-			
+		/* Highcharts.chart(container[0], {
+
+		title: {
+			text: 'Solar Employment Growth by Sector, 2010-2016'
+		},
+
+		subtitle: {
+			text: 'Source: thesolarfoundation.com'
+		},
+
+		yAxis: {
+			title: {
+				text: 'Number of Employees'
+			}
+		},
+		legend: {
+			layout: 'vertical',
+			align: 'right',
+			verticalAlign: 'middle'
+		},
+
+		plotOptions: {
+			series: {
+				pointStart: 2010
+			}
+		},
+
+		series: [{
+			name: 'Installation',
+			data: [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175]
+		}, {
+			name: 'Manufacturing',
+			data: [24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434]
+		}, {
+			name: 'Sales & Distribution',
+			data: [11744, 17722, 16005, 19771, 20185, 24377, 32147, 39387]
+		}, {
+			name: 'Project Development',
+			data: [null, null, 7988, 12169, 15112, 22452, 34400, 34227]
+		}, {
+			name: 'Other',
+			data: [12908, 5948, 8105, 11248, 8989, 11816, 18274, 18111]
+		}]
+
+	}); */
+		
+		
+		var seriesOptions = [],
+		seriesCounter = 0,
+		names = ['MSFT', 'AAPL', 'GOOG'];
 		function createChart() {
-			Highcharts.stockChart(container, {
+
+			Highcharts.stockChart(container[0], {
 
 				rangeSelector: {
 					selected: 4
@@ -82,7 +130,7 @@ define(() => {
 
 		$.each(names, function (i, name) {
 
-			$.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=' + name.toLowerCase() + '-c.json&callback=?', function (data) {
+			$.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=' + name.toLowerCase() + '-c.json&callback=?',    function (data) {
 
 				seriesOptions[i] = {
 					name: name,
@@ -97,10 +145,7 @@ define(() => {
 					createChart();
 				}
 			});
-		}); */
-		
-		
-		
+		});
 		
 		
 		
