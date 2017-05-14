@@ -1,5 +1,6 @@
-User:	reza.sad
+NEEDS BITDEFENDER ANTIVIRUS AND UPDATED
 
+User:	reza.sad
 Pass:	qwer12#$
 	Monaliz~a
 
@@ -9,3 +10,8 @@ vpngw2.mtnirancell.ir
 
 http://10.233.50.134/
 http://10.131.65.116:5000/#/accounts/login
+
+
+argus:
+admin
+123123

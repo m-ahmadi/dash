@@ -1,8 +1,7 @@
 .panel {
-	// border: 1px solid #d0d0d0;
 	box-shadow: 0px 0px 10px -1px rgba(0,0,0, 0.4);
-	// padding: 4px 6px;
-	padding: 0 20px;
+	padding: 0 25px;
+	
 	.uk-card-body {
 		padding: 0;
 	}
@@ -14,7 +13,7 @@
 		line-height: 1;
 	}
 	.uk-card-header {
-		padding: 5px 2px;
+		padding: 5px 0;
 	}
 	
 	[uk-dropdown] {

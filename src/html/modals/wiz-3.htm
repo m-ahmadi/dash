@@ -1,7 +1,7 @@
 <div id="modal_wiz3" class="wizard" uk-modal="center: true; esc-close: false; bg-close: false;" data-root="wiz3">
 	<div class="uk-modal-dialog">
 		<div class="uk-modal-header">
-			<h2 class="uk-modal-title uk-heading-bullet uk-text-bold uk-text-muted">Dashboard Setup</h2>
+			<h2 class="uk-modal-title uk-heading-bullet uk-text-bold uk-text-muted">Widget Setup</h2>
 			<h4 class="uk-text-muted">Provide details</h4>
 		</div>
 		<div class="uk-modal-body">
@@ -21,17 +21,17 @@
 				</div>
 				
 				<div class="uk-margin-small">
-					<label class="uk-form-label uk-text-center">Timeline:</label>
+					<label class="uk-form-label uk-text-center">Range:</label>
 					<div class="uk-form-controls">
-						<label class="uk-text-small">From</label>
+						<label>Last</label>
 						<input type="number" min="1" value="15" class="uk-input uk-width-1-4"/>
 						<select class="uk-select uk-width-1-4">
-							<option>minute</option>
-							<option>day</option>
-							<option>month</option>
-							<option>year</option>
+							<option>Minute</option>
+							<option>Hour</option>
+							<option>Day</option>
+							<option>Week</option>
 						</select>
-						<label class="uk-text-small">(s) ago until now.</label>
+						<label>(s)</label>
 					</div>
 				</div>
 			</form>

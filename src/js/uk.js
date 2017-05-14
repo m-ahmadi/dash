@@ -70,7 +70,7 @@ define(() => {
 				message:  icon +" "+ (msg || DEFAULT_MSG),
 				status:   status,
 				timeout:  u.isNum(timeout) ? timeout : 1000,
-				pos:      pos     || "bottom-right"
+				pos:      pos || "top-left"
 			});
 			
 			return res;
@@ -114,5 +114,6 @@ define(() => {
 	inst.closeModal = closeModal;
 	inst.openModal = openModal;
 	
+	window.uk = inst;
 	return inst;
 });
