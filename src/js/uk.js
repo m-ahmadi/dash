@@ -70,7 +70,7 @@ define(() => {
 				message:  icon +" "+ (msg || DEFAULT_MSG),
 				status:   status,
 				timeout:  u.isNum(timeout) ? timeout : 1000,
-				pos:      pos || "top-left"
+				pos:      pos || "top-right"
 			});
 			
 			return res;

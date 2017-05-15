@@ -24,12 +24,12 @@
 					<label class="uk-form-label uk-text-center">Range:</label>
 					<div class="uk-form-controls">
 						<label>Last</label>
-						<input type="number" min="1" value="15" class="uk-input uk-width-1-4"/>
-						<select class="uk-select uk-width-1-4">
-							<option>Minute</option>
-							<option>Hour</option>
-							<option>Day</option>
-							<option>Week</option>
+						<input type="number" min="1" value="15" class="uk-input uk-width-1-4" data-el="rangeCount" data-els="toDisable"/>
+						<select class="uk-select uk-width-1-4" data-el="rangeType" data-els="toDisable">
+							<option value="m">Minute</option>
+							<option value="h">Hour</option>
+							<option value="d">Day</option>
+							<option value="w">Week</option>
 						</select>
 						<label>(s)</label>
 					</div>

@@ -1,20 +1,24 @@
 define([
+	"config",
+	"token",
 	"uk",
 	"./wizard/main",
 	"./widget/main"
 ], (
+	conf,
+	token,
 	uk,
 	wizard,
 	widget
 ) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='content']";
-	const BODY = "[data-container]"
-	
-	let els;
+	const BODY = "[data-container]";
 	const temp = Handlebars.templates;
-	
+	const MSG = "Processing your request...";
+	let els, processNote;
 	let k = "";
+	
 	k += "uk-width-1-1@s ";
 	k += "uk-width-1-1@m ";
 	k += "uk-width-1-2@l ";
@@ -39,34 +43,28 @@ define([
 			el.find(BODY).highcharts().setSize();
 		}
 	}
-	function gen() {
-		var o = {
-			sla:      u.randInt(10, 100),
-			kpiName:  u.randInt(10, 100),
-			severity: u.randInt(10, 100),
-			value:    u.randInt(10, 100)
-		};
-		return o;
-	}
 	function initJqSortable() {
-		els.components.sortable({
+		els.widgets.sortable({
 			items: "> div.panel",
 			handle: ".uk-sortable-handle"
 		});
 	}
+	
 	function addCustomEvt() {
-		wizard.on("submit", (e) => {
-			console.log(e);
+		let cb;
+		wizard.on("submited", e => {
+			cb = e.cb;
+			processNote = uk.note.process(MSG, 0, "top-center");
+			widget.add(e, els.widgets);
 		});
-		/*
-			result  =  device/:device_id/detail
-			forEach result.circuits as circuit
-				if
-					circuit.ServiceForward == service_id    ||
-					circuit.ServiceBackward === service_id
-				then
-					return circuit.ID
-		*/
+		widget.on("no_circuit_id", e => {
+			processNote.close();
+			wizard.msgAlert(2, e);
+			cb();
+		});
+		widget.on("added", e => {
+			
+		});
 	}
 	inst.init = () => {
 		els = u.getEls(ROOT);
@@ -86,7 +84,6 @@ define([
 		});
 		
 		wizard.init();
-		widget.init();
 		addCustomEvt();
 	};
 	
