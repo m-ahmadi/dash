@@ -2,9 +2,12 @@ body {
 	width: 100%;
 	margin: 0 auto;
 	font: 'BYekan', Tahoma, "Helvetica Neue", Helvetica, Arial, sans-serif;
+	background: #ffffec;
 	// direction: rtl;
 }
-
+#content {
+	background: #ffffec;
+}
 @import "panel";
 @import "wizard";
 @import "util";

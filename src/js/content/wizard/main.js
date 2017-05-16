@@ -7,11 +7,6 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 	const WIZ_3 = "[data-root='wiz3']";
 	const WIZ_4 = "[data-root='wiz4']";
 	const temp = Handlebars.templates;
-	const MSG = [
-		"Could not find CIRCUIT_ID of the selected service. ",
-		"(circuits empty)",
-		"(not found in circuits)"
-	];
 	let wiz1, wiz2, wiz3, wiz4;
 	const d = { // defaults
 		TYPE: 0,
@@ -37,52 +32,73 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 		]
 	};
 	const DATE_FORMAT = "Y/MM/DD HH:mm";
-	let data;
-
+	let data, openedModal;
+	
+	const newEmpty = () => {
+		return {
+			id: undefined,
+			name: undefined
+		}
+	};
 	function reset() {
 		data = {
 			widgetType: d.TYPE,
 			startDate: moment().subtract(d.RANGE_COUNT, d.RANGE_TYPE).format(DATE_FORMAT),
 			endDate: moment().format(DATE_FORMAT),
+			rangeTitle: getRangeTitle(d.RANGE_TYPE, d.RANGE_COUNT),
 			mapType: d.MAP,
-			device: undefined,
-			service: undefined,
-			sensor: undefined
+			device: newEmpty(),
+			service: newEmpty(),
+			sensor: newEmpty()
 		};
 		wiz1.radios.eq(d.TYPE).prop({checked: true});
 		wiz2.selects.val(null).trigger("change");
+		wiz2.rangeType.find("option[value='m']").prop({selected: true});
 		wiz2.toAppendAlert.find(".uk-alert-danger").remove();
 		wiz2.submit.attr({disabled: true});
 		wiz2.service.attr({disabled: true});
 		wiz2.sensor.attr({disabled: true});
 	}
+	function open(str) {
+		openedModal = str;
+		uk.openModal(str);
+	}
+	function close() {
+		uk.closeModal(openedModal);
+	}
 	function start() {
 		reset();
-		uk.openModal(WIZ_1);
+		open(WIZ_1);
+	}
+	function alertMsg(w, msg) {
+		let set;
+		switch (w) {
+			case 2: set = wiz2; break;
+			case 3: set = wiz3; break;
+			case 4: set = wiz4; break;
+		}
+		set.toAppendAlert.append( temp.alert({message: msg}) );
+	}
+	function getRangeTitle(type, count) {
+		let s = "Last ";
+		s += count > 1 ? `${count} ` : "";
+		switch (type) {
+			case "m": s += "Minute"; break;
+			case "h": s += "Hour"; break;
+			case "d": s += "Day"; break;
+			case "w": s += "Week"; break;
+		}
+		s+= count > 1 ? "s" : "";
+		return s;
 	}
 	function getUrl(type) {
 		let route;
 		switch (type) {
 			case 0: route = "device/search"; break;
 			case 1: route = "device/service/search"; break;
-			case 2: route = "device/service/kpilist"; break;
+			case 2: route = "device/kpilist"; break;
 		}
 		return conf.BASE + route + token();
-	}
-	function _initSelect2(el, type, toEnable) {
-		const key = d.INPUT[type];
-		el.select2({
-			width: "100%",
-			placeholder: "Select an option",
-			data: [{id: 1330557, text: "Skylight VCX Controller"}, {id: 1643887, text: "NID164-T2730-T2736"}],
-			multiple: false,
-			minimumInputLength: 0,
-		})
-		.on("select2:select", () => {
-			const s = el.select2("data")[0].id;
-			data[key] = parseInt(s, 10);
-			if (toEnable) { toEnable.attr({disabled: false}); }
-		});
 	}
 	function initSelect2(el, type, toEnable, resKey, toClear, toDisable) {
 		const key = d.INPUT[type];
@@ -90,7 +106,7 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 			width: "100%",
 			placeholder: "Select an option",
 			ajax: {
-				method: type === 0 ? "GET" : "POST",
+				method: type === 1 ? "POST" : "GET",
 				url: getUrl(type),
 				dataType: "json",
 				delay: 250,
@@ -103,9 +119,9 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 					if (type === 0) {
 						// nothing
 					} else if (type === 1) {
-						o.device_ids = JSON.stringify([data.device]);
+						o.device_ids = JSON.stringify([data.device.id]);
 					} else if (type === 2) {
-						o.services = JSON.stringify([data.service]);
+						o.services = JSON.stringify([data.service.id]);
 					}
 					return o;
 				},
@@ -135,8 +151,9 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 			minimumInputLength: 0
 		})
 		.on("select2:select", () => {
-			const s = el.select2("data")[0].id;
-			data[key] = parseInt(s, 10);
+			const id = el.select2("data")[0].id;
+			data[key].id = parseInt(id, 10);
+			data[key].name = el.select2("data")[0].text;
 			if (toEnable) {
 				toEnable.attr({disabled: false});
 			}
@@ -146,7 +163,7 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 			}
 		})
 		.on("change", () => {
-			data[key] = undefined;
+			data[key] = newEmpty();
 		});
 	}
 	function rangeType(e) {
@@ -171,23 +188,12 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 			}
 		}
 	}
-	function getDate(inp1, inp2) {
-		if (inp1 && inp2) {
-			return moment().subtract(inp1.val(), inp2.val()).format(DATE_FORMAT);
+	function getDate(type, count) {
+		if (type, count) {
+			return moment().subtract(type, count).format(DATE_FORMAT);
 		} else {
 			return moment().format(DATE_FORMAT);
 		}
-	}
-	function msgAlert(w, t) {
-		let set;
-		switch (w) {
-			case 2: set = wiz2; break;
-			case 3: set = wiz3; break;
-			case 4: set = wiz4; break;
-		}
-		const m = t === 1 ? MSG[0]+MSG[1] :
-				  t === 2 ? MSG[0]+MSG[2] : "Say whaat?";
-		set.toAppendAlert.append( temp.alert({message: m}) );
 	}
 	function init() {
 		wiz1 = u.getEls(WIZ_1);
@@ -206,18 +212,15 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 			const type = parseInt(checked, 10);
 			data.widgetType = type;
 			switch (type) {
-				case 0: uk.openModal(WIZ_2); break;
-				case 1: uk.openModal(WIZ_3); break;
-				case 2: uk.openModal(WIZ_3); break;
-				case 3: uk.openModal(WIZ_4); break; 
+				case 0: open(WIZ_2); break;
+				case 1: open(WIZ_3); break;
+				case 2: open(WIZ_3); break;
+				case 3: open(WIZ_4); break; 
 			}
-			
 		});
-		wiz2.prev.on( "click", () => uk.openModal(WIZ_1) );
-		wiz3.prev.on( "click", () => uk.openModal(WIZ_1) );
-		wiz4.prev.on( "click", () => uk.openModal(WIZ_1) );
-		
-		
+		wiz2.prev.on( "click", () => open(WIZ_1) );
+		wiz3.prev.on( "click", () => open(WIZ_1) );
+		wiz4.prev.on( "click", () => open(WIZ_1) );
 		
 		wiz2.rangeType.on("change", rangeType);
 		wiz2.rangeCount.on("keyup", rangeCount);
@@ -227,8 +230,9 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 			wiz2.submit.attr({disabled: true});
 		});
 		wiz2.submit.on("click", () => {
-			data.startDate = getDate(wiz2.rangeCount, wiz2.rangeType);
+			data.startDate = getDate(wiz2.rangeCount.val(), wiz2.rangeType.val());
 			data.endDate = getDate();
+			data.rangeTitle = getRangeTitle(wiz2.rangeType.val(), wiz2.rangeCount.val());
 			
 			wiz2.toDisable.attr({disabled: true});
 			data.cb = () => wiz2.toDisable.attr({disabled: false});
@@ -247,9 +251,10 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 		});
 	}
 	
-	inst.msgAlert = msgAlert;
+	inst.alertMsg = alertMsg;
 	inst.init = init;
 	inst.start = start;
+	inst.close = close;
 	
 	window.dool = () => {return data};
 	return inst;

@@ -35,11 +35,13 @@ define([
 	
 	function shrink(el) {
 		el.removeClass(k);
+		el.find("[data-resize]").html(temp.btnExpand);
 		el.find(BODY).highcharts().setSize();
 	}
 	function expand(el) {
 		if ( !el.hasClass(k) ) {
 			el.addClass(k);
+			el.find("[data-resize]").html(temp.btnShrink);
 			el.find(BODY).highcharts().setSize();
 		}
 	}
@@ -49,7 +51,6 @@ define([
 			handle: ".uk-sortable-handle"
 		});
 	}
-	
 	function addCustomEvt() {
 		let cb;
 		wizard.on("submited", e => {
@@ -57,13 +58,17 @@ define([
 			processNote = uk.note.process(MSG, 0, "top-center");
 			widget.add(e, els.widgets);
 		});
-		widget.on("no_circuit_id", e => {
+		widget.on("error", e => {
 			processNote.close();
-			wizard.msgAlert(2, e);
+			if (e && e.set && e.msg) {
+				wizard.alertMsg(e.set, e.msg);
+			}
 			cb();
 		});
 		widget.on("added", e => {
-			
+			processNote.close();
+			cb();
+			wizard.close();
 		});
 	}
 	inst.init = () => {
