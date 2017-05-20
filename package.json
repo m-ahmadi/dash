@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "server": "node scripts/server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -14,6 +15,9 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "express": "^4.15.3",
+    "mongodb": "^2.2.26",
+    "mysql": "^2.13.0",
     "sway": "github:m-ahmadi/sway"
   }
 }

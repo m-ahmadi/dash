@@ -32,7 +32,13 @@ define([
 			   w >= 1600 ? 3 : false;
 	} */
 	
-	
+	function fetchAll() {
+		/* $.ajax({
+			url: "127.0.0.1:2000/widget/fetchAll"
+		})
+		.done()
+		.fail(); */
+	}
 	function shrink(el) {
 		el.removeClass(k);
 		el.find("[data-resize]").html(temp.btnExpand);

@@ -22,6 +22,14 @@ define([
 	function uid() {
 		return "w" + (counter+=1);
 	}
+	function save() {
+		$.ajax({
+			url: "127.0.0.1:2000/widget/add",
+			data: {}
+		})
+		.done()
+		.fail();
+	}
 	function findCircuitId(cb) {
 		const deviceId = e.device.id;
 		const tok = token();
@@ -105,16 +113,31 @@ define([
 			case 3: map(container); break;
 		}
 	}
-	function add(data, parent_, cb) {
+	function add(data, toAppend,) {
 		e = data;
-		parent = parent_;
+		parent = toAppend;
 		
-		switch (e.widgetType) {
-			case 0: addLinechart(); break;
-			case 1: addBarchart(); break;
-			case 2: addTable(); break;
-			case 3: addMap(); break;
-		}
+		save("127.0.0.1:2000/widget/add", () => {
+			switch (e.widgetType) {
+				case 0: addLinechart(); break;
+				case 1: addBarchart(); break;
+				case 2: addTable(); break;
+				case 3: addMap(); break;
+			}
+		});
+		
+	}
+	function add() {
+		
+		
+	}
+	function remove() {
+		
+		
+	}
+	function edit() {
+		
+		
 	}
 	
 	inst.add = add;
