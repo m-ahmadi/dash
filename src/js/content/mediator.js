@@ -3,19 +3,24 @@ define([
 	"token",
 	"uk",
 	"./wizard/main",
-	"./widget/main"
+	"./widget/main",
+	"./process"
 ], (
 	conf,
 	token,
 	uk,
 	wizard,
-	widget
+	widget,
+	process
 ) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='content']";
 	const BODY = "[data-container]";
 	const temp = Handlebars.templates;
-	const MSG = "Processing your request...";
+	const MSG = [
+		"Processing your request...",
+		"Fetching your widgets..."
+	];
 	let els, processNote;
 	let k = "";
 	
@@ -32,12 +37,31 @@ define([
 			   w >= 1600 ? 3 : false;
 	} */
 	
-	function fetchAll() {
-		/* $.ajax({
-			url: "127.0.0.1:2000/widget/fetchAll"
+	function fetchAll(notFirst) {
+		// process.open();
+		if (!notFirst) {
+			processNote = uk.note.process(MSG[1], 0, "top-center");
+			els.add.attr({disabled: true});
+		}
+		$.ajax({
+			url: conf.TMP + "widget/fetch",
+			method: "GET",
+			dataType: "json"
 		})
-		.done()
-		.fail(); */
+		.done( data => {
+			if (!data.length) {
+				processNote.close();
+				els.add.attr({disabled: false});
+				uk.note.info("No widgets to fetch.", undefined, "top-center");
+			}
+			widget.addMany(data, els.widgets, () => {
+				processNote.close();
+				els.add.attr({disabled: false});
+			});
+		})
+		.fail(()=> {
+			setTimeout(fetchAll, 1000, true);
+		});
 	}
 	function shrink(el) {
 		el.removeClass(k);
@@ -59,29 +83,33 @@ define([
 	}
 	function addCustomEvt() {
 		let cb;
-		wizard.on("submited", e => {
-			cb = e.cb;
-			processNote = uk.note.process(MSG, 0, "top-center");
-			widget.add(e, els.widgets);
+		wizard.on("submit", (e, fn) => {
+			cb = fn;
+			processNote = uk.note.process(MSG[0], 0, "top-center");
+			widget.add(e, els.widgets, true);
 		});
 		widget.on("error", e => {
 			processNote.close();
 			if (e && e.set && e.msg) {
 				wizard.alertMsg(e.set, e.msg);
 			}
-			cb();
+			cb ? cb() : undefined;
 		});
-		widget.on("added", e => {
-			processNote.close();
-			cb();
-			wizard.close();
+		widget.on("add", many => {
+			!many ? processNote.close() : undefined;
+			cb ? cb() : undefined;
+			if ( wizard.isOpen() ) {
+				wizard.close();
+			}
 		});
 	}
 	inst.init = () => {
 		els = u.getEls(ROOT);
 		initJqSortable();
 		
-		els.add.on("click", wizard.start);
+		els.add.on("click", () => {
+			wizard.start( els.widgets.children().length );
+		});
 		els.root.on("click", "[data-panel] [data-menu]", e => {
 			const el = $(e.target);
 			const panel = el.closest("[data-panel]");
@@ -95,7 +123,9 @@ define([
 		});
 		
 		wizard.init();
+		process.init();
 		addCustomEvt();
+		fetchAll();
 	};
 	
 	return inst;

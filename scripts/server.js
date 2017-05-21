@@ -7,7 +7,7 @@ const log = console.log;
 
 const o = {
 	find(c, p, cb)   {
-		c.find(p).toArray( (e, r) => cb(r) );
+		c.find(p).sort({order: 1}).toArray( (e, r) => cb(r) );
 	},
 	insert(c, p, cb) {
 		c.insert( p, (e, r) => cb(r) );
@@ -29,11 +29,15 @@ function q(k, par, cb) {
 	});
 }
 
-app.get("/widget/fetchAll", (req, res) => {
-	q("find", {}, r => res.send(r));
+app.get("/widget/fetch", (req, res) => {
+	const par = req.query.id;
+	let o = {};
+	if (par) o.id = par;
+	q("find", o, r => res.send(r));
 });
 app.get("/widget/add", (req, res) => {
-	q("insert", req.query, r => res.send(r));
+	const o = JSON.parse( req.query.widget )
+	q("insert", o, r => res.send(r));
 });
 app.get("/widget/edit", (req, res) => {
 	q("remove", req.query, r => res.send(r));

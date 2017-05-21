@@ -1,4 +1,4 @@
-define(["config", "token", "uk"], (conf, token, uk) => {
+define(["config", "token", "uk", "./initSelect2"], (conf, token, uk, initSelect2) => {
 	let log = console.log;
 	
 	const inst = u.extend( newPubSub() );
@@ -24,14 +24,15 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 			h: 6,
 			d: 2,
 			w: 1
-		},
-		INPUT: [
-			"device",
-			"service",
-			"sensor"
-		]
+		}
 	};
 	const DATE_FORMAT = "Y/MM/DD HH:mm";
+	const KEYS = [
+		"device",
+		"service",
+		"sensors"
+	];
+	
 	let data, openedModal;
 	
 	const newEmpty = () => {
@@ -40,16 +41,21 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 			name: undefined
 		}
 	};
-	function reset() {
+	function reset(order) {
 		data = {
-			widgetType: d.TYPE,
-			startDate: moment().subtract(d.RANGE_COUNT, d.RANGE_TYPE).format(DATE_FORMAT),
+			type: d.TYPE,
+			rangeType: d.RANGE_TYPE,
+			rangeCount: d.RANGE_COUNT,
+			startDate: moment().subtract(this.rangeCount, this.rangeType).format(DATE_FORMAT),
 			endDate: moment().format(DATE_FORMAT),
-			rangeTitle: getRangeTitle(d.RANGE_TYPE, d.RANGE_COUNT),
-			mapType: d.MAP,
+			rangeTitle: getRangeTitle(this.rangeType, this.rangeCount),
+			map: d.MAP,
 			device: newEmpty(),
 			service: newEmpty(),
-			sensor: newEmpty()
+			sensors: [],
+			sensorNames: [],
+			order: order+=1,
+			expand: false
 		};
 		wiz1.radios.eq(d.TYPE).prop({checked: true});
 		wiz2.selects.val(null).trigger("change");
@@ -57,7 +63,7 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 		wiz2.toAppendAlert.find(".uk-alert-danger").remove();
 		wiz2.submit.attr({disabled: true});
 		wiz2.service.attr({disabled: true});
-		wiz2.sensor.attr({disabled: true});
+		wiz2.sensors.attr({disabled: true});
 	}
 	function open(str) {
 		openedModal = str;
@@ -66,8 +72,12 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 	function close() {
 		uk.closeModal(openedModal);
 	}
-	function start() {
-		reset();
+	function isOpen() {
+		return !u.isUndef( openedModal );
+	}
+	function start(childs) {
+		console.log(childs);
+		reset(childs);
 		open(WIZ_1);
 	}
 	function alertMsg(w, msg) {
@@ -91,6 +101,35 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 		s+= count > 1 ? "s" : "";
 		return s;
 	}
+	function rangeType(e) {
+		const val = e.target.value;
+		const n1 = d.RANGE_COUNT_DEF[val];
+		const n2 = d.RANGE_COUNT_MAX[val];
+		wiz2.rangeCount.val(n1);
+		wiz2.rangeCount.attr("max", n2);
+	}
+	function rangeCount(e) {
+		const el = e.target;
+		const type = wiz2.rangeType.val();
+		const max = d.RANGE_COUNT_MAX[type];
+		const min = parseInt($(el).attr("min"), 10);
+		const val = el.value;
+		if (val) {
+			let num = parseInt(val, 10);
+			if (num > max) {
+				el.value = max;
+			} else if (num < min) {
+				el.value = min;
+			}
+		}
+	}
+	function getDate(type, count) {
+		if (type, count) {
+			return moment().subtract(type, count).format(DATE_FORMAT);
+		} else {
+			return moment().format(DATE_FORMAT);
+		}
+	}
 	function getUrl(type) {
 		let route;
 		switch (type) {
@@ -100,11 +139,13 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 		}
 		return conf.BASE + route + token();
 	}
-	function initSelect2(el, type, toEnable, resKey, toClear, toDisable) {
-		const key = d.INPUT[type];
+	function initSelect2(el, type, toEnable, resKey, toClear, toDisable, toErase) {
+		const key = KEYS[type];
 		el.select2({
 			width: "100%",
-			placeholder: "Select an option",
+			placeholder: type === 0 ? "Select a device" :
+						 type === 1 ? "Select a service" :
+						 type === 2 ? "Select sensors" : "",
 			ajax: {
 				method: type === 1 ? "POST" : "GET",
 				url: getUrl(type),
@@ -147,70 +188,60 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 				},
 				cache: false
 			},
-			multiple: false,
+			multiple: type === 2 ? true : false,
 			minimumInputLength: 0
 		})
-		.on("select2:select", () => {
-			const id = el.select2("data")[0].id;
-			data[key].id = parseInt(id, 10);
-			data[key].name = el.select2("data")[0].text;
+		.on("select2:select", e => {
+			const selected = e.params.data;
+			if (type === 2) {
+				wiz2.units.append( temp.sensorUnit({name: selected.text, id: selected.id}) );
+			} else {
+				data[key].id = parseInt(selected.id, 10);
+				data[key].name = selected.text;
+			}
 			if (toEnable) {
 				toEnable.attr({disabled: false});
 			}
 			if (toClear) {
 				toClear.val(null).trigger("change");
 				toDisable.attr({disabled: true});
+				toErase.empty();
 			}
 		})
 		.on("change", () => {
-			data[key] = newEmpty();
-		});
-	}
-	function rangeType(e) {
-		const val = e.target.value;
-		const n1 = d.RANGE_COUNT_DEF[val];
-		const n2 = d.RANGE_COUNT_MAX[val];
-		wiz2.rangeCount.val(n1);
-		wiz2.rangeCount.attr("max", n2);
-	}
-	function rangeCount(e) {
-		const el = e.target;
-		const type = wiz2.rangeType.val();
-		const max = d.RANGE_COUNT_MAX[type];
-		const min = parseInt($(el).attr("min"), 10);
-		const val = el.value;
-		if (val) {
-			let num = parseInt(val, 10);
-			if (num > max) {
-				el.value = max;
-			} else if (num < min) {
-				el.value = min;
+			if (!type === 2) {
+				data[key] = newEmpty();
 			}
-		}
-	}
-	function getDate(type, count) {
-		if (type, count) {
-			return moment().subtract(type, count).format(DATE_FORMAT);
-		} else {
-			return moment().format(DATE_FORMAT);
-		}
+		})
+		.on("select2:unselect", e => {
+			if (type === 2) {
+				const id = e.params.data.id.toString();
+				wiz2.units.find(`[data-sensor-id=${id}]`).remove();
+				if (!el.val().length) {
+					wiz2.submit.attr({disabled: true});
+				}
+			}
+		});
 	}
 	function init() {
 		wiz1 = u.getEls(WIZ_1);
 		wiz2 = u.getEls(WIZ_2);
 		wiz3 = u.getEls(WIZ_3);
 		wiz4 = u.getEls(WIZ_4);
-		
-		const toClear = wiz2.service.add(wiz2.sensor);
-		initSelect2(wiz2.device, 0, wiz2.service, "devices", toClear, wiz2.submit);
-		initSelect2(wiz2.service, 1, wiz2.sensor, "service", wiz2.sensor, wiz2.submit);
-		initSelect2(wiz2.sensor, 2, wiz2.submit, "");
-		
 		reset();
+		
+		const toClear = wiz2.service.add(wiz2.sensors);
+		const toDisable = wiz2.sensors.add(wiz2.submit);
+		const toErase = wiz2.units;
+		initSelect2(wiz2.device, 0, wiz2.service, "devices", toClear, toDisable, toErase);
+		initSelect2(wiz2.service, 1, wiz2.sensors, "service", wiz2.sensors, wiz2.submit, toErase);
+		initSelect2(wiz2.sensors, 2, wiz2.submit, "");
+		
+		
 		wiz1.next.on("click", () => {
 			const checked = wiz1.radios.filter(":checked").val();
 			const type = parseInt(checked, 10);
-			data.widgetType = type;
+			data.type = type;
 			switch (type) {
 				case 0: open(WIZ_2); break;
 				case 1: open(WIZ_3); break;
@@ -229,14 +260,43 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 		wiz2.selects.on("click", () => {
 			wiz2.submit.attr({disabled: true});
 		});
+		wiz2.units.on("click", "[data-delete-sensor]", e => {
+			const el = $(e.currentTarget);
+			const id = el.closest("[data-sensor-id]").data().sensorId.toString();
+			const sensors = wiz2.sensors;
+			const val = sensors.val();
+			const index = val.indexOf(id);
+			val.splice(index, 1);
+			sensors.val(val).trigger("change");
+			el.parent().parent().remove();
+			if (!sensors.val().length) {
+				wiz2.submit.attr({disabled: true});
+			}
+		});
 		wiz2.submit.on("click", () => {
+			data.rangeType = wiz2.rangeType.val();
+			data.rangeCount = parseInt( wiz2.rangeCount.val() );
 			data.startDate = getDate(wiz2.rangeCount.val(), wiz2.rangeType.val());
 			data.endDate = getDate();
 			data.rangeTitle = getRangeTitle(wiz2.rangeType.val(), wiz2.rangeCount.val());
+			// wiz2.sensors.select2("data").forEach(i => data.sensors[i.id] = i.text);
+			wiz2.units.find("[data-sensor-id]").each((i, l) => {
+				const el = $(l);
+				data.sensors.push({
+					id: el.data().sensorId,
+					unit: el.find("[data-select]").val()
+				});
+				data.sensorNames.push(el.data().sensorName);
+			});
+			log(data);
 			
 			wiz2.toDisable.attr({disabled: true});
-			data.cb = () => wiz2.toDisable.attr({disabled: false});
-			inst.emit("submited", data);
+			wiz2.units.find("[data-todisable]").attr({disabled: true});
+			
+			inst.emit("submit", data, () => {
+				wiz2.toDisable.attr({disabled: false}); 
+				wiz2.units.find("[data-todisable]").attr({disabled: false});
+			});
 		});
 		wiz3.submit.on("click", () => {
 			const t = data.type;
@@ -255,7 +315,9 @@ define(["config", "token", "uk"], (conf, token, uk) => {
 	inst.init = init;
 	inst.start = start;
 	inst.close = close;
+	inst.isOpen = isOpen;
 	
 	window.dool = () => {return data};
+	window.wz2 = () => {return wiz2};;
 	return inst;
 });

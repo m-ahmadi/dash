@@ -12,7 +12,8 @@ define([
 		"(circuits empty)",
 		"(not found in circuits)",
 		"Selected sensor does not have any chart_data in the ",
-		"Network Error."
+		"Network Error.",
+		"Saving Failed. "
 	];
 	const temp = Handlebars.templates;
 	let widgets = {};
@@ -20,15 +21,34 @@ define([
 	let counter = 0;
 	
 	function uid() {
-		return "w" + (counter+=1);
+		var d = new Date().getTime();
+		if (typeof performance !== 'undefined' && typeof performance.now === 'function'){
+			d += performance.now(); //use high-precision timer if available
+		}
+		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+			var r = (d + Math.random() * 16) % 16 | 0;
+			d = Math.floor(d / 16);
+			return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+		});
 	}
-	function save() {
+	
+	
+	function buildServerData() {
+		const o = {
+			type: e.type
+		};
+		
+	}
+	function save(route, cb) {
 		$.ajax({
-			url: "127.0.0.1:2000/widget/add",
-			data: {}
+			url: conf.TMP + route,
+			method: "GET",
+			data: {
+				widget: JSON.stringify(e)
+			}
 		})
-		.done()
-		.fail();
+		.done( d => cb(false) )
+		.fail( (x, err) => cb(true, err) );
 	}
 	function findCircuitId(cb) {
 		const deviceId = e.device.id;
@@ -58,7 +78,7 @@ define([
 	function getLast() {
 		return parent.find(`[data-panel]:last-child [data-container]`);
 	}
-	function addLinechart() {
+	function addLinechart(many, cb) {
 		findCircuitId((circuitId, empty) => {
 			if ( !u.isNum(circuitId) ) {
 				inst.emit("error", { set: 2, msg: MSG[0] + MSG[empty? 1 : 2] });
@@ -70,7 +90,7 @@ define([
 				data: {
 					start_date: e.startDate,
 					end_date: e.endDate,
-					sensors: JSON.stringify( [{id: e.sensor.id, unit: "Microsecond"}] ),
+					sensors: JSON.stringify(e.sensors),
 					is_snmp: false
 				},
 			})
@@ -83,15 +103,17 @@ define([
 					const html = temp.panel( {title: "Graph Sensor", range: e.rangeTitle, body: temp.lineChart()} );
 					parent.append(html);
 					const container = getLast();
+					const names = e.sensorNames;
 					makeLineChart(container, target, temp.graphTitle({
 						device: e.device.name,
 						service: e.service.name,
-						sensor: e.sensor.name
+						sensors: names.length > 1 ? names.join(", ") : names[0]
 					}));
-					inst.emit("added");
+					cb ? cb() : undefined;
+					inst.emit("add", many);
 				}
 			})
-			.fail( () => inst.emit("error", { set: 2, msg: MSG[3]}) );
+			.fail( () => inst.emit("error", { set: 2, msg: MSG[4]}) );
 		});
 	}
 	function _add(type, parentEl) {
@@ -113,34 +135,47 @@ define([
 			case 3: map(container); break;
 		}
 	}
-	function add(data, toAppend,) {
+	
+	function main() {
+		
+	}
+	function add(data, toAppend, saveIt, cb) {
 		e = data;
 		parent = toAppend;
 		
-		save("127.0.0.1:2000/widget/add", () => {
-			switch (e.widgetType) {
-				case 0: addLinechart(); break;
-				case 1: addBarchart(); break;
-				case 2: addTable(); break;
-				case 3: addMap(); break;
+		switch (e.type) {
+			case 0:
+				addLinechart(!saveIt, () => {
+					if (saveIt) {
+						save("widget/add", (err, m) => {
+							if (err) {
+								inst.emit("error", { set: 2, msg: MSG[4]+m });
+							}
+						});
+					}
+					cb ? cb() : undefined;
+				});
+				break;
+			case 1: addBarchart(); break;
+			case 2: addTable(); break;
+			case 3: addMap(); break;
+		}
+		
+	}
+	function addMany(arr, parent, cb) {
+		const last = arr.length - 1;
+		arr.forEach((i, x) => {
+			if (x === last) {
+				add(i, parent, false, cb);
+			} else {
+				add(i, parent, false);
 			}
 		});
-		
-	}
-	function add() {
-		
-		
-	}
-	function remove() {
-		
-		
-	}
-	function edit() {
-		
-		
 	}
 	
+	
 	inst.add = add;
+	inst.addMany = addMany;
 	// , update, fetch
 	return inst;
 });

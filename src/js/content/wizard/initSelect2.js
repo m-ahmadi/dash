@@ -1,3 +1,3 @@
-define(["config", "uk"], (conf, uk) => {
+define(["config", "token", "uk"], (conf, token, uk) => {
 	
 });

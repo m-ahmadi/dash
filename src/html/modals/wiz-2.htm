@@ -7,18 +7,6 @@
 		<div class="uk-modal-body" data-el="toAppendAlert">
 			<form class="uk-form-horizontal">
 				
-				<!-- <div class="uk-margin-small">
-					<label class="uk-form-label uk-text-center">Group:</label>
-					<div class="uk-form-controls">
-						<select class="uk-select">
-							<option>Choose a group...</option>
-							<option>IPBB</option>
-							<option>PSSwitch</option>
-							<option>CallCenter</option>
-							<option>Charging</option>
-						</select>
-					</div>
-				</div> -->
 				<div class="uk-margin-small">
 					<label class="uk-form-label uk-text-center">Device:</label>
 					<div class="uk-form-controls">
@@ -38,8 +26,14 @@
 				<div class="uk-margin-small">
 					<label class="uk-form-label uk-text-center">Sensor:</label>
 					<div class="uk-form-controls">
-						<select class="uk-select" data-el="sensor" data-els="toDisable selects">
+						<select class="uk-select" data-el="sensors" data-els="toDisable selects">
 						</select>
+					</div>
+				</div>
+				
+				<div class="uk-margin-small">
+					<div class="uk-form-controls">
+						<table class="uk-table uk-table-divider uk-table-hover uk-table-striped" data-el="units"></table>
 					</div>
 				</div>
 				
@@ -57,6 +51,7 @@
 						<label>(s)</label>
 					</div>
 				</div>
+
 			</form>
 		</div>
 		
