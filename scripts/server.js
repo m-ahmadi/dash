@@ -12,8 +12,8 @@ const o = {
 	insert(c, p, cb) {
 		c.insert( p, (e, r) => cb(r) );
 	},
-	update(c, p, cb) {
-		c.update( p, (e, r) => cb(r) );
+	update(c, q, u, cb) {
+		c.update( q, u, (e, r) => cb(r) );
 	},
 	remove(c, p, cb) {
 		c.deleteOne( p, (e, r) => cb(r) );
@@ -40,7 +40,9 @@ app.get("/widget/add", (req, res) => {
 	q("insert", o, r => res.send(r));
 });
 app.get("/widget/edit", (req, res) => {
-	q("remove", req.query, r => res.send(r));
+	const id = req.query.id;
+	delete req.query.id;
+	q("remove", {id: id}, req.query, r => res.send(r));
 });
 app.get("/widget/delete", (req, res) => {
 	const id = req.query.id;

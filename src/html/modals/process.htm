@@ -1,21 +1,18 @@
 <div id="modal_process" class="uk-modal-container" uk-modal="center: true; esc-close: true; bg-close: false;" data-root="process">
 	<div class="uk-modal-dialog">
-		
-			
-			<div class="uk-modal-header">
-				<h3 class="uk-modal-title uk-heading-bullet uk-text-bold uk-text-muted">Fetching Your Dashboard...</h3>
-				<p>This might take a few seconds.</p>
+		<div class="uk-modal-header">
+			<h3 class="uk-modal-title uk-heading-bullet uk-text-bold uk-text-muted">Loading Your Dashboard...</h3>
+			<p>This might take a few seconds.</p>
+			<p data-el="currently">Contacting server</p>
+		</div>
+		<div class="uk-modal-body">
+			<div class="uk-text-center">
+				<span data-el="percent">0</span>%<i class="fa fa-refresh fa-lg fa-fw fa-spin"></i>
 			</div>
-			<div class="uk-modal-body">
-				<progress class="uk-progress" value="0" max="100" data-el="bar"></progress>
-				<div data-el="content">
-					<div class="uk-alert-success" uk-alert>
-							<a class="uk-alert-close" uk-close></a>
-							<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.</p>
-					</div>
-				</div>
-			</div>
+			<progress class="uk-progress" value="0" max="100" data-el="bar"></progress>
 			
-		
+			<div data-el="logs">
+			</div>
+		</div>
 	</div>
 </div>

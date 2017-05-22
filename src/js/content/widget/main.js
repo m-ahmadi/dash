@@ -156,10 +156,11 @@ define([
 								widget: JSON.stringify(e)
 							}
 						})
-						.done()
+						.done(cb)
 						.fail( (x, err) => inst.emit("error", { set: 2, msg: MSG[4]+m }) );
+					} else {
+						cb ? cb() : undefined;
 					}
-					cb ? cb() : undefined;
 				});
 				break;
 			case 1: addBarchart(); break;
