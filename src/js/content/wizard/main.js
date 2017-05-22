@@ -41,8 +41,20 @@ define(["config", "token", "uk", "./initSelect2"], (conf, token, uk, initSelect2
 			name: undefined
 		}
 	};
+	function uid() {
+		var d = new Date().getTime();
+		if (typeof performance !== 'undefined' && typeof performance.now === 'function'){
+			d += performance.now(); //use high-precision timer if available
+		}
+		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+			var r = (d + Math.random() * 16) % 16 | 0;
+			d = Math.floor(d / 16);
+			return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+		});
+	}
 	function reset(order) {
 		data = {
+			id: uid(),
 			type: d.TYPE,
 			rangeType: d.RANGE_TYPE,
 			rangeCount: d.RANGE_COUNT,
@@ -64,6 +76,7 @@ define(["config", "token", "uk", "./initSelect2"], (conf, token, uk, initSelect2
 		wiz2.submit.attr({disabled: true});
 		wiz2.service.attr({disabled: true});
 		wiz2.sensors.attr({disabled: true});
+		wiz2.units.empty();
 	}
 	function open(str) {
 		openedModal = str;

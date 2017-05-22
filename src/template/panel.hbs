@@ -1,4 +1,4 @@
-<div class="panel uk-card uk-card-default" data-panel>
+<div class="panel uk-card uk-card-default" data-panel data-id="{{id}}">
 	<div class="panel-wrap">
 	<div class="uk-card-header">
 		<span class="uk-card-title uk-float-left uk-text-muted uk-text-small uk-text-bold">
@@ -12,7 +12,11 @@
 				</button>
 				<div uk-dropdown="delay-hide: 50;">
 					<ul class="uk-list uk-text-left">
-						<li data-resize><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-menu data-action="0"><i uk-icon="icon: expand; ratio: 0.8;"></i> Expand</a></li>
+						{{#if expand}}
+							{{{<li data-resize><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-menu data-action="0"><i uk-icon="icon: expand; ratio: 0.8;"></i> Expand</a></li>}}}
+						{{else}}
+							{{{<li data-resize><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-menu data-action="1"><i uk-icon="icon: shrink; ratio: 0.8;"></i> Shrink</a></li>}}}
+						{{/if}}
 						<li><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-menu data-action="2"><i uk-icon="icon: file-edit; ratio: 0.8;"></i> Edit</a></li>
 						<li><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-menu data-action="3"><i uk-icon="icon: close; ratio: 0.8;"></i> Delete</a></li>
 					</ul>

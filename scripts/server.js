@@ -30,9 +30,9 @@ function q(k, par, cb) {
 }
 
 app.get("/widget/fetch", (req, res) => {
-	const par = req.query.id;
+	const id = req.query.id;
 	let o = {};
-	if (par) o.id = par;
+	if (id) o.id = id;
 	q("find", o, r => res.send(r));
 });
 app.get("/widget/add", (req, res) => {
@@ -43,7 +43,10 @@ app.get("/widget/edit", (req, res) => {
 	q("remove", req.query, r => res.send(r));
 });
 app.get("/widget/delete", (req, res) => {
-	q("remove", {id: req.query.id}, r => res.send(r));
+	const id = req.query.id;
+	let o = {};
+	if (id) o.id = id;
+	q("remove", o, r => res.send(r));
 });
 
 app.listen(2000, "localhost");

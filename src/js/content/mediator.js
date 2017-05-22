@@ -63,18 +63,7 @@ define([
 			setTimeout(fetchAll, 1000, true);
 		});
 	}
-	function shrink(el) {
-		el.removeClass(k);
-		el.find("[data-resize]").html(temp.btnExpand);
-		el.find(BODY).highcharts().setSize();
-	}
-	function expand(el) {
-		if ( !el.hasClass(k) ) {
-			el.addClass(k);
-			el.find("[data-resize]").html(temp.btnShrink);
-			el.find(BODY).highcharts().setSize();
-		}
-	}
+	
 	function initJqSortable() {
 		els.widgets.sortable({
 			items: "> div.panel",
@@ -86,7 +75,7 @@ define([
 		wizard.on("submit", (e, fn) => {
 			cb = fn;
 			processNote = uk.note.process(MSG[0], 0, "top-center");
-			widget.add(e, els.widgets, true);
+			widget.add(e, els.widgets);
 		});
 		widget.on("error", e => {
 			processNote.close();
@@ -115,10 +104,10 @@ define([
 			const panel = el.closest("[data-panel]");
 			const action = parseInt(el.data().action, 10);
 			switch (action) {
-				case 0: expand(panel); break;
-				case 1: shrink(panel); break;
-				case 2: undefined; break;
-				case 3: undefined; break;
+				case 0: widget.expand(panel); break;
+				case 1: widget.shrink(panel); break;
+				case 2: widget.edit(panel); break;
+				case 3: widget.remove(panel); break;
 			}
 		});
 		

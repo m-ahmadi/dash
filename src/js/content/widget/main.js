@@ -17,21 +17,6 @@ define([
 	];
 	const temp = Handlebars.templates;
 	let widgets = {};
-	let parent, e = {};
-	let counter = 0;
-	
-	function uid() {
-		var d = new Date().getTime();
-		if (typeof performance !== 'undefined' && typeof performance.now === 'function'){
-			d += performance.now(); //use high-precision timer if available
-		}
-		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-			var r = (d + Math.random() * 16) % 16 | 0;
-			d = Math.floor(d / 16);
-			return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-		});
-	}
-	
 	
 	function buildServerData() {
 		const o = {
@@ -39,7 +24,30 @@ define([
 		};
 		
 	}
-	function save(route, cb) {
+	function shrink(el) {
+		const id = el.data().id;
+		let e = widgets[id];
+		e.expand = false;
+		$.ajax({
+			url: conf.TMP + "widget/edit",
+			method: "GET",
+			data: JSON.stringify(e)
+		})
+		.done(() => {
+			el.removeClass(k);
+			el.find("[data-resize]").html(temp.btnExpand);
+			el.find(BODY).highcharts().setSize();
+		})
+		.fail();
+	}
+	function expand(el) {
+		if ( !el.hasClass(k) ) {
+			el.addClass(k);
+			el.find("[data-resize]").html(temp.btnShrink);
+			el.find(BODY).highcharts().setSize();
+		}
+	}
+	function save(e, route, cb) {
 		$.ajax({
 			url: conf.TMP + route,
 			method: "GET",
@@ -50,7 +58,7 @@ define([
 		.done( d => cb(false) )
 		.fail( (x, err) => cb(true, err) );
 	}
-	function findCircuitId(cb) {
+	function findCircuitId(e, cb) {
 		const deviceId = e.device.id;
 		const tok = token();
 		$.ajax({
@@ -75,11 +83,11 @@ define([
 		})
 		.fail( () => cb(false) );
 	}
-	function getLast() {
-		return parent.find(`[data-panel]:last-child [data-container]`);
+	function getLast(el) {
+		return el.find(`[data-panel]:last-child [data-container]`);
 	}
-	function addLinechart(many, cb) {
-		findCircuitId((circuitId, empty) => {
+	function addLinechart(e, parent, many, cb) {
+		findCircuitId(e, (circuitId, empty) => {
 			if ( !u.isNum(circuitId) ) {
 				inst.emit("error", { set: 2, msg: MSG[0] + MSG[empty? 1 : 2] });
 				return;
@@ -100,9 +108,10 @@ define([
 					inst.emit("error", { set: 2, msg: MSG[3]+e.rangeTitle.toLowerCase()+"." });
 				}
 				if (target) {
-					const html = temp.panel( {title: "Graph Sensor", range: e.rangeTitle, body: temp.lineChart()} );
+					widgets[e.id] = e;
+					const html = temp.panel( {title: "Graph Sensor", range: e.rangeTitle, body: temp.lineChart(), id: e.id} );
 					parent.append(html);
-					const container = getLast();
+					const container = getLast(parent);
 					const names = e.sensorNames;
 					makeLineChart(container, target, temp.graphTitle({
 						device: e.device.name,
@@ -135,23 +144,20 @@ define([
 			case 3: map(container); break;
 		}
 	}
-	
-	function main() {
-		
-	}
-	function add(data, toAppend, saveIt, cb) {
-		e = data;
-		parent = toAppend;
-		
+	function add(e, parent, noSave, cb) {
 		switch (e.type) {
 			case 0:
-				addLinechart(!saveIt, () => {
-					if (saveIt) {
-						save("widget/add", (err, m) => {
-							if (err) {
-								inst.emit("error", { set: 2, msg: MSG[4]+m });
+				addLinechart(e, parent, cb ? true : false, () => {
+					if (!noSave) {
+						$.ajax({
+							url: conf.TMP + "widget/add",
+							method: "GET",
+							data: {
+								widget: JSON.stringify(e)
 							}
-						});
+						})
+						.done()
+						.fail( (x, err) => inst.emit("error", { set: 2, msg: MSG[4]+m }) );
 					}
 					cb ? cb() : undefined;
 				});
@@ -166,16 +172,32 @@ define([
 		const last = arr.length - 1;
 		arr.forEach((i, x) => {
 			if (x === last) {
-				add(i, parent, false, cb);
+				add(i, parent, true, cb);
 			} else {
-				add(i, parent, false);
+				add(i, parent, true);
 			}
 		});
 	}
+	function remove(id) {
+		$.ajax({
+			url: conf.TMP + "widget/delete",
+			method: "GET",
+			dataType: "json",
+			data: {
+				id: id
+			}
+		})
+		.done()
+		.fail();
+	}
 	
-	
+	inst.expand = expand;
+	inst.shrink = shrink;
 	inst.add = add;
+	inst.remove = remove;
 	inst.addMany = addMany;
 	// , update, fetch
+	
+	window.widgets = widgets;
 	return inst;
 });
