@@ -37,12 +37,11 @@ define([
 			   w >= 1600 ? 3 : false;
 	} */
 	
+	const ori = ["st","nd","rd","th","th","th","th","th","th"];
 	function fetchAll(notFirst) {
-		// process.open();
-		if (!notFirst) {
-			processNote = uk.note.process(MSG[1], 0, "top-center");
-			els.add.attr({disabled: true});
-		}
+		let counter = 0;
+		process.open();
+		process.doing("Fetching widget list...");
 		$.ajax({
 			url: conf.TMP + "widget/fetch",
 			method: "GET",
@@ -50,16 +49,19 @@ define([
 		})
 		.done( data => {
 			if (!data.length) {
-				processNote.close();
-				els.add.attr({disabled: false});
-				uk.note.info("No widgets to fetch.", undefined, "top-center");
+				process.log("No widgets to fetch", "primary");
+				process.close();
 			}
 			widget.addMany(data, els.widgets, () => {
-				processNote.close();
-				els.add.attr({disabled: false});
+				process.log("Finished.", "success");
+				setTimeout(process.close, 1000);
 			});
 		})
-		.fail(()=> {
+		.fail((x, err)=> {
+			if (counter > 0) {
+				process.doing(" (${counter+ori[counter]} attempt)", true);
+			}
+			process.log(`Couldn't fetch widget list. ${err}`);
 			setTimeout(fetchAll, 1000, true);
 		});
 	}

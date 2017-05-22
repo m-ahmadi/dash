@@ -17,7 +17,7 @@ define(["uk"], (uk) => {
 		els.logs.empty();
 	}
 	function reset() {
-		els.bar.val(0);
+		set(0);
 	}
 	function log(msg, type) {
 		const ctx = {};
@@ -40,6 +40,11 @@ define(["uk"], (uk) => {
 			els.percent.text( $(e.target).val() );
 		});
 	}
+	function doing(msg, append) {
+		let txt = msg;
+		txt += append ? els.currently.text() : "";
+		els.currently.text(txt);
+	}
 	
 	inst.open = open;
 	inst.close = close;
@@ -48,6 +53,7 @@ define(["uk"], (uk) => {
 	inst.reset = reset;
 	inst.set = set;
 	inst.inc = inc;
+	inst.doing = doing;
 	inst.init = init;
 	
 	window.proc = inst;

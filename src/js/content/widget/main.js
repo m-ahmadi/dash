@@ -89,7 +89,7 @@ define([
 	function addLinechart(e, parent, many, cb) {
 		findCircuitId(e, (circuitId, empty) => {
 			if ( !u.isNum(circuitId) ) {
-				inst.emit("error", { set: 2, msg: MSG[0] + MSG[empty? 1 : 2] });
+				inst.emit("fetch_error", { set: 2, msg: MSG[0] + MSG[empty? 1 : 2] });
 				return;
 			}
 			$.ajax({
