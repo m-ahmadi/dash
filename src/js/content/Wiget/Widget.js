@@ -8,82 +8,113 @@ define(["./makeLineChart"], (makeLineChart) => {
 		"uk-width-1-2@xl"
 	].join(" ");
 	
-	
-	function shrink(el) {
-		el.removeClass(KLASS);
-		el.find("[data-resize]").html(temp.btnExpand);
-		el.find(BODY).highcharts().setSize();
-	}
-	function expand(el) {
-		if ( !el.hasClass(KLASS) ) {
-			el.addClass(KLASS);
-			el.find("[data-resize]").html(temp.btnShrink);
-			el.find(BODY).highcharts().setSize();
-		}
-	}
-	function makeLineChart(container, series) {
+	function makeLineChart(container, series, text) {
 		return Highcharts.stockChart(container[0], {
+			rangeSelector: false,
+			exporting: false,
+			credits: false,
 			title: {
 				align: "left",
-				text: text,
+				text: text || "",
 				style: {
 					color: "#717171",
 					fontSize: "14px"
 				}
 			},
-			rangeSelector: false,
-			exporting: false,
-			credits: false,
 			chart: {
 				zoomType: "x"
 			},
+			legend: {
+				enabled: true
+            },
 			series: series || []
 		});
 	}
-	function loadGraphSensorData() {
-		
-	}
-	function createPanel() {
-		
-	}
-	function createGraphSensor(container, e) {
-		const o = {
-			title: "Graph Sensor",
-			range: "Last 15 Minutes",
-			body: temp.lineChart(),
-			id: e.id
+	function createPanel(parent, type, rangeTitle, id, expand) {
+		let body, title;
+		switch (type) {
+			case 0: body = temp.lineChart(); title = "Graph Sensor";           break;
+			case 1: body = temp.barChart();  title = "Sensor Violation Ratio"; break;
+			case 2: body = "";               title = "Sensor Violation Stats"; break;
+			case 3: body = "";               title = "Map";                    break;
+		}
+		const ctx = {
+			title: title,
+			range: rangeTitle,
+			body: body,
+			id: id,
+			expand: expand
 		};
-		const html = temp.panel(o);
-		container.append(html);
-		const chartContainer = container.find(`[data-panel]:last-child [data-container]`)
-		return makeLineChart(chartContainer, []);
+		const html = temp.panel(ctx);
+		parent.append(html);
+		return parent.children().last();
 	}
-	function addEvt() {
-		
-	}
-	function create() {
-		
-	}
+	
+	
 	function constructor(container, e) {
 		let inst = {};
-		let el;
+		let root, els,
+			chart = {};
 		
-		switch(e.type) {
-			case 0: el = createGraphSensor(container, e); break;
-			case 1: ; break;
-			case 2: ; break;
-			case 3: ; break;
+		
+		function init() {
+			let root = createPanel(container, e.type, e.rangeTitle, e.id, e.expand);
+			els = u.getEls(root);
+			
+			switch (e.type) {
+				case 0: chart = makeLineChart(els.body, []); break;
+				case 1: ; break;
+				case 2: ; break;
+				case 3: ; break;
+			}
+			els.menus.on("click", "[data-menu]", e => {
+				let el = $(e.target);
+				let action = parseInt(el.data().action, 10);
+				if (action === 0) {
+					if ( !el.hasClass(KLASS) ) {
+						root.addClass(KLASS);
+						els.menus.find("[data-resize]").html( temp.btnShrink() );
+						if (chart) {
+							chart.setSize();
+						}
+					}
+				} else if (action === 1) {
+					root.removeClass(KLASS);
+					els.menus.find("[data-resize]").html( temp.btnExpand() );
+					if (chart) {
+						chart.setSize();
+					}
+				}
+			});
+			els.edit.on("click", () => {
+				switch (e.type) {
+					case 0: chart = makeLineChart(els.body, []); break;
+					case 1: ; break;
+					case 2: ; break;
+					case 3: ; break;
+				}
+			});
+			els.remove.on("click", () => {
+				alert(4);
+			});
+			els.refresh.on("click", () => {
+				alert(5);
+			});
 		}
 		
 		inst.shrink = () => {
-			
+			el.removeClass(KLASS);
+			el.find("[data-resize]").html(temp.btnExpand);
+			el.find(BODY).highcharts().setSize();
 		};
-		inst.expand = () => {
-			
-		};
+		inst.chart = () => {return chart};
+		
+		init();
 		
 		return inst;
 	}
 	
+	
+	window.newWidget = constructor;
 	return constructor;
 });
