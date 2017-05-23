@@ -4,14 +4,16 @@ define([
 	"uk",
 	"./wizard/main",
 	"./widget/main",
-	"./process"
+	"./process",
+	"./Wiget/Widget"
 ], (
 	conf,
 	token,
 	uk,
 	wizard,
 	widget,
-	process
+	process,
+	newWidget
 ) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='content']";
@@ -112,8 +114,8 @@ define([
 			const panel = el.closest("[data-panel]");
 			const action = parseInt(el.data().action, 10);
 			switch (action) {
-				case 0: widget.expand(panel); break;
-				case 1: widget.shrink(panel); break;
+				case 0: widget.shrink(panel); break;
+				case 1: widget.expand(panel); break;
 				case 2: widget.edit(panel); break;
 				case 3: widget.remove(panel); break;
 			}
@@ -125,5 +127,6 @@ define([
 		fetchAll();
 	};
 	
+	window.newWidget = newWidget;
 	return inst;
 });
