@@ -1,11 +1,14 @@
 <tr data-sensor-id="{{id}}" data-sensor-name="{{name}}">
-	<td>{{ name }}</td>
+	<td title="{{name}}">{{name}}</td>
 	<td>
 		<select class="uk-select uk-form-small" data-select data-todisable>
 			<option value="Microsecond">Microsecond</option>
 			<option value="Millisecond">Millisecond</option>
 			<option value="Second">Second</option>
 		</select>
+	</td>
+	<td>
+		<input type="text" data-colorpick />
 	</td>
 	<td>
 		<button type="button" class="uk-button uk-button-danger uk-button-small small-btn" data-delete-sensor data-todisable>

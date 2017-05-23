@@ -17,4 +17,5 @@ chart.js/dist/chart
 highcharts/highstock
 highcharts/modules/exporting
 
+spectrum/spectrum
 @ handlebars/handlebars.runtime

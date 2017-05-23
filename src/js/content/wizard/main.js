@@ -1,4 +1,4 @@
-define(["config", "token", "uk", "./initSelect2"], (conf, token, uk, initSelect2) => {
+define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) => {
 	let log = console.log;
 	
 	const inst = u.extend( newPubSub() );
@@ -51,6 +51,15 @@ define(["config", "token", "uk", "./initSelect2"], (conf, token, uk, initSelect2
 			d = Math.floor(d / 16);
 			return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
 		});
+	}
+	function randColor(brightness) {
+		// Six levels of brightness from 0 to 5, 0 being the darkest
+		var rgb = [Math.random() * 256, Math.random() * 256, Math.random() * 256];
+		var mix = [brightness * 51, brightness * 51, brightness * 51]; //51 => 255/5
+		var mixedrgb = [rgb[0] + mix[0], rgb[1] + mix[1], rgb[2] + mix[2]].map(function (x) {
+			return Math.round(x / 2.0)
+		})
+		return "rgb(" + mixedrgb.join(",") + ")";
 	}
 	function reset(order) {
 		data = {
@@ -148,7 +157,7 @@ define(["config", "token", "uk", "./initSelect2"], (conf, token, uk, initSelect2
 		switch (type) {
 			case 0: route = "device/search"; break;
 			case 1: route = "device/service/search"; break;
-			case 2: route = "device/kpilist"; break;
+			case 2: route = "device/service/kpilist"; break;
 		}
 		return conf.BASE + route + token();
 	}
@@ -160,7 +169,7 @@ define(["config", "token", "uk", "./initSelect2"], (conf, token, uk, initSelect2
 						 type === 1 ? "Select a service" :
 						 type === 2 ? "Select sensors" : "",
 			ajax: {
-				method: type === 1 ? "POST" : "GET",
+				method: type === 0 ? "GET" : "POST",
 				url: getUrl(type),
 				dataType: "json",
 				delay: 250,
@@ -208,6 +217,9 @@ define(["config", "token", "uk", "./initSelect2"], (conf, token, uk, initSelect2
 			const selected = e.params.data;
 			if (type === 2) {
 				wiz2.units.append( temp.sensorUnit({name: selected.text, id: selected.id}) );
+				const el = wiz2.units.find("[data-colorpick]:last-child");
+				colorpick.init( el, randColor(1) );
+				
 			} else {
 				data[key].id = parseInt(selected.id, 10);
 				data[key].name = selected.text;
@@ -293,22 +305,34 @@ define(["config", "token", "uk", "./initSelect2"], (conf, token, uk, initSelect2
 			data.endDate = getDate();
 			data.rangeTitle = getRangeTitle(wiz2.rangeType.val(), wiz2.rangeCount.val());
 			// wiz2.sensors.select2("data").forEach(i => data.sensors[i.id] = i.text);
+			
+			data.sensors = [];
+			data.sensorOption = {};
 			wiz2.units.find("[data-sensor-id]").each((i, l) => {
 				const el = $(l);
+				const elData = el.data();
+				const sensorId = elData.sensorId;
+				const sensorName = elData.sensorName;
 				data.sensors.push({
-					id: el.data().sensorId,
+					id: sensorId,
 					unit: el.find("[data-select]").val()
 				});
-				data.sensorNames.push(el.data().sensorName);
+				data.sensorOption[sensorId] = {
+					color: el.find("[data-colorpick]").spectrum("get").toHex(),
+					name: sensorName
+				};
+				data.sensorNames.push(sensorName);
 			});
 			log(data);
 			
 			wiz2.toDisable.attr({disabled: true});
 			wiz2.units.find("[data-todisable]").attr({disabled: true});
+			wiz2.units.find("[data-colorpick]").spectrum("disable");
 			
 			inst.emit("submit", data, () => {
 				wiz2.toDisable.attr({disabled: false}); 
 				wiz2.units.find("[data-todisable]").attr({disabled: false});
+				wiz2.units.find("[data-colorpick]").spectrum("enable");
 			});
 		});
 		wiz3.submit.on("click", () => {

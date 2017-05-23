@@ -15,19 +15,13 @@ define([
 ) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='content']";
-	const BODY = "[data-container]";
 	const temp = Handlebars.templates;
 	const MSG = [
 		"Processing your request...",
 		"Fetching your widgets..."
 	];
 	let els, processNote;
-	let k = "";
 	
-	k += "uk-width-1-1@s ";
-	k += "uk-width-1-1@m ";
-	k += "uk-width-1-2@l ";
-	k += "uk-width-1-2@xl ";
 	/* function viewport() {
 		const w = window.innerWidth;
 		return w > 0     && w < 640   ? 0 :
@@ -37,11 +31,22 @@ define([
 			   w >= 1600 ? 3 : false;
 	} */
 	
-	const ori = ["st","nd","rd","th","th","th","th","th","th"];
-	function fetchAll(notFirst) {
-		let counter = 0;
-		process.open();
-		process.doing("Fetching widget list...");
+	const ori = ["", "st","nd","rd","th","th","th","th","th","th"];
+	
+	let counter = 1;
+	
+	function initJqSortable() {
+		els.widgets.sortable({
+			items: "> div.panel",
+			handle: ".uk-sortable-handle"
+		});
+	}
+	function fetchAll() {
+		let timer;
+		if (counter === 1) {
+			process.open();
+		}
+		process.doing("Fetching widget list.");
 		$.ajax({
 			url: conf.TMP + "widget/fetch",
 			method: "GET",
@@ -49,27 +54,26 @@ define([
 		})
 		.done( data => {
 			if (!data.length) {
+				process.finish();
 				process.log("No widgets to fetch", "primary");
-				process.close();
+				return;
 			}
+			process.log(`Found ${data.length} widgets.`, "success");
+			process.doing("Creating widgets.");
+			
 			widget.addMany(data, els.widgets, () => {
 				process.log("Finished.", "success");
-				setTimeout(process.close, 1000);
+				process.close();
 			});
 		})
 		.fail((x, err)=> {
-			if (counter > 0) {
-				process.doing(" (${counter+ori[counter]} attempt)", true);
+			if (counter > 1) {
+				process.doing(` (${counter}${ori[counter]} attempt)`, true);
 			}
-			process.log(`Couldn't fetch widget list. ${err}`);
-			setTimeout(fetchAll, 1000, true);
-		});
-	}
-	
-	function initJqSortable() {
-		els.widgets.sortable({
-			items: "> div.panel",
-			handle: ".uk-sortable-handle"
+			counter += 1;
+			process.log(`Fetching widget list failed. ${err}`, "danger");
+			if (counter > 3) return;
+			setTimeout(fetchAll, 1000);
 		});
 	}
 	function addCustomEvt() {
@@ -79,15 +83,17 @@ define([
 			processNote = uk.note.process(MSG[0], 0, "top-center");
 			widget.add(e, els.widgets);
 		});
-		widget.on("error", e => {
-			processNote.close();
-			if (e && e.set && e.msg) {
-				wizard.alertMsg(e.set, e.msg);
+		widget.on("create_err", msg => {
+			if (processNote) {
+				processNote.close();
+			}
+			if ( wizard.isOpen() ) {
+				wizard.alertMsg(2, msg);
 			}
 			cb ? cb() : undefined;
 		});
 		widget.on("add", many => {
-			!many ? processNote.close() : undefined;
+			!many && processNote ? processNote.close() : undefined;
 			cb ? cb() : undefined;
 			if ( wizard.isOpen() ) {
 				wizard.close();

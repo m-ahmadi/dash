@@ -3,6 +3,8 @@ define(["uk"], (uk) => {
 	const ROOT = "[data-root='process']";
 	const temp = Handlebars.templates;
 	let els;
+	let doingMsg = "";
+	let timer;
 	
 	
 	function open() {
@@ -11,7 +13,7 @@ define(["uk"], (uk) => {
 		uk.openModal(ROOT);
 	}
 	function close() {
-		uk.closeModal(ROOT);
+		setTimeout(() => uk.closeModal(ROOT), 1000);
 	}
 	function clear() {
 		els.logs.empty();
@@ -27,12 +29,12 @@ define(["uk"], (uk) => {
 		ctx[str] = true;
 		els.logs.append( temp.procAlert(ctx) );
 	}
-	function inc() {
-		let n = parseInt(els.bar.val(), 10);
-		set(n+=1);
+	function inc(steps) {
+		let n = parseFloat(els.bar.val(), 10);
+		set(n += steps || 1);
 	}
 	function set(n) {
-		els.bar.val(""+n).trigger("change");
+		els.bar.val(n).trigger("change");
 	}
 	function init() {
 		els = u.getEls(ROOT);
@@ -41,9 +43,25 @@ define(["uk"], (uk) => {
 		});
 	}
 	function doing(msg, append) {
-		let txt = msg;
-		txt += append ? els.currently.text() : "";
-		els.currently.text(txt);
+		if (append) {
+			els.currently.text(doingMsg + msg);
+		} else {
+			doingMsg = msg;
+			els.currently.text(doingMsg);
+		}
+	}
+	function start(steps) {
+		timer = setTimeout(() => {
+			inc(1);
+			start();
+		}, 800);
+	}
+	function stop() {
+		clearTimeout(timer);
+	}
+	function finish() {
+		set(100);
+		close();
 	}
 	
 	inst.open = open;
@@ -54,6 +72,9 @@ define(["uk"], (uk) => {
 	inst.set = set;
 	inst.inc = inc;
 	inst.doing = doing;
+	inst.start = start;
+	inst.stop = stop;
+	inst.finish = finish;
 	inst.init = init;
 	
 	window.proc = inst;
