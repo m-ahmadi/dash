@@ -5,7 +5,7 @@ define([
 	"./wizard/main",
 	"./widget/main",
 	"./process",
-	"./Wiget/Widget"
+	"./Widget/Widget"
 ], (
 	conf,
 	token,

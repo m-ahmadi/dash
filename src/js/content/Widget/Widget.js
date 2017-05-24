@@ -17,7 +17,7 @@ define([
 	
 	const extractor = newPubSub();
 	function init() {
-		worker = new Worker(conf.ROOT + "js/content/Wiget/worker.js");
+		worker = new Worker(conf.ROOT + "js/content/Widget/worker.js");
 		worker.onmessage = e => {
 			let d = e.data;
 			extractor.emit(d.reqId, d.result);
@@ -93,8 +93,16 @@ define([
 			throw new TypeError("You must provive a container and a widget object.");
 		}
 		
-		
+		function toggleSpinner() {
+			let len = els.spinnerParent.children().length;
+			if (len) {
+				els.spinnerParent.empty();
+			} else {
+				els.spinnerParent.append( temp.spinner() );
+			}
+		}
 		function loadGraphSensorData(e) {
+			toggleSpinner();
 			$.ajax({
 				url: conf.BASE +`device/devicekpisensordata`+ token(),
 				method: "POST",
@@ -104,16 +112,18 @@ define([
 					device_ids: jsonStr([e.device.id]),
 					service_ids: jsonStr([e.service.id]),
 					kpis: jsonStr(e.sensors)
-				},
+				}
 			})
 			.done(data => {
 				if (data.length) {
 					worker.postMessage({reqId: e.id, rawData: data});
 				}
+				toggleSpinner();
 			})
 			.fail(() => {
 				console.log(root, els);
 				els.root.prepend( temp.alert({message: "Couldn't fetch widget data."}) );
+				toggleSpinner();
 			});
 		}
 		function load() {
@@ -149,10 +159,11 @@ define([
 			}
 			
 			els.menus.on("click", "[data-menu]", e => {
-				let el = $(e.target);
-				let action = parseInt(el.data().action, 10);
+				let action = $(e.target).data().action || $(e.currentTarget).data().action;
+					action = parseInt(action, 10);
+				console.log(action);
 				if (action === 0) {
-					if ( !el.hasClass(KLASS) ) {
+					if ( !root.hasClass(KLASS) ) {
 						root.addClass(KLASS);
 						els.menus.find("[data-resize]").html( temp.btnShrink() );
 						if (chart) {

@@ -8,7 +8,7 @@ define(() => {
 		}
 		return n;
 	}
-	function generate(data, sensors) {
+	function generate(data, opts) {
 		let res = [];
 		data.forEach((i, x) => {
 			const arr = i.Data;
@@ -18,7 +18,7 @@ define(() => {
 					d.push( [format(i.Timestamp), i.Value] );
 				});
 			}
-			const sensor = sensors[i.SensorId];
+			const sensor = opts[i.SensorId];
 			res.push({
 				type: "line",
 				name: sensor.name,
