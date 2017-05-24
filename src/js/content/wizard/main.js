@@ -33,7 +33,8 @@ define(["config", "token", "uk", "../colorpick"], (conf, token, uk, colorpick) =
 		"sensors"
 	];
 	
-	let data, openedModal;
+	let data = {},
+		openedModal;
 	
 	const newEmpty = () => {
 		return {
@@ -74,7 +75,6 @@ define(["config", "token", "uk", "../colorpick"], (conf, token, uk, colorpick) =
 			device: newEmpty(),
 			service: newEmpty(),
 			sensors: [],
-			sensorNames: [],
 			order: order+=1,
 			expand: false
 		};
@@ -98,9 +98,21 @@ define(["config", "token", "uk", "../colorpick"], (conf, token, uk, colorpick) =
 		return !u.isUndef( openedModal );
 	}
 	function start(childs) {
-		console.log(childs);
 		reset(childs);
 		open(WIZ_1);
+	}
+	function edit(type, e) {
+		if (!e) { throw new TypeError("You must provide a widget object.") }
+		data = e;
+		if (type === 0) {
+			open(WIZ_2);
+		} else if (type === 1) {
+			open(WIZ_3);
+		} else if (type === 2) {
+			open(WIZ_3);
+		} else if (type === 3) {
+			open(WIZ_4);
+		}
 	}
 	function alertMsg(w, msg) {
 		let set;
@@ -307,21 +319,17 @@ define(["config", "token", "uk", "../colorpick"], (conf, token, uk, colorpick) =
 			// wiz2.sensors.select2("data").forEach(i => data.sensors[i.id] = i.text);
 			
 			data.sensors = [];
-			data.sensorOption = {};
 			wiz2.units.find("[data-sensor-id]").each((i, l) => {
 				const el = $(l);
 				const elData = el.data();
 				const sensorId = elData.sensorId;
 				const sensorName = elData.sensorName;
-				data.sensors.push({
+				data.sensors[sensorId] = {
 					id: sensorId,
-					unit: el.find("[data-select]").val()
-				});
-				data.sensorOption[sensorId] = {
+					name: sensorName,
+					unit: el.find("[data-select]").val(),
 					color: el.find("[data-colorpick]").spectrum("get").toHex(),
-					name: sensorName
-				};
-				data.sensorNames.push(sensorName);
+				});
 			});
 			log(data);
 			
@@ -351,10 +359,11 @@ define(["config", "token", "uk", "../colorpick"], (conf, token, uk, colorpick) =
 	inst.alertMsg = alertMsg;
 	inst.init = init;
 	inst.start = start;
+	inst.edit = edit;
 	inst.close = close;
 	inst.isOpen = isOpen;
 	
 	window.dool = () => {return data};
-	window.wz2 = () => {return wiz2};;
+	window.wizard = inst;
 	return inst;
 });

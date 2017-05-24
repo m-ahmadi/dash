@@ -1,4 +1,8 @@
-define(["./makeLineChart"], (makeLineChart) => {
+define([
+	"config",
+	"token",
+	"./makeLineChart"
+], (conf, token, makeLineChart) => {
 	const temp = Handlebars.templates;
 	const BODY = "[data-container]";
 	const KLASS = [
@@ -7,15 +11,44 @@ define(["./makeLineChart"], (makeLineChart) => {
 		"uk-width-1-2@l",
 		"uk-width-1-2@xl"
 	].join(" ");
+	const jsonStr = JSON.stringify;
+	const jsonParse = JSON.parse;
+	let worker;
 	
-	function makeLineChart(container, series, text) {
+	const extractor = newPubSub();
+	function init() {
+		worker = new Worker(conf.ROOT + "js/content/Wiget/worker.js");
+		worker.onmessage = e => {
+			let d = e.data;
+			extractor.emit(d.reqId, d.result);
+		};
+	}
+	function extract() {
+		
+	}
+	function generateSeries(sensors) {
+		let res = [];
+		sensors.forEach(i => {
+			res.push({
+				type: "line",
+				name: i.name,
+				color: "#"+ i.color,
+				data: [],
+				tooltip: {
+					valueDecimals: 2
+				}
+			});
+		});
+		return res;
+	}
+	function makeLineChart(container, title, sensors) {
 		return Highcharts.stockChart(container[0], {
 			rangeSelector: false,
 			exporting: false,
 			credits: false,
 			title: {
 				align: "left",
-				text: text || "",
+				text: title || "",
 				style: {
 					color: "#717171",
 					fontSize: "14px"
@@ -27,7 +60,7 @@ define(["./makeLineChart"], (makeLineChart) => {
 			legend: {
 				enabled: true
             },
-			series: series || []
+			series: generateSeries(sensors)
 		});
 	}
 	function createPanel(parent, type, rangeTitle, id, expand) {
@@ -50,23 +83,71 @@ define(["./makeLineChart"], (makeLineChart) => {
 		return parent.children().last();
 	}
 	
-	
 	function constructor(container, e) {
 		let inst = {};
-		let root, els,
+		let root,
+			els,
 			chart = {};
 		
+		if (!container || !e) {
+			throw new TypeError("You must provive a container and a widget object.");
+		}
 		
-		function init() {
-			let root = createPanel(container, e.type, e.rangeTitle, e.id, e.expand);
-			els = u.getEls(root);
-			
+		
+		function loadGraphSensorData(e) {
+			$.ajax({
+				url: conf.BASE +`device/devicekpisensordata`+ token(),
+				method: "POST",
+				data: {
+					start_date: e.startDate,
+					end_date: e.endDate,
+					device_ids: jsonStr([e.device.id]),
+					service_ids: jsonStr([e.service.id]),
+					kpis: jsonStr(e.sensors)
+				},
+			})
+			.done(data => {
+				if (data.length) {
+					worker.postMessage({reqId: e.id, rawData: data});
+				}
+			})
+			.fail(() => {
+				console.log(root, els);
+				els.root.prepend( temp.alert({message: "Couldn't fetch widget data."}) );
+			});
+		}
+		function load() {
 			switch (e.type) {
-				case 0: chart = makeLineChart(els.body, []); break;
+				case 0: loadGraphSensorData(e); break;
 				case 1: ; break;
 				case 2: ; break;
 				case 3: ; break;
 			}
+		}
+		function init() {
+			root = createPanel(container, e.type, e.rangeTitle, e.id, e.expand);
+			els = u.getEls(root);
+			
+			// when creating dom stuff.
+			 
+			const type = e.type;
+			if (type === 0) {
+				chart = makeLineChart(els.body, e.device.name, e.sensors);
+				
+				extractor.on(e.id, d => {
+					d.forEach((i, x) => {
+						chart.series[x].update({data: i});
+					});
+				});
+			
+			} else if (type === 1) {
+			
+			} else if (type === 2) {
+			
+			} else if (type === 3) {
+			
+			}
+			
 			els.menus.on("click", "[data-menu]", e => {
 				let el = $(e.target);
 				let action = parseInt(el.data().action, 10);
@@ -88,7 +169,7 @@ define(["./makeLineChart"], (makeLineChart) => {
 			});
 			els.edit.on("click", () => {
 				switch (e.type) {
-					case 0: chart = makeLineChart(els.body, []); break;
+					case 0: ; break;
 					case 1: ; break;
 					case 2: ; break;
 					case 3: ; break;
@@ -109,12 +190,14 @@ define(["./makeLineChart"], (makeLineChart) => {
 		};
 		inst.chart = () => {return chart};
 		
+		
 		init();
+		load();
 		
 		return inst;
 	}
 	
 	
 	window.newWidget = constructor;
-	return constructor;
+	return {constructor, init};
 });

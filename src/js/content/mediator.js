@@ -124,6 +124,7 @@ define([
 		wizard.init();
 		process.init();
 		addCustomEvt();
+		newWidget.init();
 		// fetchAll();
 	};
 	
