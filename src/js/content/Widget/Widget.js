@@ -1,8 +1,9 @@
 define([
 	"config",
 	"token",
-	"./makeLineChart"
-], (conf, token, makeLineChart) => {
+	"./makeLineChart",
+	"../wizard"
+], (conf, token, makeLineChart, wizard) => {
 	const temp = Handlebars.templates;
 	const BODY = "[data-container]";
 	const KLASS = [
@@ -23,16 +24,25 @@ define([
 			extractor.emit(d.reqId, d.result);
 		};
 	}
-	function extract() {
-		
+	function getSensors(o) {
+		let a = [];
+		Object.keys(o).forEach(i => {
+			let p = o[i];
+			a.push({
+				id: p.id,
+				unit: p.unit
+			});
+		});
+		return a;
 	}
 	function generateSeries(sensors) {
 		let res = [];
-		sensors.forEach(i => {
+		Object.keys(sensors).forEach(i => {
+			let sensor = sensors[i];
 			res.push({
 				type: "line",
-				name: i.name,
-				color: "#"+ i.color,
+				name: sensor.name,
+				color: "#"+ sensor.color,
 				data: [],
 				tooltip: {
 					valueDecimals: 2
@@ -111,11 +121,13 @@ define([
 					end_date: e.endDate,
 					device_ids: jsonStr([e.device.id]),
 					service_ids: jsonStr([e.service.id]),
-					kpis: jsonStr(e.sensors)
+					kpis: jsonStr( getSensors(e.sensors) )
 				}
 			})
 			.done(data => {
-				if (data.length) {
+				if (!data) {
+					worker.postMessage({reqId: e.id, rawData: []});
+				} else if (data.length) {
 					worker.postMessage({reqId: e.id, rawData: data});
 				}
 				toggleSpinner();
@@ -142,6 +154,7 @@ define([
 			 
 			const type = e.type;
 			if (type === 0) {
+				// debugger
 				chart = makeLineChart(els.body, e.device.name, e.sensors);
 				
 				extractor.on(e.id, d => {
@@ -187,10 +200,10 @@ define([
 				}
 			});
 			els.remove.on("click", () => {
-				alert(4);
+				wizard.deleteConfirm(e.id);
 			});
 			els.refresh.on("click", () => {
-				alert(5);
+				load();
 			});
 		}
 		
@@ -198,6 +211,9 @@ define([
 			el.removeClass(KLASS);
 			el.find("[data-resize]").html(temp.btnExpand);
 			el.find(BODY).highcharts().setSize();
+		};
+		inst.remove = () => {
+			root.remove();
 		};
 		inst.chart = () => {return chart};
 		
@@ -210,5 +226,5 @@ define([
 	
 	
 	window.newWidget = constructor;
-	return {constructor, init};
+	return {newWidget, init};
 });

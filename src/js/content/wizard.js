@@ -1,4 +1,4 @@
-define(["config", "token", "uk", "../colorpick"], (conf, token, uk, colorpick) => {
+define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) => {
 	let log = console.log;
 	
 	const inst = u.extend( newPubSub() );
@@ -6,8 +6,9 @@ define(["config", "token", "uk", "../colorpick"], (conf, token, uk, colorpick) =
 	const WIZ_2 = "[data-root='wiz2']";
 	const WIZ_3 = "[data-root='wiz3']";
 	const WIZ_4 = "[data-root='wiz4']";
+	const DEL = "[data-root='delete']";
 	const temp = Handlebars.templates;
-	let wiz1, wiz2, wiz3, wiz4;
+	let wiz1, wiz2, wiz3, wiz4, del;
 	const d = { // defaults
 		TYPE: 0,
 		MAP: 0,
@@ -113,6 +114,10 @@ define(["config", "token", "uk", "../colorpick"], (conf, token, uk, colorpick) =
 		} else if (type === 3) {
 			open(WIZ_4);
 		}
+	}
+	function deleteConfirm(id) {
+		data.id = id;
+		open(DEL);
 	}
 	function alertMsg(w, msg) {
 		let set;
@@ -265,6 +270,7 @@ define(["config", "token", "uk", "../colorpick"], (conf, token, uk, colorpick) =
 		wiz2 = u.getEls(WIZ_2);
 		wiz3 = u.getEls(WIZ_3);
 		wiz4 = u.getEls(WIZ_4);
+		del = u.getEls(DEL);
 		reset();
 		
 		const toClear = wiz2.service.add(wiz2.sensors);
@@ -318,7 +324,7 @@ define(["config", "token", "uk", "../colorpick"], (conf, token, uk, colorpick) =
 			data.rangeTitle = getRangeTitle(wiz2.rangeType.val(), wiz2.rangeCount.val());
 			// wiz2.sensors.select2("data").forEach(i => data.sensors[i.id] = i.text);
 			
-			data.sensors = [];
+			data.sensors = {};
 			wiz2.units.find("[data-sensor-id]").each((i, l) => {
 				const el = $(l);
 				const elData = el.data();
@@ -328,8 +334,8 @@ define(["config", "token", "uk", "../colorpick"], (conf, token, uk, colorpick) =
 					id: sensorId,
 					name: sensorName,
 					unit: el.find("[data-select]").val(),
-					color: el.find("[data-colorpick]").spectrum("get").toHex(),
-				});
+					color: el.find("[data-colorpick]").spectrum("get").toHex()
+				};
 			});
 			log(data);
 			
@@ -341,6 +347,7 @@ define(["config", "token", "uk", "../colorpick"], (conf, token, uk, colorpick) =
 				wiz2.toDisable.attr({disabled: false}); 
 				wiz2.units.find("[data-todisable]").attr({disabled: false});
 				wiz2.units.find("[data-colorpick]").spectrum("enable");
+				close();
 			});
 		});
 		wiz3.submit.on("click", () => {
@@ -354,12 +361,20 @@ define(["config", "token", "uk", "../colorpick"], (conf, token, uk, colorpick) =
 		wiz4.submit.on("click", () => {
 			inst.emit(data.type);
 		});
+		del.submit.on("click", () => {
+			del.toDisable.attr({disabled: true});
+			inst.emit("delete_confirm", data.id, () => {
+				wiz2.toDisable.attr({disabled: false}); 
+				close();
+			});
+		});
 	}
 	
 	inst.alertMsg = alertMsg;
 	inst.init = init;
 	inst.start = start;
 	inst.edit = edit;
+	inst.deleteConfirm = deleteConfirm;
 	inst.close = close;
 	inst.isOpen = isOpen;
 	

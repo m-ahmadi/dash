@@ -2,8 +2,7 @@ define([
 	"config",
 	"token",
 	"uk",
-	"./wizard/main",
-	"./widget/main",
+	"./wizard",
 	"./process",
 	"./Widget/Widget"
 ], (
@@ -11,9 +10,8 @@ define([
 	token,
 	uk,
 	wizard,
-	widget,
 	process,
-	newWidget
+	widget
 ) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='content']";
@@ -22,6 +20,7 @@ define([
 		"Processing your request...",
 		"Fetching your widgets..."
 	];
+	let widgets = {};
 	let els, processNote;
 	
 	/* function viewport() {
@@ -63,44 +62,68 @@ define([
 			process.log(`Found ${data.length} widgets.`, "success");
 			process.doing("Creating widgets.");
 			
-			widget.addMany(data, els.widgets, () => {
-				process.log("Finished.", "success");
-				process.close();
+			let step = 100 - process.get() / data.length;
+			data.forEach(i => {
+				process.inc(step);
+				widgets[i.id] = widget.newWidget(els.widgets, i);
 			});
+			process.log("Finished.", "success");
+			process.close();
 		})
-		.fail((x, err)=> {
+		.fail(()=> {
 			if (counter > 1) {
 				process.doing(` (${counter}${ori[counter]} attempt)`, true);
 			}
 			counter += 1;
-			process.log(`Fetching widget list failed. ${err}`, "danger");
-			if (counter > 3) return;
+			process.log("Fetching widget list failed.", "danger");
+			if (counter > 3) {
+				process.log("Aborted.", "danger");
+				return;
+			}
 			setTimeout(fetchAll, 1000);
 		});
 	}
+	
 	function addCustomEvt() {
-		let cb;
 		wizard.on("submit", (e, fn) => {
-			cb = fn;
+			
 			processNote = uk.note.process(MSG[0], 0, "top-center");
-			widget.add(e, els.widgets);
-		});
-		widget.on("create_err", msg => {
-			if (processNote) {
+			$.ajax({
+				url: conf.TMP + "widget/add",
+				method: "GET",
+				data: {
+					widget: JSON.stringify(e)
+				}
+			})
+			.done(() => {
+				widget.newWidget(els.widgets, e);
+				fn();
 				processNote.close();
-			}
-			if ( wizard.isOpen() ) {
-				wizard.alertMsg(2, msg);
-			}
-			cb ? cb() : undefined;
+			})
+			.fail(() => {
+				fn();
+				processNote.close();
+			});
 		});
-		widget.on("add", many => {
-			!many && processNote ? processNote.close() : undefined;
-			cb ? cb() : undefined;
-			if ( wizard.isOpen() ) {
-				wizard.close();
-			}
+		wizard.on("delete_confirm", (id, fn) => {
+			processNote = uk.note.process(MSG[0], 0, "top-center");
+			$.ajax({
+				url: conf.TMP + "widget/delete",
+				method: "GET",
+				data: {id: id}
+			})
+			.done(() => {
+				widgets[id].remove();
+				processNote.close();
+				fn();
+			})
+			.fail(() => {
+				fn();
+				uk.note.error("Couldn't remove the widget.");
+				processNote.close();
+			});
 		});
+		
 	}
 	inst.init = () => {
 		els = u.getEls(ROOT);
@@ -124,10 +147,10 @@ define([
 		wizard.init();
 		process.init();
 		addCustomEvt();
-		newWidget.init();
-		// fetchAll();
+		widget.init();
+		fetchAll();
 	};
 	
-	window.newWidget = newWidget;
+	window.newWidget = widget.newWidget;
 	return inst;
 });

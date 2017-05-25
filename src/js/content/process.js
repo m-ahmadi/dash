@@ -36,6 +36,9 @@ define(["uk"], (uk) => {
 	function set(n) {
 		els.bar.val(n).trigger("change");
 	}
+	function get(n) {
+		return parseInt(els.bar.val(), 10);
+	}
 	function init() {
 		els = u.getEls(ROOT);
 		els.bar.on("change", e => {
@@ -70,6 +73,7 @@ define(["uk"], (uk) => {
 	inst.clear = clear;
 	inst.reset = reset;
 	inst.set = set;
+	inst.get = get;
 	inst.inc = inc;
 	inst.doing = doing;
 	inst.start = start;
