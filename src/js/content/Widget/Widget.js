@@ -117,7 +117,22 @@ define([
 		
 		function changeOrder(n) {
 			toggleSpinner();
-			$.ajax({
+			manager.emit("save_signal", {
+				action: "edit",
+				id: e.id,
+				key: "order",
+				val: n,
+				done: () => {
+					toggleSpinner();
+					mark(true);
+				},
+				fail: () => {
+					toggleSpinner();
+					mark(false);
+					root.prepend( temp.alert({message: "Could not save the widget. Try saving manually."}) );
+				}
+			});
+			/* $.ajax({
 				url: conf.TMP + "widget/edit",
 				method: "GET",
 				data: {
@@ -132,20 +147,14 @@ define([
 				toggleSpinner();
 				mark(false);
 				root.prepend( temp.alert({message: "Could not save the widget. Try saving manually."}) );
-			});
+			}); */
 		}
-		function expand() {
-			if ( !root.hasClass(KLASS) ) {
-				root.addClass(KLASS);
-				els.menus.find("[data-resize]").html( temp.btnShrink() );
-				if (chart) chart.setSize();
-			}
-			toggleSpinner();
+		function _saveState(flag) {
 			$.ajax({
 				url: conf.TMP + "widget/edit",
 				method: "GET",
 				data: {
-					widget: jsonStr( {id: e.id, expand: true} ),
+					widget: jsonStr( {id: e.id, expand: flag} ),
 				}
 			})
 			.done(() => {
@@ -158,35 +167,44 @@ define([
 				root.prepend( temp.alert({message: "Widget could not be saved. Try saving manually."}) );
 			});
 		}
+		function saveState(flag) {
+			manager.emit("save_signal", {
+				action: "edit",
+				id: e.id,
+				key: "expand",
+				val: flag,
+				done: () => {
+					toggleSpinner();
+					mark(true);
+				},
+				fail: () => {
+					toggleSpinner();
+					mark(false);
+					root.prepend( temp.alert({message: "Widget could not be saved. Try saving manually."}) );
+				}
+			});
+		}
+		function expand() {
+			if ( !root.hasClass(KLASS) ) {
+				root.addClass(KLASS);
+				els.menus.find("[data-resize]").html( temp.btnShrink() );
+				if (chart) chart.setSize();
+			}
+			toggleSpinner();
+			saveState(true);
+		}
 		function shrink() {
 			root.removeClass(KLASS);
 			els.menus.find("[data-resize]").html( temp.btnExpand() );
 			if (chart) chart.setSize();
 			toggleSpinner();
-			$.ajax({
-				url: conf.TMP + "widget/edit",
-				method: "GET",
-				data: {
-					widget: jsonStr( {id: e.id, expand: false} ),
-				}
-			})
-			.done(() => {
-				toggleSpinner();
-				mark(true);
-			})
-			.fail(() => {
-				toggleSpinner();
-				mark(false);
-				root.prepend( temp.alert({message: "Could not save the widget. Try saving manually."}) );
-			});
+			saveState(false);
 		}
 		function mark(stat) {
 			let par = els.spinnerParent;
 			par.empty();
 			par.append( stat ? temp.markSuccess() : temp.markFail() );
-			setTimeout(() => {
-				par.empty();
-			}, 1400);
+			setTimeout(() => par.empty(), 1200);
 		}
 		function toggleSpinner() {
 			let len = els.spinnerParent.children().length;

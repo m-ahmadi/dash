@@ -56,6 +56,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		return "rgb(" + mixedrgb.join(",") + ")";
 	}
 	function reset(order) {
+		order = order ? order : 0;
 		data = {
 			id: uid(),
 			type: d.TYPE,
@@ -347,7 +348,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		});
 		delConf.submit.on("click", () => {
 			delConf.toDisable.attr({disabled: true});
-			inst.emit("delete_confirm", data.id, () => {
+			inst.emit("delete_confirm_submit", data.id, () => {
 				delConf.toDisable.attr({disabled: false}); 
 				close();
 			});

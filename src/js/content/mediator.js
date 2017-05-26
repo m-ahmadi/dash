@@ -21,6 +21,7 @@ define([
 		"Fetching your widgets..."
 	];
 	let widgets = {};
+	let _WIDGETS_ = {};
 	let els, processNote;
 	
 	/* function viewport() {
@@ -43,23 +44,32 @@ define([
 		}
 		process.doing("Fetching widget list.");
 		$.ajax({
-			url: conf.TMP + "widget/fetch",
+			url: conf.ALT + "dashboard" + token(), // "widget/fetch",
 			method: "GET",
-			dataType: "json"
+			dataType: "json",
+			header: {"cache-control": "no-cache"}
 		})
 		.done( data => {
-			if (!data.length) {
+			if ( u.isEmptyObj(data) ) {
 				process.finish();
 				process.log("No widgets to fetch", "primary");
 				return;
 			}
-			process.log(`Found ${data.length} widgets.`, "success");
+			_WIDGETS_ = data;
+			const len = u.objLength(data);
+			process.log(`Found ${len} widgets.`, "success");
 			process.doing("Creating widgets.");
 			
-			let step = 100 - process.get() / data.length;
-			data.forEach(i => {
+			let step = 100 - process.get() / len;
+			let sorted = [];
+			Object.keys(data).forEach(k => {
+				sorted.push([data[k].order, k]);
+			});
+			sorted.sort();
+			sorted.forEach(i => {
+				let w = data[ i[1] ];
 				process.inc(step);
-				widgets[i.id] = widget.create(els.widgets, i);
+				widgets[w.id] = widget.create(els.widgets, w);
 			});
 			process.log("Finished.", "success");
 			process.close();
@@ -77,10 +87,30 @@ define([
 			setTimeout(fetchAll, 1000);
 		});
 	}
+	function save(done, fail) {
+		$.ajax({
+			url: conf.ALT + "dashboard/save" + token(), // "widget/add",
+			method: "POST",
+			contentType: "application/json",
+			data: JSON.stringify(_WIDGETS_)
+		})
+		.done(done)
+		.fail(fail);
+	}
+	
 	function addCustomEvt() {
 		wizard.on("submit", (e, fn) => {
 			processNote = uk.note.process(MSG[0], 0, "top-center");
-			$.ajax({
+			_WIDGETS_[e.id] = e;
+			save(() => {
+				widgets[e.id] = widget.create(els.widgets, e);
+				fn();
+				processNote.close();
+			}, () => {
+				fn();
+				processNote.close();
+			});
+			/* $.ajax({
 				url: conf.TMP + "widget/add",
 				method: "GET",
 				data: {
@@ -95,11 +125,22 @@ define([
 			.fail(() => {
 				fn();
 				processNote.close();
-			});
+			}); */
 		});
-		wizard.on("delete_confirm", (id, fn) => {
+		wizard.on("delete_confirm_submit", (id, fn) => {
 			processNote = uk.note.process(MSG[0], 0, "top-center");
-			$.ajax({
+			
+			delete _WIDGETS_[id];
+			save(() => {
+				widgets[id].remove();
+				processNote.close();
+				fn();
+			}, () => {
+				fn();
+				uk.note.error("Couldn't remove the widget.");
+				processNote.close();
+			});
+			/* $.ajax({
 				url: conf.TMP + "widget/delete",
 				method: "GET",
 				data: {id: id}
@@ -113,11 +154,25 @@ define([
 				fn();
 				uk.note.error("Couldn't remove the widget.");
 				processNote.close();
-			});
+			}); */
 		});
-		widget.on("create", (id, widget )=> {
+		widget.on("save_signal", e => {
+			let s = e.action;
+			if (s === "create") {
+				
+			} else if (s === "edit") {
+			
+				_WIDGETS_[e.id][e.key] = e.val;
+				
+			} else if (s === "delete") {
+				
+			}
+			
+			save(e.done, e.fail);
+		});
+		widget.on("create", (id, widget)=> {
 			widgets[id] = widget;
-			// sortable( "refresh" )
+			els.widgets.sortable("refresh");
 		});
 		widget.on("delete", id => {
 			wizard.deleteConfirm(id);
@@ -160,6 +215,6 @@ define([
 		fetchAll();
 	};
 	
-	window.ws = () => { return widgets; };
+	window.ws = {_WIDGETS_, save};
 	return inst;
 });
