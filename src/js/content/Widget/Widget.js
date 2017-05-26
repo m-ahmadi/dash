@@ -4,7 +4,10 @@ define([
 	"./makeLineChart",
 	"../wizard"
 ], (conf, token, makeLineChart, wizard) => {
+	const manager = u.extend( newPubSub() );
 	const temp = Handlebars.templates;
+	const extractor = newPubSub();
+	
 	const BODY = "[data-container]";
 	const KLASS = [
 		"uk-width-1-1@s",
@@ -12,17 +15,26 @@ define([
 		"uk-width-1-2@l",
 		"uk-width-1-2@xl"
 	].join(" ");
+	const DATE_FORMAT = "Y/MM/DD HH:mm";
 	const jsonStr = JSON.stringify;
 	const jsonParse = JSON.parse;
 	let worker;
 	
-	const extractor = newPubSub();
+	
 	function init() {
 		worker = new Worker(conf.ROOT + "js/content/Widget/worker.js");
 		worker.onmessage = e => {
 			let d = e.data;
 			extractor.emit(d.reqId, d.result);
 		};
+	}
+	
+	function getDate(type, count) {
+		if (type && count) {
+			return moment().subtract(count, type).format(DATE_FORMAT);
+		} else {
+			return moment().format(DATE_FORMAT);
+		}
 	}
 	function getSensors(o) {
 		let a = [];
@@ -94,31 +106,106 @@ define([
 	}
 	
 	function constructor(container, e) {
-		let inst = {};
+		const inst = {};
 		let root,
 			els,
 			chart = {};
 		
 		if (!container || !e) {
-			throw new TypeError("You must provive a container and a widget object.");
+			throw new TypeError("You must provide a container and a widget object.");
 		}
 		
+		function changeOrder(n) {
+			toggleSpinner();
+			$.ajax({
+				url: conf.TMP + "widget/edit",
+				method: "GET",
+				data: {
+					widget: jsonStr( {id: e.id, order: n} ),
+				}
+			})
+			.done(() => {
+				toggleSpinner();
+				mark(true);
+			})
+			.fail(() => {
+				toggleSpinner();
+				mark(false);
+				root.prepend( temp.alert({message: "Could not save the widget. Try saving manually."}) );
+			});
+		}
+		function expand() {
+			if ( !root.hasClass(KLASS) ) {
+				root.addClass(KLASS);
+				els.menus.find("[data-resize]").html( temp.btnShrink() );
+				if (chart) chart.setSize();
+			}
+			toggleSpinner();
+			$.ajax({
+				url: conf.TMP + "widget/edit",
+				method: "GET",
+				data: {
+					widget: jsonStr( {id: e.id, expand: true} ),
+				}
+			})
+			.done(() => {
+				toggleSpinner();
+				mark(true);
+			})
+			.fail(() => {
+				toggleSpinner();
+				mark(false);
+				root.prepend( temp.alert({message: "Widget could not be saved. Try saving manually."}) );
+			});
+		}
+		function shrink() {
+			root.removeClass(KLASS);
+			els.menus.find("[data-resize]").html( temp.btnExpand() );
+			if (chart) chart.setSize();
+			toggleSpinner();
+			$.ajax({
+				url: conf.TMP + "widget/edit",
+				method: "GET",
+				data: {
+					widget: jsonStr( {id: e.id, expand: false} ),
+				}
+			})
+			.done(() => {
+				toggleSpinner();
+				mark(true);
+			})
+			.fail(() => {
+				toggleSpinner();
+				mark(false);
+				root.prepend( temp.alert({message: "Could not save the widget. Try saving manually."}) );
+			});
+		}
+		function mark(stat) {
+			let par = els.spinnerParent;
+			par.empty();
+			par.append( stat ? temp.markSuccess() : temp.markFail() );
+			setTimeout(() => {
+				par.empty();
+			}, 1400);
+		}
 		function toggleSpinner() {
 			let len = els.spinnerParent.children().length;
+			let par = els.spinnerParent;
 			if (len) {
-				els.spinnerParent.empty();
+				par.empty();
 			} else {
-				els.spinnerParent.append( temp.spinner() );
+				par.append( temp.spinner() );
 			}
 		}
 		function loadGraphSensorData(e) {
 			toggleSpinner();
+			chart ? chart.showLoading() : undefined;
 			$.ajax({
 				url: conf.BASE +`device/devicekpisensordata`+ token(),
 				method: "POST",
 				data: {
-					start_date: e.startDate,
-					end_date: e.endDate,
+					start_date: getDate(e.rangeType, e.rangeCount),
+					end_date: getDate(),
 					device_ids: jsonStr([e.device.id]),
 					service_ids: jsonStr([e.service.id]),
 					kpis: jsonStr( getSensors(e.sensors) )
@@ -131,11 +218,14 @@ define([
 					worker.postMessage({reqId: e.id, rawData: data});
 				}
 				toggleSpinner();
+				mark(true);
+				chart.hideLoading()
 			})
 			.fail(() => {
-				console.log(root, els);
-				els.root.prepend( temp.alert({message: "Couldn't fetch widget data."}) );
 				toggleSpinner();
+				mark(false);
+				chart.hideLoading();
+				root.prepend( temp.alert({message: "Couldn't fetch widget data."}) );
 			});
 		}
 		function load() {
@@ -157,7 +247,7 @@ define([
 				// debugger
 				chart = makeLineChart(els.body, e.device.name, e.sensors);
 				
-				extractor.on(e.id, d => {
+				extractor.on(""+e.id, d => {
 					d.forEach((i, x) => {
 						chart.series[x].update({data: i});
 					});
@@ -174,21 +264,11 @@ define([
 			els.menus.on("click", "[data-menu]", e => {
 				let action = $(e.target).data().action || $(e.currentTarget).data().action;
 					action = parseInt(action, 10);
-				console.log(action);
+				
 				if (action === 0) {
-					if ( !root.hasClass(KLASS) ) {
-						root.addClass(KLASS);
-						els.menus.find("[data-resize]").html( temp.btnShrink() );
-						if (chart) {
-							chart.setSize();
-						}
-					}
+					expand();
 				} else if (action === 1) {
-					root.removeClass(KLASS);
-					els.menus.find("[data-resize]").html( temp.btnExpand() );
-					if (chart) {
-						chart.setSize();
-					}
+					shrink();
 				}
 			});
 			els.edit.on("click", () => {
@@ -200,31 +280,32 @@ define([
 				}
 			});
 			els.remove.on("click", () => {
-				wizard.deleteConfirm(e.id);
+				manager.emit("delete", e.id);
 			});
 			els.refresh.on("click", () => {
 				load();
 			});
 		}
 		
-		inst.shrink = () => {
-			el.removeClass(KLASS);
-			el.find("[data-resize]").html(temp.btnExpand);
-			el.find(BODY).highcharts().setSize();
-		};
-		inst.remove = () => {
-			root.remove();
-		};
-		inst.chart = () => {return chart};
-		
-		
 		init();
 		load();
 		
+		inst.mark = mark;
+		inst.toggleSpinner = toggleSpinner;
+		inst.refresh = load;
+		inst.changeOrder = changeOrder;
+		inst.expand = expand;
+		inst.shrink = shrink;
+		inst.remove = () => {
+			root.remove();
+		};
+		
+		manager.emit("create", e.id, inst);
 		return inst;
 	}
 	
+	manager.create = constructor;
+	manager.init = init;
 	
-	window.newWidget = constructor;
-	return {newWidget, init};
+	return manager;
 });

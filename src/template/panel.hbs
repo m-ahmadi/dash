@@ -11,10 +11,12 @@
 	data-el="panel" data-id="{{id}}">
 	<div class="panel-wrap">
 	<div class="uk-card-header">
-		<span class="uk-card-title uk-float-left uk-text-muted uk-text-small uk-text-bold">
-			<i class="uk-sortable-handle" uk-icon="icon: move; ratio: 1"></i><span data-el="title"> {{title}}</span>
-			<span class="uk-margin-small-left" data-el="spinnerParent"></span>
-		</span>
+		<div class="uk-float-left">
+			<span class="uk-card-title uk-text-muted uk-text-small uk-text-bold">
+				<i class="uk-sortable-handle" uk-icon="icon: move; ratio: 1"></i><span data-el="title"> {{title}}</span>
+				<span class="uk-margin-small-left" data-el="spinnerParent"></span>
+			</span>
+		</div>
 		<span class="uk-text-small uk-text-meta">{{range}}</span>
 		<div class="uk-float-right">
 			<div class="uk-inline">
@@ -29,8 +31,9 @@
 							<li data-resize><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-menu data-action="0"><i uk-icon="icon: expand; ratio: 0.8;"></i> Expand</a></li>
 						{{/if}}
 						<li><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-el="edit"><i uk-icon="icon: file-edit; ratio: 0.8;"></i> Edit</a></li>
-						<li><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-el="remove"><i uk-icon="icon: close; ratio: 0.8;"></i> Delete</a></li>
 						<li><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-el="refresh"><i uk-icon="icon: refresh; ratio: 0.8;"></i> Refresh</a></li>
+						<li><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-el="save"><i uk-icon="icon:  file-edit; ratio: 0.8;"></i> Save</a></li>
+						<li><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-el="remove"><i uk-icon="icon: close; ratio: 0.8;"></i> Delete</a></li>
 					</ul>
 				</div>
 			</div>

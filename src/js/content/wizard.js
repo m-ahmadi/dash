@@ -6,7 +6,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 	const WIZ_2 = "[data-root='wiz2']";
 	const WIZ_3 = "[data-root='wiz3']";
 	const WIZ_4 = "[data-root='wiz4']";
-	const DEL = "[data-root='delete']";
+	const DEL_CONFIRM = "[data-root='delete']";
 	const temp = Handlebars.templates;
 	let wiz1, wiz2, wiz3, wiz4, del;
 	const d = { // defaults
@@ -27,7 +27,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 			w: 1
 		}
 	};
-	const DATE_FORMAT = "Y/MM/DD HH:mm";
+	
 	const KEYS = [
 		"device",
 		"service",
@@ -44,15 +44,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		}
 	};
 	function uid() {
-		var d = new Date().getTime();
-		if (typeof performance !== 'undefined' && typeof performance.now === 'function'){
-			d += performance.now(); //use high-precision timer if available
-		}
-		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-			var r = (d + Math.random() * 16) % 16 | 0;
-			d = Math.floor(d / 16);
-			return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-		});
+		return Math.floor( Math.random() * 1000 );
 	}
 	function randColor(brightness) {
 		// Six levels of brightness from 0 to 5, 0 being the darkest
@@ -69,14 +61,12 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 			type: d.TYPE,
 			rangeType: d.RANGE_TYPE,
 			rangeCount: d.RANGE_COUNT,
-			startDate: moment().subtract(this.rangeCount, this.rangeType).format(DATE_FORMAT),
-			endDate: moment().format(DATE_FORMAT),
 			rangeTitle: getRangeTitle(this.rangeType, this.rangeCount),
 			map: d.MAP,
 			device: newEmpty(),
 			service: newEmpty(),
 			sensors: [],
-			order: order+=1,
+			order: order,
 			expand: false
 		};
 		wiz1.radios.eq(d.TYPE).prop({checked: true});
@@ -117,7 +107,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 	}
 	function deleteConfirm(id) {
 		data.id = id;
-		open(DEL);
+		open(DEL_CONFIRM);
 	}
 	function alertMsg(w, msg) {
 		let set;
@@ -162,13 +152,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 			}
 		}
 	}
-	function getDate(type, count) {
-		if (type, count) {
-			return moment().subtract(type, count).format(DATE_FORMAT);
-		} else {
-			return moment().format(DATE_FORMAT);
-		}
-	}
+	
 	function getUrl(type) {
 		let route;
 		switch (type) {
@@ -235,7 +219,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 			if (type === 2) {
 				wiz2.units.append( temp.sensorUnit({name: selected.text, id: selected.id}) );
 				const el = wiz2.units.find("[data-colorpick]:last-child");
-				colorpick.init( el, randColor(1) );
+				colorpick.init( el, randColor( u.randInt(0, 6) ) );
 				
 			} else {
 				data[key].id = parseInt(selected.id, 10);
@@ -270,7 +254,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		wiz2 = u.getEls(WIZ_2);
 		wiz3 = u.getEls(WIZ_3);
 		wiz4 = u.getEls(WIZ_4);
-		del = u.getEls(DEL);
+		delConf = u.getEls(DEL_CONFIRM);
 		reset();
 		
 		const toClear = wiz2.service.add(wiz2.sensors);
@@ -316,23 +300,23 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 				wiz2.submit.attr({disabled: true});
 			}
 		});
+		wiz2.expand.on("change", e => {
+			data.expand = e.target.checked;
+		});
 		wiz2.submit.on("click", () => {
 			data.rangeType = wiz2.rangeType.val();
 			data.rangeCount = parseInt( wiz2.rangeCount.val() );
-			data.startDate = getDate(wiz2.rangeCount.val(), wiz2.rangeType.val());
-			data.endDate = getDate();
 			data.rangeTitle = getRangeTitle(wiz2.rangeType.val(), wiz2.rangeCount.val());
 			// wiz2.sensors.select2("data").forEach(i => data.sensors[i.id] = i.text);
 			
 			data.sensors = {};
 			wiz2.units.find("[data-sensor-id]").each((i, l) => {
-				const el = $(l);
-				const elData = el.data();
-				const sensorId = elData.sensorId;
-				const sensorName = elData.sensorName;
+				let el = $(l);
+				let elData = el.data();
+				let sensorId = elData.sensorId;
 				data.sensors[sensorId] = {
 					id: sensorId,
-					name: sensorName,
+					name: elData.sensorName,
 					unit: el.find("[data-select]").val(),
 					color: el.find("[data-colorpick]").spectrum("get").toHex()
 				};
@@ -361,10 +345,10 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		wiz4.submit.on("click", () => {
 			inst.emit(data.type);
 		});
-		del.submit.on("click", () => {
-			del.toDisable.attr({disabled: true});
+		delConf.submit.on("click", () => {
+			delConf.toDisable.attr({disabled: true});
 			inst.emit("delete_confirm", data.id, () => {
-				wiz2.toDisable.attr({disabled: false}); 
+				delConf.toDisable.attr({disabled: false}); 
 				close();
 			});
 		});

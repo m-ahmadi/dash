@@ -36,12 +36,6 @@ define([
 	
 	let counter = 1;
 	
-	function initJqSortable() {
-		els.widgets.sortable({
-			items: "> div.panel",
-			handle: ".uk-sortable-handle"
-		});
-	}
 	function fetchAll() {
 		let timer;
 		if (counter === 1) {
@@ -65,7 +59,7 @@ define([
 			let step = 100 - process.get() / data.length;
 			data.forEach(i => {
 				process.inc(step);
-				widgets[i.id] = widget.newWidget(els.widgets, i);
+				widgets[i.id] = widget.create(els.widgets, i);
 			});
 			process.log("Finished.", "success");
 			process.close();
@@ -83,10 +77,8 @@ define([
 			setTimeout(fetchAll, 1000);
 		});
 	}
-	
 	function addCustomEvt() {
 		wizard.on("submit", (e, fn) => {
-			
 			processNote = uk.note.process(MSG[0], 0, "top-center");
 			$.ajax({
 				url: conf.TMP + "widget/add",
@@ -96,7 +88,7 @@ define([
 				}
 			})
 			.done(() => {
-				widget.newWidget(els.widgets, e);
+				widgets[e.id] = widget.create(els.widgets, e);
 				fn();
 				processNote.close();
 			})
@@ -123,25 +115,42 @@ define([
 				processNote.close();
 			});
 		});
-		
+		widget.on("create", (id, widget )=> {
+			widgets[id] = widget;
+			// sortable( "refresh" )
+		});
+		widget.on("delete", id => {
+			wizard.deleteConfirm(id);
+		});
 	}
 	inst.init = () => {
 		els = u.getEls(ROOT);
-		initJqSortable();
 		
+		els.widgets.sortable({
+			items: "> div.panel",
+			handle: ".uk-sortable-handle",
+			delay: 50,
+			opacity: 0.5,
+			distance: 5,
+			revert: 300, // true
+			scroll: false,
+			tolerance: "pointer"
+		//	placeholder: "ui-state-highlight"
+		});
+		
+		let index;
+		els.widgets.on("sortstart", (e, ui) => {
+			index = ui.item.index();
+		});
+		els.widgets.on("sortupdate", (e, ui) => {
+			let el = ui.item;
+			let other = els.widgets.children().eq(index);
+			
+			widgets[ el.data().id ].changeOrder( el.index() );
+			widgets[ other.data().id ].changeOrder( other.index() );
+		});
 		els.add.on("click", () => {
 			wizard.start( els.widgets.children().length );
-		});
-		els.root.on("click", "[data-panel] [data-menu]", e => {
-			const el = $(e.target);
-			const panel = el.closest("[data-panel]");
-			const action = parseInt(el.data().action, 10);
-			switch (action) {
-				case 0: widget.shrink(panel); break;
-				case 1: widget.expand(panel); break;
-				case 2: widget.edit(panel); break;
-				case 3: widget.remove(panel); break;
-			}
 		});
 		
 		wizard.init();
@@ -151,6 +160,6 @@ define([
 		fetchAll();
 	};
 	
-	window.newWidget = widget.newWidget;
+	window.ws = () => { return widgets; };
 	return inst;
 });
