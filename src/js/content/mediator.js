@@ -130,9 +130,13 @@ define([
 		wizard.on("delete_confirm_submit", (id, fn) => {
 			processNote = uk.note.process(MSG[0], 0, "top-center");
 			
-			delete _WIDGETS_[id];
+			if (id = "delete_all") {
+				_WIDGETS_ = {};
+			} else {
+				delete _WIDGETS_[id];
+			}
 			save(() => {
-				widgets[id].remove();
+				Object.keys(widgets).forEach(k => widgets[k].remove());
 				processNote.close();
 				fn();
 			}, () => {
@@ -196,16 +200,21 @@ define([
 		let index;
 		els.widgets.on("sortstart", (e, ui) => {
 			index = ui.item.index();
+			console.log(index);
 		});
 		els.widgets.on("sortupdate", (e, ui) => {
 			let el = ui.item;
 			let other = els.widgets.children().eq(index);
 			
+			console.log(el.index());
 			widgets[ el.data().id ].changeOrder( el.index() );
 			widgets[ other.data().id ].changeOrder( other.index() );
 		});
 		els.add.on("click", () => {
 			wizard.start( els.widgets.children().length );
+		});
+		els.deleteAll.on("click", () => {
+			wizard.deleteConfirm("delete_all");
 		});
 		
 		wizard.init();

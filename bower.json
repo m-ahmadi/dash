@@ -14,22 +14,5 @@
     "src/lib",
     "test",
     "tests"
-  ],
-  "dependencies": {
-    "handlebars": "latest",
-    "requirejs": "latest",
-    "fastclick": "^1.0.6",
-    "nprogress": "^0.2.0",
-    "font-awesome": "^4.7.0",
-    "chart.js": "2.0.2",
-    "highcharts": "^5.0.11",
-    "jquery": "^3.2.1",
-    "uikit": "3.0.0-beta.22",
-    "pubsub-ma": "*",
-    "util-ma": "*",
-    "select2": "^4.0.3",
-    "js-cookie": "^2.1.4",
-    "moment": "^2.18.1",
-    "spectrum": "^1.8.0"
-  }
+  ]
 }
