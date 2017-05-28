@@ -129,7 +129,7 @@ define([
 				fail: () => {
 					toggleSpinner();
 					mark(false);
-					root.prepend( temp.alert({message: "Could not save the widget. Try saving manually."}) );
+					root.prepend( temp.alert({message: "Could not save the widget."}) );
 				}
 			});
 			/* $.ajax({

@@ -97,7 +97,6 @@ define([
 		.done(done)
 		.fail(fail);
 	}
-	
 	function addCustomEvt() {
 		wizard.on("submit", (e, fn) => {
 			processNote = uk.note.process(MSG[0], 0, "top-center");
@@ -130,13 +129,18 @@ define([
 		wizard.on("delete_confirm_submit", (id, fn) => {
 			processNote = uk.note.process(MSG[0], 0, "top-center");
 			
-			if (id = "delete_all") {
+			if (id === "delete_all") {
 				_WIDGETS_ = {};
 			} else {
 				delete _WIDGETS_[id];
 			}
 			save(() => {
-				Object.keys(widgets).forEach(k => widgets[k].remove());
+				if (id === "deleteAll") {
+					Object.keys(widgets).forEach(k => widgets[k].remove());
+				} else {
+					widgets[id].remove();
+				}
+				
 				processNote.close();
 				fn();
 			}, () => {
@@ -186,7 +190,7 @@ define([
 		els = u.getEls(ROOT);
 		
 		els.widgets.sortable({
-			items: "> div.panel",
+			items: "> div",
 			handle: ".uk-sortable-handle",
 			delay: 50,
 			opacity: 0.5,
@@ -224,6 +228,6 @@ define([
 		fetchAll();
 	};
 	
-	window.ws = {_WIDGETS_, save};
+	window.ws = () => {return _WIDGETS_};
 	return inst;
 });
