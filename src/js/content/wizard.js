@@ -6,7 +6,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 	const WIZ_2 = "[data-root='wiz2']";
 	const WIZ_3 = "[data-root='wiz3']";
 	const WIZ_4 = "[data-root='wiz4']";
-	const DEL_CONFIRM = "[data-root='delete']";
+	const CONFIRM = "[data-root='delete']";
 	const temp = Handlebars.templates;
 	let wiz1, wiz2, wiz3, wiz4, del;
 	const d = { // defaults
@@ -106,9 +106,9 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 			open(WIZ_4);
 		}
 	}
-	function deleteConfirm(id) {
+	function confirm(id) {
 		data.id = id;
-		open(DEL_CONFIRM);
+		open(CONFIRM);
 	}
 	function alertMsg(w, msg) {
 		let set;
@@ -255,7 +255,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		wiz2 = u.getEls(WIZ_2);
 		wiz3 = u.getEls(WIZ_3);
 		wiz4 = u.getEls(WIZ_4);
-		delConf = u.getEls(DEL_CONFIRM);
+		confirm = u.getEls(CONFIRM);
 		reset();
 		
 		const toClear = wiz2.service.add(wiz2.sensors);
@@ -346,10 +346,10 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		wiz4.submit.on("click", () => {
 			inst.emit(data.type);
 		});
-		delConf.submit.on("click", () => {
-			delConf.toDisable.attr({disabled: true});
-			inst.emit("delete_confirm_submit", data.id, () => {
-				delConf.toDisable.attr({disabled: false}); 
+		confirm.submit.on("click", () => {
+			confirm.toDisable.attr({disabled: true});
+			inst.emit("confirm_submit", data.id, () => {
+				confirm.toDisable.attr({disabled: false}); 
 				close();
 			});
 		});
@@ -359,7 +359,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 	inst.init = init;
 	inst.start = start;
 	inst.edit = edit;
-	inst.deleteConfirm = deleteConfirm;
+	inst.confirm = confirm;
 	inst.close = close;
 	inst.isOpen = isOpen;
 	

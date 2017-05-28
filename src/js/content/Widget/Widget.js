@@ -115,90 +115,18 @@ define([
 			throw new TypeError("You must provide a container and a widget object.");
 		}
 		
-		function changeOrder(n) {
-			toggleSpinner();
-			manager.emit("save_signal", {
-				action: "edit",
-				id: e.id,
-				key: "order",
-				val: n,
-				done: () => {
-					toggleSpinner();
-					mark(true);
-				},
-				fail: () => {
-					toggleSpinner();
-					mark(false);
-					root.prepend( temp.alert({message: "Could not save the widget."}) );
-				}
-			});
-			/* $.ajax({
-				url: conf.TMP + "widget/edit",
-				method: "GET",
-				data: {
-					widget: jsonStr( {id: e.id, order: n} ),
-				}
-			})
-			.done(() => {
-				toggleSpinner();
-				mark(true);
-			})
-			.fail(() => {
-				toggleSpinner();
-				mark(false);
-				root.prepend( temp.alert({message: "Could not save the widget. Try saving manually."}) );
-			}); */
-		}
-		function _saveState(flag) {
-			$.ajax({
-				url: conf.TMP + "widget/edit",
-				method: "GET",
-				data: {
-					widget: jsonStr( {id: e.id, expand: flag} ),
-				}
-			})
-			.done(() => {
-				toggleSpinner();
-				mark(true);
-			})
-			.fail(() => {
-				toggleSpinner();
-				mark(false);
-				root.prepend( temp.alert({message: "Widget could not be saved. Try saving manually."}) );
-			});
-		}
-		function saveState(flag) {
-			manager.emit("save_signal", {
-				action: "edit",
-				id: e.id,
-				key: "expand",
-				val: flag,
-				done: () => {
-					toggleSpinner();
-					mark(true);
-				},
-				fail: () => {
-					toggleSpinner();
-					mark(false);
-					root.prepend( temp.alert({message: "Widget could not be saved. Try saving manually."}) );
-				}
-			});
-		}
+		
 		function expand() {
 			if ( !root.hasClass(KLASS) ) {
-				root.addClass(KLASS);
+				root.addClass(KLASS).data("expand", true).attr("data-expand", true);
 				els.menus.find("[data-resize]").html( temp.btnShrink() );
 				if (chart) chart.setSize();
 			}
-			toggleSpinner();
-			saveState(true);
 		}
 		function shrink() {
-			root.removeClass(KLASS);
+			root.removeClass(KLASS).data("expand", false).attr("data-expand", false);
 			els.menus.find("[data-resize]").html( temp.btnExpand() );
 			if (chart) chart.setSize();
-			toggleSpinner();
-			saveState(false);
 		}
 		function mark(stat) {
 			let par = els.spinnerParent;
@@ -262,7 +190,6 @@ define([
 			 
 			const type = e.type;
 			if (type === 0) {
-				// debugger
 				chart = makeLineChart(els.body, e.device.name, e.sensors);
 				
 				extractor.on(""+e.id, d => {
@@ -291,7 +218,7 @@ define([
 			});
 			els.edit.on("click", () => {
 				switch (e.type) {
-					case 0: ; break;
+					case 0: manager.emit("edit", e.id); break;
 					case 1: ; break;
 					case 2: ; break;
 					case 3: ; break;
@@ -311,14 +238,13 @@ define([
 		inst.mark = mark;
 		inst.toggleSpinner = toggleSpinner;
 		inst.refresh = load;
-		inst.changeOrder = changeOrder;
 		inst.expand = expand;
 		inst.shrink = shrink;
 		inst.remove = () => {
 			root.remove();
 		};
 		
-		manager.emit("create", e.id, inst);
+		manager.emit("create_node", e.id, inst);
 		return inst;
 	}
 	

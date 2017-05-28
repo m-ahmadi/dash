@@ -109,38 +109,29 @@ define([
 				fn();
 				processNote.close();
 			});
-			/* $.ajax({
-				url: conf.TMP + "widget/add",
-				method: "GET",
-				data: {
-					widget: JSON.stringify(e)
-				}
-			})
-			.done(() => {
-				widgets[e.id] = widget.create(els.widgets, e);
-				fn();
-				processNote.close();
-			})
-			.fail(() => {
-				fn();
-				processNote.close();
-			}); */
 		});
-		wizard.on("delete_confirm_submit", (id, fn) => {
+		wizard.on("confirm_submit", (id, fn) => {
+			let cb;
 			processNote = uk.note.process(MSG[0], 0, "top-center");
 			
 			if (id === "delete_all") {
 				_WIDGETS_ = {};
+				cb = () => Object.keys(widgets).forEach(k => widgets[k].remove());
+			} else if ("save_all") {
+				els.widgets.find("> div").each((i, l) => {
+					let d = $(l).data();
+					console.log(d.expand, i);
+					_WIDGETS_[d.id].order = i;
+					_WIDGETS_[d.id].expand = d.expand;
+					
+				});
 			} else {
 				delete _WIDGETS_[id];
+				cb = widgets[id].remove();
 			}
+			
 			save(() => {
-				if (id === "deleteAll") {
-					Object.keys(widgets).forEach(k => widgets[k].remove());
-				} else {
-					widgets[id].remove();
-				}
-				
+				cb ? cb() : undefined;
 				processNote.close();
 				fn();
 			}, () => {
@@ -148,21 +139,6 @@ define([
 				uk.note.error("Couldn't remove the widget.");
 				processNote.close();
 			});
-			/* $.ajax({
-				url: conf.TMP + "widget/delete",
-				method: "GET",
-				data: {id: id}
-			})
-			.done(() => {
-				widgets[id].remove();
-				processNote.close();
-				fn();
-			})
-			.fail(() => {
-				fn();
-				uk.note.error("Couldn't remove the widget.");
-				processNote.close();
-			}); */
 		});
 		widget.on("save_signal", e => {
 			let s = e.action;
@@ -178,12 +154,12 @@ define([
 			
 			save(e.done, e.fail);
 		});
-		widget.on("create", (id, widget)=> {
+		widget.on("create_node", (id, widget)=> {
 			widgets[id] = widget;
 			els.widgets.sortable("refresh");
 		});
 		widget.on("delete", id => {
-			wizard.deleteConfirm(id);
+			wizard.confirm(id);
 		});
 	}
 	inst.init = () => {
@@ -201,24 +177,21 @@ define([
 		//	placeholder: "ui-state-highlight"
 		});
 		
-		let index;
-		els.widgets.on("sortstart", (e, ui) => {
-			index = ui.item.index();
-			console.log(index);
-		});
-		els.widgets.on("sortupdate", (e, ui) => {
-			let el = ui.item;
-			let other = els.widgets.children().eq(index);
-			
-			console.log(el.index());
-			widgets[ el.data().id ].changeOrder( el.index() );
-			widgets[ other.data().id ].changeOrder( other.index() );
-		});
 		els.add.on("click", () => {
 			wizard.start( els.widgets.children().length );
 		});
 		els.deleteAll.on("click", () => {
-			wizard.deleteConfirm("delete_all");
+			wizard.confirm("delete_all");
+		});
+		els.save.on("click", () => {
+			wizard.confirm("save_all");
+		});
+		
+		$(window).on("beforeunload", e => {
+			if (false) { // changed then return
+				return null;
+			}
+			
 		});
 		
 		wizard.init();
