@@ -50,6 +50,7 @@ define([
 			header: {"cache-control": "no-cache"}
 		})
 		.done( data => {
+			els.root.css("height", "auto");
 			if ( u.isEmptyObj(data) ) {
 				process.finish();
 				process.log("No widgets to fetch", "primary");
@@ -63,6 +64,7 @@ define([
 			let step = 100 - process.get() / len;
 			let sorted = [];
 			Object.keys(data).forEach(k => {
+				process.inc(1);
 				sorted.push([data[k].order, k]);
 			});
 			sorted.sort();
@@ -117,7 +119,7 @@ define([
 			if (id === "delete_all") {
 				_WIDGETS_ = {};
 				cb = () => Object.keys(widgets).forEach(k => widgets[k].remove());
-			} else if ("save_all") {
+			} else if (id === "save_all") {
 				els.widgets.find("> div").each((i, l) => {
 					let d = $(l).data();
 					console.log(d.expand, i);
@@ -127,10 +129,11 @@ define([
 				});
 			} else {
 				delete _WIDGETS_[id];
-				cb = widgets[id].remove();
+				cb = () => widgets[id].remove();
 			}
 			
 			save(() => {
+				
 				cb ? cb() : undefined;
 				processNote.close();
 				fn();
@@ -165,6 +168,7 @@ define([
 	inst.init = () => {
 		els = u.getEls(ROOT);
 		
+		els.root.height( window.innerHeight - (parseInt($("#heading").css("height"), 10) + parseInt($("footer").css("height"), 10))  );
 		els.widgets.sortable({
 			items: "> div",
 			handle: ".uk-sortable-handle",

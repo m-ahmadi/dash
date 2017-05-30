@@ -2,11 +2,12 @@ body {
 	width: 100%;
 	margin: 0 auto;
 	font: 'BYekan', Tahoma, "Helvetica Neue", Helvetica, Arial, sans-serif;
-	background: #ffffec;
+	
 	// direction: rtl;
 }
 #content {
 	background: #ffffec;
+	height: 600px;
 }
 
 .ui-state-highlight {
@@ -14,6 +15,8 @@ body {
 	background: #f0f8ff;
 	color: #777620;
 }
+@import "header";
+@import "footer";
 
 @import "panel";
 @import "wizard";

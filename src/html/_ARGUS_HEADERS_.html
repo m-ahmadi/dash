@@ -1,0 +1,149 @@
+<div id="top_header" ng-if="headerShow">
+	<div class="container">
+		<div class="row">
+			<a href="#/home/nodes" class="col12">
+				<div class="logoHeader"></div>
+			</a>
+			<div class="col4 collast">
+				<ul>
+					<li id="help-icon" class="col7" ng-click="intro()">
+						<span>Help</span>
+					</li>
+					<li class="col8" id="user">
+						<div class="main">
+							<a id="msg_count" href="#/user/message/inbox/" ng-show="unreadMessagesCount">{{ unreadMessagesCount }}</a>
+							<span ng-show="localUser.Name">{{ localUser.Name }}</span>
+							<span ng-hide="localUser.Name">{{ localUser.Username }}</span>
+							<div class="tri"></div>
+						</div>
+						<ul class="sub">
+							<li>
+								<div class="tri_up"></div>
+								<a href="#/user/profile/edit/">Edit Profile</a>
+							</li>
+							<li>
+								<div class="tri_up"></div>
+								<a href="#/user/change_password/">Change Password</a>
+							</li>
+							<li>
+								<a href="#/user/message/inbox/">Messages</a>
+							</li>
+							<li>
+								<a href="#/accounts/logout/">Logout</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+			<div class="clear"></div>
+		</div>
+	</div>
+</div>
+
+<div id="header" class="section ng-scope" ng-if="headerShow">
+	<div class="container">
+		<div class="row">
+			<div class="col13">
+				<ul id="menu">
+					<li id="nodes_li">
+						<a href="#/home/nodes" ng-class="{ 'active': menubar.check('nodes') }" class="active" style="">Nodes</a>
+						<ul class="sub">
+							<!-- ngIf: adminAccess -->
+							<li ng-if="adminAccess" class="ng-scope">
+								<a id="addNode" href="#/add/Node">Add Node</a>
+							</li>
+							<!-- end ngIf: adminAccess -->
+
+							<!-- ngIf: adminAccess -->
+							<li ng-if="adminAccess" class="ng-scope">
+								<a id="addGroup" href="#/add/Group">Add Group</a>
+							</li>
+							<!-- end ngIf: adminAccess -->
+
+							<li>
+								<a href="#/sensor/compare/view/node/">
+									<span>Comparison</span>
+								</a>
+							</li>
+
+							<li>
+								<a href="#/sensor/top/">
+									<span>Top Sensor</span>
+								</a>
+							</li>
+						</ul>
+					</li>
+					<li id="graph_li">
+						<a href="#/topology/graph/" ng-class="{ 'active': menubar.check('topology') }">Topology</a>
+					</li>
+					<li id="map_li">
+						<a href="#/map/" ng-class="{ 'active': menubar.check('map') }">Map</a>
+					</li>
+					<li id="events_li">
+						<a href="javascript:void(0)" ng-class="{ 'active': menubar.check('events') }">Events</a>
+						<ul class="sub">
+							<li>
+								<a href="#/event/log/">
+									<span>Event Log</span>
+								</a>
+							</li>
+							<!-- ngIf: adminAccess --><li ng-if="adminAccess" class="ng-scope">
+								<a href="#/access/log/">
+									<span>Access Log</span>
+								</a>
+							</li><!-- end ngIf: adminAccess -->
+						</ul>
+					</li>
+					<li id="reports" ng-hide="true" class="ng-hide">
+						<a href="javascript:void(0)" ng-class="{ 'active': menubar.check('reports') }">Reports</a>
+						<ul class="sub">
+							<li>
+								<a href="#/report/all">
+									<span>All Report</span>
+								</a>
+							</li>
+							<li>
+								<a href="#/report/new">
+									<span>Create Report</span>
+								</a>
+							</li>
+						</ul>
+					</li>
+					<li id="conf_li">
+						<!-- ngIf: adminAccess --><a href="javascript:void(0)" ng-class="{ 'active': menubar.check('configuration') }" ng-if="adminAccess" class="ng-scope">Configuration</a><!-- end ngIf: adminAccess -->
+						<ul class="sub">
+							<li>
+								<a href="#/sla/">
+									<span>SLA</span>
+								</a>
+							</li>
+							<li>
+								<a href="#/users/list/">
+									<span>User</span>
+								</a>
+							</li>
+							<li>
+								<a href="#/LDAP/">
+									<span>LDAP</span>
+								</a>
+							</li>
+							<li>
+								<a href="#/Mail_configuration/">
+									<span>Mail</span>
+								</a>
+							</li>
+							<li>
+								<a href="#/formula/">
+									<span>Formula</span>
+								</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+			<div class="col3 collast ng-binding" id="header-datetime" data-time="2016-07-17 14:49:51">May 30th 2017, 1:20:33 pm</div>
+			<div class="clear"></div>
+		</div>
+	</div>
+
+</div>
