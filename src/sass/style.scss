@@ -7,7 +7,7 @@ body {
 }
 #content {
 	background: #ffffec;
-	height: 600px;
+	min-height: 600px;
 }
 
 .ui-state-highlight {
@@ -24,3 +24,4 @@ body {
 @import "util";
 
 @import "markAni";
+@import "login";

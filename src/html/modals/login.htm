@@ -1,0 +1,32 @@
+<div id="modal_login" class="wizard" uk-modal="center: true; esc-close: false; bg-close: false;" data-root="login">
+	<div class="uk-modal-dialog">
+		<div class="uk-modal-header">
+			<h2 class="uk-modal-title uk-heading-bullet uk-text-bold uk-text-muted">LOGIN</h2>
+			<h4 class="uk-text-muted uk-margin-remove-top">You must log in first.</h4>
+		</div>
+		<div class="uk-modal-body">
+			<div class="uk-width-1-1@s uk-width-1-2@m uk-margin-auto">
+				<form class="uk-form-horizontal">
+					<div class="uk-inline uk-margin-small-bottom uk-width-1-1">
+						<span class="uk-form-icon" uk-icon="icon: user"></span>
+						<input type="text" class="uk-input uk-form-large" placeholder="Username" data-el="username" data-els="toDisable" />
+					</div>
+					<div class="uk-inline uk-margin-small-bottom uk-width-1-1">
+						<span class="uk-form-icon" uk-icon="icon: lock"></span>
+						<input type="password" class="uk-input uk-form-large" placeholder="Password" data-el="password" data-els="toDisable" />
+					</div>
+				</form>
+				<button class="uk-button uk-button-primary uk-text-bold uk-text-capitalize uk-width-1-1 uk-margin-small-bottom" disabled data-el="submit" data-els="toDisable">Log in</button>
+			</div>
+			<div data-el="process"></div>
+			<div data-el="alerts"></div>
+		</div>
+	</div>
+</div>
+
+<!--
+{{#if primary}}fa-info-circle{{/if}}
+{{#if success}}fa-check-circle{{/if}}
+{{#if danger}}fa-exclamation-triangle{{/if}}
+
+-->

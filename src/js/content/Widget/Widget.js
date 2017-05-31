@@ -2,7 +2,8 @@ define([
 	"config",
 	"token",
 	"./makeLineChart",
-	"../wizard"
+	"../wizard",
+	"../ajax"
 ], (conf, token, makeLineChart, wizard) => {
 	const manager = u.extend( newPubSub() );
 	const temp = Handlebars.templates;

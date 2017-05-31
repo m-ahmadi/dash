@@ -35,6 +35,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 	];
 	
 	let data = {},
+		confirmId,
 		openedModal;
 	
 	const newEmpty = () => {
@@ -72,6 +73,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		};
 		wiz1.radios.eq(d.TYPE).prop({checked: true});
 		wiz2.selects.val(null).trigger("change");
+		
 		wiz2.rangeType.find("option[value='m']").prop({selected: true});
 		wiz2.toAppendAlert.find(".uk-alert-danger").remove();
 		wiz2.submit.attr({disabled: true});
@@ -107,7 +109,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		}
 	}
 	function confirm(id) {
-		data.id = id;
+		confirmId = id;
 		open(CONFIRM);
 	}
 	function alertMsg(w, msg) {
@@ -256,7 +258,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		wiz3 = u.getEls(WIZ_3);
 		wiz4 = u.getEls(WIZ_4);
 		confirm = u.getEls(CONFIRM);
-		reset();
+		
 		
 		const toClear = wiz2.service.add(wiz2.sensors);
 		const toDisable = wiz2.sensors.add(wiz2.submit);
@@ -264,7 +266,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		initSelect2(wiz2.device, 0, wiz2.service, "devices", toClear, toDisable, toErase);
 		initSelect2(wiz2.service, 1, wiz2.sensors, "service", wiz2.sensors, wiz2.submit, toErase);
 		initSelect2(wiz2.sensors, 2, wiz2.submit, "");
-		
+		reset();
 		
 		wiz1.next.on("click", () => {
 			const checked = wiz1.radios.filter(":checked").val();
@@ -348,7 +350,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		});
 		confirm.submit.on("click", () => {
 			confirm.toDisable.attr({disabled: true});
-			inst.emit("confirm_submit", data.id, () => {
+			inst.emit("confirm_submit", confirmId, () => {
 				confirm.toDisable.attr({disabled: false}); 
 				close();
 			});

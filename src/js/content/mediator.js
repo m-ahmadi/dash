@@ -4,6 +4,7 @@ define([
 	"uk",
 	"./wizard",
 	"./process",
+	"./login",
 	"./Widget/Widget"
 ], (
 	conf,
@@ -11,6 +12,7 @@ define([
 	uk,
 	wizard,
 	process,
+	login,
 	widget
 ) => {
 	const inst = u.extend( newPubSub() );
@@ -50,7 +52,6 @@ define([
 			header: {"cache-control": "no-cache"}
 		})
 		.done( data => {
-			els.root.css("height", "auto");
 			if ( u.isEmptyObj(data) ) {
 				process.finish();
 				process.log("No widgets to fetch", "primary");
@@ -87,9 +88,10 @@ define([
 				return;
 			}
 			setTimeout(fetchAll, 1000);
-		});
+		})
+		.always();
 	}
-	function save(done, fail) {
+	function save(done, fail, always) {
 		$.ajax({
 			url: conf.ALT + "dashboard/save" + token(), // "widget/add",
 			method: "POST",
@@ -97,7 +99,8 @@ define([
 			data: JSON.stringify(_WIDGETS_)
 		})
 		.done(done)
-		.fail(fail);
+		.fail(fail)
+		.always(always);
 	}
 	function addCustomEvt() {
 		wizard.on("submit", (e, fn) => {
@@ -122,7 +125,6 @@ define([
 			} else if (id === "save_all") {
 				els.widgets.find("> div").each((i, l) => {
 					let d = $(l).data();
-					console.log(d.expand, i);
 					_WIDGETS_[d.id].order = i;
 					_WIDGETS_[d.id].expand = d.expand;
 					
@@ -133,7 +135,6 @@ define([
 			}
 			
 			save(() => {
-				
 				cb ? cb() : undefined;
 				processNote.close();
 				fn();
@@ -165,10 +166,21 @@ define([
 			wizard.confirm(id);
 		});
 	}
+	function css(el, prop) {
+		el = u.isStr(el) ? $(el) : el;
+		return parseInt( el.css(prop).slice(0, -2), 10 );
+	}
+	function adjustHeight() {
+		let el = els.root;
+		let h = css(el, "min-height");
+		let avail = window.innerHeight - ( css("#heading", "height") + css("#footer", "height") );
+		el.css("min-height", avail);
+	}
 	inst.init = () => {
 		els = u.getEls(ROOT);
 		
-		els.root.height( window.innerHeight - (parseInt($("#heading").css("height"), 10) + parseInt($("footer").css("height"), 10))  );
+		adjustHeight();
+		$(window).on("resize", adjustHeight);
 		els.widgets.sortable({
 			items: "> div",
 			handle: ".uk-sortable-handle",
@@ -200,11 +212,12 @@ define([
 		
 		wizard.init();
 		process.init();
+		login.init();
 		addCustomEvt();
 		widget.init();
 		fetchAll();
 	};
 	
-	window.ws = () => {return _WIDGETS_};
+	window.ws = () => {return adjustHeight};
 	return inst;
 });
