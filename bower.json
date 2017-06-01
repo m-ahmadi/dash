@@ -27,7 +27,6 @@
     "select2": "^4.0.3",
     "requirejs": "^2.3.3",
     "handlebars": "^4.0.10",
-    "chart.js": "^2.6.0",
     "spectrum": "^1.8.0"
   }
 }

@@ -168,11 +168,12 @@ define([
 				mark(true);
 				chart.hideLoading()
 			})
-			.fail(() => {
+			.fail(x => {
 				toggleSpinner();
 				mark(false);
 				chart.hideLoading();
 				root.prepend( temp.alert({message: "Couldn't fetch widget data."}) );
+				if (x.status === 403) manager.emit("login_error");
 			});
 		}
 		function load() {

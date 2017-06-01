@@ -163,7 +163,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 			case 1: route = "device/service/search"; break;
 			case 2: route = "device/service/kpilist"; break;
 		}
-		return conf.BASE + route + token();
+		return conf.BASE + route;
 	}
 	function initSelect2(el, type, toEnable, resKey, toClear, toDisable, toErase) {
 		const key = KEYS[type];
@@ -174,7 +174,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 						 type === 2 ? "Select sensors" : "",
 			ajax: {
 				method: type === 0 ? "GET" : "POST",
-				url: getUrl(type),
+				url: () => { return getUrl(type) + token() },
 				dataType: "json",
 				delay: 250,
 				data: params => {
@@ -191,6 +191,12 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 						o.services = JSON.stringify([data.service.id]);
 					}
 					return o;
+				},
+				error: x => {
+					if (x.status === 403) {
+						el.select2("close");
+						inst.emit("login_error", () => open(WIZ_2));
+					}
 				},
 				processResults: (data, params) => {
 					let target = resKey ? data[resKey]: data;
@@ -212,6 +218,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 						}
 					};
 				},
+				
 				cache: false
 			},
 			multiple: type === 2 ? true : false,

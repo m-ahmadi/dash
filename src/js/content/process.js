@@ -7,6 +7,9 @@ define(["uk"], (uk) => {
 	let timer;
 	
 	
+	function resume() {
+		uk.openModal(ROOT);
+	}
 	function open() {
 		clear();
 		reset();
@@ -67,6 +70,7 @@ define(["uk"], (uk) => {
 		close();
 	}
 	
+	inst.resume = resume;
 	inst.open = open;
 	inst.close = close;
 	inst.log = log;

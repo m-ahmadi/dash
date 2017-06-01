@@ -1,11 +1,19 @@
 define(() => {
-	const hard = "10037c4d7bbb0407d1e2";
-	
-	return (pure) => {
-		let userCookie = Cookies.get("user");
-		const token = userCookie ? JSON.parse(userCookie).Token :  hard;
-		const toAppend = `?Token=${token}`;
+	function main(pure) {
+		let cookie, o, res;
+		cookie = Cookies.get("user");
 		
-		return pure ? token : toAppend;
-	};
+		if ( cookie && u.isStr(cookie) ) {
+			o = JSON.parse(cookie);
+			res = o.Token; 
+		} else {
+			res = false;
+		}
+		
+		
+		return pure ? res : `?Token=${res}`;
+	}
+	
+	window.tok = main;
+	return main;
 });

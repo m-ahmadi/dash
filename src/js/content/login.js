@@ -64,10 +64,13 @@ define(["config", "uk"], (conf, uk) => {
 		}
 		changeSubmitBtn();
 	}
-	function open(cb) {
+	function start(cb) {
 		callback = cb;
 		uk.openModal(ROOT);
-		els.username.focus();
+		let inpust = els.username.add(els.password);
+		inpust.val("");
+		inpust.attr({disabled: false});
+		els.username.val("").focus();
 		changeSubmitBtn();
 	}
 	function init() {
@@ -81,7 +84,7 @@ define(["config", "uk"], (conf, uk) => {
 	}
 	
 	inst.init = init;
-	inst.open = open;
+	inst.start = start;
 	window.login = inst;
 	return inst;
 });

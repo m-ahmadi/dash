@@ -5,7 +5,7 @@ define([
 	"./wizard",
 	"./process",
 	"./login",
-	"./Widget/Widget"
+	"./widget/widget"
 ], (
 	conf,
 	token,
@@ -39,6 +39,22 @@ define([
 	
 	let counter = 1;
 	
+	
+	function isStatWrong(n) {
+		return n && (n === 403 || n === 404) ? true : false;
+	}
+	function fetchAllFail() {
+		if (counter > 1) {
+			process.doing(` (${counter}${ori[counter]} attempt)`, true);
+		}
+		counter += 1;
+		process.log("Fetching widget list failed.", "danger");
+		if (counter > 3) {
+			process.log("Aborted.", "danger");
+			return;
+		}
+		setTimeout(fetchAll, 1000);
+	}
 	function fetchAll() {
 		let timer;
 		if (counter === 1) {
@@ -65,7 +81,7 @@ define([
 			let step = 100 - process.get() / len;
 			let sorted = [];
 			Object.keys(data).forEach(k => {
-				process.inc(1);
+				process.inc(2);
 				sorted.push([data[k].order, k]);
 			});
 			sorted.sort();
@@ -77,17 +93,15 @@ define([
 			process.log("Finished.", "success");
 			process.close();
 		})
-		.fail(()=> {
-			if (counter > 1) {
-				process.doing(` (${counter}${ori[counter]} attempt)`, true);
+		.fail(x => {
+			if ( isStatWrong(x.status) ) {
+				login.start(() => {
+					process.resume();
+					fetchAllFail();
+				});
+			} else {
+				fetchAllFail();
 			}
-			counter += 1;
-			process.log("Fetching widget list failed.", "danger");
-			if (counter > 3) {
-				process.log("Aborted.", "danger");
-				return;
-			}
-			setTimeout(fetchAll, 1000);
 		})
 		.always();
 	}
@@ -99,8 +113,11 @@ define([
 			data: JSON.stringify(_WIDGETS_)
 		})
 		.done(done)
-		.fail(fail)
+		.fail( x => isStatWrong(x.status) ? login.start(fail) : fail() )
 		.always(always);
+	}
+	function onLoginErr(cb) {
+		login.start(cb);
 	}
 	function addCustomEvt() {
 		wizard.on("submit", (e, fn) => {
@@ -144,6 +161,8 @@ define([
 				processNote.close();
 			});
 		});
+		wizard.on("login_error", onLoginErr);
+		widget.on("login_error", onLoginErr);
 		widget.on("save_signal", e => {
 			let s = e.action;
 			if (s === "create") {
@@ -215,7 +234,12 @@ define([
 		login.init();
 		addCustomEvt();
 		widget.init();
-		fetchAll();
+		
+		if ( !token(true) ) {
+			login.start(fetchAll);
+		} else {
+			fetchAll();
+		}
 	};
 	
 	window.ws = () => {return adjustHeight};

@@ -13,7 +13,6 @@ fastclick/lib/fastclick
 
 nprogress/nprogress
 
-chart.js/dist/chart
 highcharts/highstock
 highcharts/modules/exporting
 
