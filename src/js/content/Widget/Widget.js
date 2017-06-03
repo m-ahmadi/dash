@@ -309,6 +309,8 @@ define([
 		inst.chart = chart;
 		inst.mark = mark;
 		inst.refresh = load;
+		inst.min = min;
+		inst.max = max;
 		inst.expand = expand;
 		inst.shrink = shrink;
 		inst.remove = () => {

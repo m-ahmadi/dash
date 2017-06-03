@@ -247,6 +247,18 @@ define([
 		els.save.on("click", () => {
 			confirm.open("save_all");
 		});
+		els.minAll.on("click", () => {
+			Object.keys(widgets).forEach( k => widgets[k].min() );
+		});
+		els.maxAll.on("click", () => {
+			Object.keys(widgets).forEach( k => widgets[k].max() );
+		});
+		els.shrinkAll.on("click", () => {
+			Object.keys(widgets).forEach( k => widgets[k].shrink() );
+		});
+		els.expandAll.on("click", () => {
+			Object.keys(widgets).forEach( k => widgets[k].expand() );
+		});
 		
 		$(window).on("beforeunload", e => {
 			if (false) { // changed then return
