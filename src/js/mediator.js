@@ -1,7 +1,8 @@
 define([
+	"header",
 	"content/mediator",
 	"templates"
-], (content) => {
+], (header, content) => {
 	const inst = u.extend( newPubSub() );
 	
 	function customEvents() {
@@ -11,7 +12,9 @@ define([
 		
 	};
 	inst.onReady = () => {
+		header.init();
 		content.init();
+		
 		customEvents();
 	};
 	

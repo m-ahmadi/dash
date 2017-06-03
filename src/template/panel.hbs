@@ -1,12 +1,17 @@
-<div class="
-	{{#if expand}}
-		uk-width-1-1@s
-		uk-width-1-1@m
-		uk-width-1-2@l
-		uk-width-1-2@xl
-	{{/if}}"
+<div
 	data-id="{{id}}"
-	data-expand="{{#if expand}}true{{else}}false{{/if}}"
+	{{#if xOne}}
+		class="uk-width-1-1@s uk-width-1-1@m uk-width-1-2@l uk-width-1-2@xl"
+		data-expand="1"
+	{{else if xTwo}}
+		class="uk-width-1-1@s uk-width-1-1@m uk-width-2-3@l uk-width-3-4@xl"
+		data-expand="2"
+	{{else if xThree}}
+		class="uk-width-1-1"
+		data-expand="3"
+	{{else}}
+		data-expand="0"
+	{{/if}}
 	>
 	
 	<div class="
@@ -18,34 +23,42 @@
 		<div class="uk-card-header">
 			<div class="uk-float-left">
 				<span class="uk-card-title uk-text-muted uk-text-small uk-text-bold">
-					<i class="uk-sortable-handle" uk-icon="icon: move; ratio: 1"></i><span data-el="title"> {{title}}</span>
-					<span class="uk-margin-small-left" data-el="spinnerParent"></span>
+					<i class="uk-sortable-handle" uk-icon="icon: move; ratio: 1"></i> <span data-el="title">{{title}}</span>
+					<span class="uk-margin-small-left" data-el="spinnerParent">&nbsp;</span>
 				</span>
 			</div>
-			<span class="uk-text-small uk-text-meta">{{range}}</span>
+			<span class="uk-text-small uk-text-meta" data-el="rangeTitle">{{rangeTitle}}</span>
 			<div class="uk-float-right">
+				<!-- <ul class="uk-iconnav">
+						<li><a uk-icon="icon: plus-circle" title="Maximize" uk-tooltip></a></li>
+						<li><a uk-icon="icon: minus-circle" title="Minimize" uk-tooltip></a></li>
+						<li><a uk-icon="icon: shrink" title="Shrink" uk-tooltip></a></li>
+						<li><a uk-icon="icon: expand" title="Expand" uk-tooltip></a></li>
+				</ul> -->
+				
 				<div class="uk-inline">
-					<button class="dropdown uk-button uk-button-default uk-button-small" type="button">
+					<button class="dropdown uk-button uk-button-default uk-button-small" type="button" data-el="menuBtn">
 						<span uk-icon="icon: menu; ratio: 1"></span>
 					</button>
 					<div uk-dropdown="delay-hide: 10;">
 						<ul class="uk-list uk-text-left" data-el="menus">
-							{{#if expand}}
-								<li data-resize><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-menu data-action="1"><i uk-icon="icon: shrink; ratio: 0.8;"></i> Shrink</a></li>
+							<li><button type="button" class="uk-button uk-button-text uk-text-small uk-text-meta uk-text-capitalize" data-el="expand"><i uk-icon="icon: expand; ratio: 0.8;"></i> Expand</button></li>
+							<li><button type="button" class="uk-button uk-button-text uk-text-small uk-text-meta uk-text-capitalize" data-el="shrink"><i uk-icon="icon: shrink; ratio: 0.8;"></i> Shrink</button></li>
+							{{#if min}}
+								<li data-resize><button type="button" class="uk-button uk-button-text uk-text-small uk-text-meta uk-text-capitalize" data-menu data-action="0"><i uk-icon="icon: arrow-down; ratio: 0.8;"></i> Max</button></li>
 							{{else}}
-								<li data-resize><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-menu data-action="0"><i uk-icon="icon: expand; ratio: 0.8;"></i> Expand</a></li>
+								<li data-resize><button type="button" class="uk-button uk-button-text uk-text-small uk-text-meta uk-text-capitalize" data-menu data-action="1"><i uk-icon="icon: arrow-up; ratio: 0.8;"></i> Min</button></li>
 							{{/if}}
-							<!-- <li><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-el="min"><i uk-icon="icon: minus-circle; ratio: 0.8;"></i> Open</a></li> -->
-							<!-- <li><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-el="max"><i uk-icon="icon: plus-circle; ratio: 0.8;"></i> Close</a></li> -->
-							<li><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-el="edit"><i uk-icon="icon: file-edit; ratio: 0.8;"></i> Edit</a></li>
-							<li><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-el="refresh"><i uk-icon="icon: refresh; ratio: 0.8;"></i> Refresh</a></li>
-							<li><a class="uk-button uk-button-text uk-text-small uk-text-meta" data-el="remove"><i uk-icon="icon: close; ratio: 0.8;"></i> Delete</a></li>
+							<li><button type="button" class="uk-button uk-button-text uk-text-small uk-text-meta uk-text-capitalize" data-el="edit"><i uk-icon="icon: file-edit; ratio: 0.8;"></i> Edit</button></li>
+							<li><button type="button" class="uk-button uk-button-text uk-text-small uk-text-meta uk-text-capitalize" data-el="refresh"><i uk-icon="icon: refresh; ratio: 0.8;"></i> Refresh</button></li>
+							<li><button type="button" class="uk-button uk-button-text uk-text-small uk-text-meta uk-text-capitalize" data-el="remove"><i uk-icon="icon: close; ratio: 0.8;"></i> Delete</button></li>
+							
 						</ul>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div class="uk-card-body" data-el="body">
+		<div class="uk-card-body" data-el="body" {{#if min}}style="display:none;"{{/if}}>
 			
 		</div>
 	</div>

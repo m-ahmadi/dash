@@ -2,20 +2,27 @@ define([
 	"config",
 	"token",
 	"./makeLineChart",
-	"../wizard",
-	"../ajax"
-], (conf, token, makeLineChart, wizard) => {
+], (conf, token, makeLineChart) => {
 	const manager = u.extend( newPubSub() );
 	const temp = Handlebars.templates;
 	const extractor = newPubSub();
 	
 	const BODY = "[data-container]";
-	const KLASS = [
+	const KLASS_X1 = [
 		"uk-width-1-1@s",
 		"uk-width-1-1@m",
 		"uk-width-1-2@l",
 		"uk-width-1-2@xl"
 	].join(" ");
+	const KLASS_X2 = [
+		"uk-width-1-1@s",
+		"uk-width-1-1@m",
+		"uk-width-2-3@l",
+		"uk-width-3-4@xl"
+	].join(" ");
+	const KLASS_X3 = "uk-width-1-1";
+	const KLASSES = `${KLASS_X1} ${KLASS_X2} ${KLASS_X3}`;
+	
 	const DATE_FORMAT = "Y/MM/DD HH:mm";
 	const jsonStr = JSON.stringify;
 	const jsonParse = JSON.parse;
@@ -86,115 +93,173 @@ define([
 			series: generateSeries(sensors)
 		});
 	}
-	function createPanel(parent, type, rangeTitle, id, expand) {
-		let body, title;
+	function editLineChart(chart, title, sensors) {
+		chart.update({
+			title: {
+				text: title
+			},
+			series: generateSeries(sensors)
+		});
+	}
+	function makeTitle(type) {
+		let title;
 		switch (type) {
-			case 0: body = temp.lineChart(); title = "Graph Sensor";           break;
-			case 1: body = temp.barChart();  title = "Sensor Violation Ratio"; break;
-			case 2: body = "";               title = "Sensor Violation Stats"; break;
-			case 3: body = "";               title = "Map";                    break;
+			case 0: title = "Graph Sensor";           break;
+			case 1: title = "Sensor Violation Ratio"; break;
+			case 2: title = "Sensor Violation Stats"; break;
+			case 3: title = "Map";                    break;
 		}
+		return title;
+	}
+	function createPanel(parent, type, rangeTitle, id, expand, min) {
+		let body;
 		const ctx = {
-			title: title,
-			range: rangeTitle,
+			title: makeTitle(type),
+			rangeTitle: rangeTitle,
 			body: body,
 			id: id,
-			expand: expand
+			xOne: expand === 1,
+			xTwo: expand === 2,
+			xThree: expand === 3,
+			min: min
 		};
 		const html = temp.panel(ctx);
 		parent.append(html);
 		return parent.children().last();
 	}
 	
-	function constructor(container, e) {
+	function constructor(container, o) {
 		const inst = {};
-		let root,
-			els,
+		let w = {},
+			root, els,
 			chart = {};
 		
-		if (!container || !e) {
+		if (!container || !o) {
 			throw new TypeError("You must provide a container and a widget object.");
 		}
+		w = o;
 		
 		
-		function expand() {
-			if ( !root.hasClass(KLASS) ) {
-				root.addClass(KLASS).data("expand", true).attr("data-expand", true);
-				els.menus.find("[data-resize]").html( temp.btnShrink() );
-				if (chart) chart.setSize();
-			}
+		function min() {
+			let el = els.body;
+			root.data("min", true);
+			els.menus.find("[data-resize]").html( temp.btnMax() );
+			
+			!el.is(":animated") ? el.slideUp(400, () => {
+				//if (chart) chart.setSize();
+			}) : undefined;
 		}
-		function shrink() {
-			root.removeClass(KLASS).data("expand", false).attr("data-expand", false);
-			els.menus.find("[data-resize]").html( temp.btnExpand() );
+		function max() {
+			let el = els.body;
+			root.data("min", false);
+			els.menus.find("[data-resize]").html( temp.btnMin() );
+			
+			!el.is(":animated") ? el.slideDown(400, () => {
+				if (chart) chart.setSize();
+			}) : undefined;
+		}
+		function expand() {
+			let curr = parseInt(root.attr("data-expand"), 10);
+			let inced = curr + 1;
+			let n = inced > 3 ? 3 :
+					inced < 0 ? 0 : inced;
+			root.attr("data-expand", n);
+			root.removeClass(KLASSES);
+			let toAdd;
+			switch (curr) {
+				case 0: toAdd = KLASS_X1; break;
+				case 1: toAdd = KLASS_X2; break;
+				case 2: toAdd = KLASS_X3; break;
+				case 3: toAdd = KLASS_X3; break;
+			}
+			root.addClass(toAdd);
 			if (chart) chart.setSize();
 		}
-		function mark(stat) {
-			let par = els.spinnerParent;
-			par.empty();
-			par.append( stat ? temp.markSuccess() : temp.markFail() );
-			setTimeout(() => par.empty(), 1200);
+		function shrink() {
+			let curr = parseInt(root.attr("data-expand"), 10);
+			let deced = curr - 1;
+			let n = deced > 3 ? 3 :
+					deced < 0 ? 0 : deced;
+			root.attr("data-expand", n);
+			root.removeClass(KLASSES);
+			let toAdd;
+			switch (curr) {
+				case 0: toAdd = ""; break;
+				case 1: toAdd = ""; break;
+				case 2: toAdd = KLASS_X1; break;
+				case 3: toAdd = KLASS_X2; break;
+			}
+			root.addClass(toAdd);
+			if (chart) chart.setSize();
 		}
-		function toggleSpinner() {
-			let len = els.spinnerParent.children().length;
+		function mark(stat, keep) {
 			let par = els.spinnerParent;
-			if (len) {
-				par.empty();
-			} else {
-				par.append( temp.spinner() );
+			par.html("&nbsp;");
+			par.append( stat ? temp.markSuccess() : temp.markFail() );
+			if (!keep) {
+				setTimeout(() => par.html("&nbsp;"), 1200);
 			}
 		}
-		function loadGraphSensorData(e) {
-			toggleSpinner();
+		function spinnerOn() {
+			let par = els.spinnerParent;
+			par.html("&nbsp;");
+			par.append( temp.spinner() );
+		}
+		function spinnerOff() {
+			els.spinnerParent.html("&nbsp;");
+		}
+		function loadGraphSensorData() {
+			spinnerOn();
 			chart ? chart.showLoading() : undefined;
 			$.ajax({
-				url: conf.BASE +`device/devicekpisensordata`+ token(),
+				url: conf.BASE +"device/devicekpisensordata"+ token(),
 				method: "POST",
 				data: {
-					start_date: getDate(e.rangeType, e.rangeCount),
+					start_date: getDate(w.rangeType, w.rangeCount),
 					end_date: getDate(),
-					device_ids: jsonStr([e.device.id]),
-					service_ids: jsonStr([e.service.id]),
-					kpis: jsonStr( getSensors(e.sensors) )
+					device_ids: jsonStr([w.device.id]),
+					service_ids: jsonStr([w.service.id]),
+					kpis: jsonStr( getSensors(w.sensors) )
 				}
 			})
 			.done(data => {
 				if (!data) {
-					worker.postMessage({reqId: e.id, rawData: []});
+					worker.postMessage({reqId: w.id, rawData: []});
 				} else if (data.length) {
-					worker.postMessage({reqId: e.id, rawData: data});
+					worker.postMessage({reqId: w.id, rawData: data});
 				}
-				toggleSpinner();
+				spinnerOff();
 				mark(true);
 				chart.hideLoading()
 			})
 			.fail(x => {
-				toggleSpinner();
-				mark(false);
+				spinnerOff();
+				mark(false, true);
 				chart.hideLoading();
-				root.prepend( temp.alert({message: "Couldn't fetch widget data."}) );
+				// root.children().first().prepend( temp.alert({message: "Couldn't fetch widget data."}) );
 				if (x.status === 403) manager.emit("login_error");
-			});
+			})
+			.always(() => els.refresh.attr({disabled: false}));
 		}
 		function load() {
-			switch (e.type) {
-				case 0: loadGraphSensorData(e); break;
+			switch (w.type) {
+				case 0: loadGraphSensorData(w); break;
 				case 1: ; break;
 				case 2: ; break;
 				case 3: ; break;
 			}
 		}
 		function init() {
-			root = createPanel(container, e.type, e.rangeTitle, e.id, e.expand);
+			root = createPanel(container, w.type, w.rangeTitle, w.id, w.expand, w.min);
 			els = u.getEls(root);
 			
 			// when creating dom stuff.
 			 
-			const type = e.type;
+			const type = w.type;
 			if (type === 0) {
-				chart = makeLineChart(els.body, e.device.name, e.sensors);
+				chart = makeLineChart(els.body, w.device.name, w.sensors);
 				
-				extractor.on(""+e.id, d => {
+				extractor.on(""+w.id, d => {
 					d.forEach((i, x) => {
 						chart.series[x].update({data: i});
 					});
@@ -211,42 +276,61 @@ define([
 			els.menus.on("click", "[data-menu]", e => {
 				let action = $(e.target).data().action || $(e.currentTarget).data().action;
 					action = parseInt(action, 10);
-				
 				if (action === 0) {
-					expand();
+					max();
 				} else if (action === 1) {
-					shrink();
+					min();
 				}
 			});
-			els.edit.on("click", () => {
-				switch (e.type) {
-					case 0: manager.emit("edit", e.id); break;
-					case 1: ; break;
-					case 2: ; break;
-					case 3: ; break;
-				}
+			els.expand.on("click", () => {
+				expand();
+			});
+			els.shrink.on("click", () => {
+				shrink();
 			});
 			els.remove.on("click", () => {
-				manager.emit("delete", e.id);
+				els.menuBtn.mouseout();
+				manager.emit("delete", w.id);
 			});
-			els.refresh.on("click", () => {
+			els.refresh.on("click", e => {
+				$(e.target).attr({disabled: true});
 				load();
+			});
+			els.edit.on("click", () => {
+				els.menuBtn.mouseout();
+				
+				manager.emit("edit", w)
 			});
 		}
 		
 		init();
 		load();
 		
+		inst.chart = chart;
 		inst.mark = mark;
-		inst.toggleSpinner = toggleSpinner;
 		inst.refresh = load;
 		inst.expand = expand;
 		inst.shrink = shrink;
 		inst.remove = () => {
 			root.remove();
+			chart ? chart.destroy() : undefined;
+		};
+		inst.update = obj => {
+			w = obj;
+			els.title.text( makeTitle(w.type) );
+			els.rangeTitle.text( w.rangeTitle );
+			switch (w.type) {
+				case 0: editLineChart(chart, w.device.name, w.sensors); break;
+				case 1: ; break;
+				case 2: ; break;
+				case 3: ; break;
+			}
+			
+			load();
 		};
 		
-		manager.emit("create_node", e.id, inst);
+		manager.emit("create_node", w.id, inst);
+		window.asad = inst;
 		return inst;
 	}
 	

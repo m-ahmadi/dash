@@ -1,11 +1,9 @@
-var q = [];
-
 self.onmessage = e => {
 	var d = e.data;
 	extract(d.rawData, d.reqId);
 };
 
-extract = function (data, reqId) {
+function extract(data, reqId) {
 	var arr = data,
 		len1, len2, itm1, itm2, tmp, i, j,
 		result = [];

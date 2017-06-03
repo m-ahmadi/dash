@@ -3,6 +3,7 @@ define([
 	"token",
 	"uk",
 	"./wizard",
+	"./confirm",
 	"./process",
 	"./login",
 	"./widget/widget"
@@ -11,6 +12,7 @@ define([
 	token,
 	uk,
 	wizard,
+	confirm,
 	process,
 	login,
 	widget
@@ -119,36 +121,67 @@ define([
 	function onLoginErr(cb) {
 		login.start(cb);
 	}
+	function css(el, prop) {
+		el = u.isStr(el) ? $(el) : el;
+		return parseInt( el.css(prop).slice(0, -2), 10 );
+	}
+	function adjustHeight() {
+		let el = els.root;
+		let h = css(el, "min-height");
+		let avail = window.innerHeight - ( css("#heading", "height") + css("#footer", "height") );
+		el.css("min-height", avail);
+	}
 	function addCustomEvt() {
-		wizard.on("submit", (e, fn) => {
+		wizard.on("submit:create", (e, fn) => {
 			processNote = uk.note.process(MSG[0], 0, "top-center");
 			_WIDGETS_[e.id] = e;
 			save(() => {
 				widgets[e.id] = widget.create(els.widgets, e);
-				fn();
+				fn(true);
 				processNote.close();
 			}, () => {
-				fn();
+				fn(false);
 				processNote.close();
+				uk.note.error("Could not create your widget. Try again.");
 			});
 		});
-		wizard.on("confirm_submit", (id, fn) => {
+		wizard.on("submit:edit", (e, fn) => {
+			processNote = uk.note.process(MSG[0], 0, "top-center");
+			_WIDGETS_[e.id] = e;
+			save(() => {
+				widgets[e.id].update(e);
+				fn(true);
+				processNote.close();
+			}, () => {
+				fn(false);
+				processNote.close();
+				uk.note.error("Could not create your widget. Try again.");
+			});
+		});
+		confirm.on("submit", (id, fn) => {
 			let cb;
 			processNote = uk.note.process(MSG[0], 0, "top-center");
 			
 			if (id === "delete_all") {
 				_WIDGETS_ = {};
-				cb = () => Object.keys(widgets).forEach(k => widgets[k].remove());
+				cb = () => {
+					Object.keys(widgets).forEach(k => widgets[k].remove());
+					widgets = {};
+				};
 			} else if (id === "save_all") {
+				
 				els.widgets.find("> div").each((i, l) => {
 					let d = $(l).data();
 					_WIDGETS_[d.id].order = i;
-					_WIDGETS_[d.id].expand = d.expand;
-					
+					_WIDGETS_[d.id].expand = parseInt(d.expand);
+					_WIDGETS_[d.id].min = d.min;
 				});
 			} else {
 				delete _WIDGETS_[id];
-				cb = () => widgets[id].remove();
+				cb = () => {
+					widgets[id].remove();
+					delete widgets[id];
+				};
 			}
 			
 			save(() => {
@@ -182,18 +215,11 @@ define([
 			els.widgets.sortable("refresh");
 		});
 		widget.on("delete", id => {
-			wizard.confirm(id);
+			confirm.open(id);
 		});
-	}
-	function css(el, prop) {
-		el = u.isStr(el) ? $(el) : el;
-		return parseInt( el.css(prop).slice(0, -2), 10 );
-	}
-	function adjustHeight() {
-		let el = els.root;
-		let h = css(el, "min-height");
-		let avail = window.innerHeight - ( css("#heading", "height") + css("#footer", "height") );
-		el.css("min-height", avail);
+		widget.on("edit", e => {
+			wizard.edit(e);
+		});
 	}
 	inst.init = () => {
 		els = u.getEls(ROOT);
@@ -216,10 +242,10 @@ define([
 			wizard.start( els.widgets.children().length );
 		});
 		els.deleteAll.on("click", () => {
-			wizard.confirm("delete_all");
+			confirm.open("delete_all");
 		});
 		els.save.on("click", () => {
-			wizard.confirm("save_all");
+			confirm.open("save_all");
 		});
 		
 		$(window).on("beforeunload", e => {
@@ -230,6 +256,7 @@ define([
 		});
 		
 		wizard.init();
+		confirm.init();
 		process.init();
 		login.init();
 		addCustomEvt();
@@ -242,6 +269,6 @@ define([
 		}
 	};
 	
-	window.ws = () => {return adjustHeight};
+	window.ws = () => {return widgets};
 	return inst;
 });

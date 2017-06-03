@@ -1,6 +1,6 @@
 define(() => {
 
-	function init($el, defColor) {
+	function init($el, defColor, onChange) {
 		$el.spectrum({
 			color: defColor || "#ECC",
 			showInput: true,
@@ -12,21 +12,7 @@ define(() => {
 			maxSelectionSize: 10,
 			preferredFormat: "hex",
 			localStorageKey: "spectrum.demo",
-			move: function (color) {
-				
-			},
-			show: function () {
-			
-			},
-			beforeShow: function () {
-			
-			},
-			hide: function () {
-			
-			},
-			change: function() {
-				
-			},
+			change: onChange,
 			palette: [
 				["rgb(0, 0, 0)", "rgb(67, 67, 67)", "rgb(102, 102, 102)",
 				"rgb(204, 204, 204)", "rgb(217, 217, 217)","rgb(255, 255, 255)"],

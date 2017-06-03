@@ -8,7 +8,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 	const WIZ_4 = "[data-root='wiz4']";
 	const CONFIRM = "[data-root='delete']";
 	const temp = Handlebars.templates;
-	let wiz1, wiz2, wiz3, wiz4, del;
+	let wiz1, wiz2, wiz3, wiz4;
 	const d = { // defaults
 		TYPE: 0,
 		MAP: 0,
@@ -21,7 +21,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 			w: 1
 		},
 		RANGE_COUNT_DEF: {
-			m: 25,
+			m: 15,
 			h: 6,
 			d: 2,
 			w: 1
@@ -35,7 +35,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 	];
 	
 	let data = {},
-		confirmId,
+		editMode,
 		openedModal;
 	
 	const newEmpty = () => {
@@ -44,18 +44,6 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 			name: undefined
 		}
 	};
-	function uid() {
-		return Math.floor( Math.random() * 1000 );
-	}
-	function randColor(brightness) {
-		// Six levels of brightness from 0 to 5, 0 being the darkest
-		var rgb = [Math.random() * 256, Math.random() * 256, Math.random() * 256];
-		var mix = [brightness * 51, brightness * 51, brightness * 51]; //51 => 255/5
-		var mixedrgb = [rgb[0] + mix[0], rgb[1] + mix[1], rgb[2] + mix[2]].map(function (x) {
-			return Math.round(x / 2.0)
-		})
-		return "rgb(" + mixedrgb.join(",") + ")";
-	}
 	function reset(order) {
 		order = order ? order : 0;
 		data = {
@@ -69,17 +57,42 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 			service: newEmpty(),
 			sensors: [],
 			order: order,
-			expand: false
+			expand: 0,
+			min: false
 		};
 		wiz1.radios.eq(d.TYPE).prop({checked: true});
+		wiz2.selects.empty();
 		wiz2.selects.val(null).trigger("change");
 		
-		wiz2.rangeType.find("option[value='m']").prop({selected: true});
+		
+		let set = wiz2.rangeCount.add(wiz3.rangeCount)
+		
+		wiz2.rangeType.off("change");
+		set.off("keyup");
+		
+		wiz2.rangeType.on("change", rangeType);
+		set.on("keyup", rangeCount);
+		
+		wiz2.rangeType.find(`option[value='${d.RANGE_TYPE}']`).prop({selected: true}).change();
+		//wiz2.rangeCount.val(d.RANGE_COUNT);
+		
 		wiz2.toAppendAlert.find(".uk-alert-danger").remove();
 		wiz2.submit.attr({disabled: true});
 		wiz2.service.attr({disabled: true});
 		wiz2.sensors.attr({disabled: true});
 		wiz2.units.empty();
+	}
+	function uid() {
+		return Math.floor( Math.random() * 1000 );
+	}
+	function randColor(brightness) {
+		// Six levels of brightness from 0 to 5, 0 being the darkest
+		var rgb = [Math.random() * 256, Math.random() * 256, Math.random() * 256];
+		var mix = [brightness * 51, brightness * 51, brightness * 51]; //51 => 255/5
+		var mixedrgb = [rgb[0] + mix[0], rgb[1] + mix[1], rgb[2] + mix[2]].map(function (x) {
+			return Math.round(x / 2.0)
+		})
+		return "rgb(" + mixedrgb.join(",") + ")";
 	}
 	function open(str) {
 		openedModal = str;
@@ -92,6 +105,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		return !u.isUndef( openedModal );
 	}
 	function start(childs) {
+		editMode = false;
 		reset(childs);
 		open(WIZ_1);
 	}
@@ -107,10 +121,6 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		} else if (type === 3) {
 			open(WIZ_4);
 		}
-	}
-	function confirm(id) {
-		confirmId = id;
-		open(CONFIRM);
 	}
 	function alertMsg(w, msg) {
 		let set;
@@ -155,7 +165,6 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 			}
 		}
 	}
-	
 	function getUrl(type) {
 		let route;
 		switch (type) {
@@ -264,7 +273,6 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		wiz2 = u.getEls(WIZ_2);
 		wiz3 = u.getEls(WIZ_3);
 		wiz4 = u.getEls(WIZ_4);
-		confirm = u.getEls(CONFIRM);
 		
 		
 		const toClear = wiz2.service.add(wiz2.sensors);
@@ -290,10 +298,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		wiz3.prev.on( "click", () => open(WIZ_1) );
 		wiz4.prev.on( "click", () => open(WIZ_1) );
 		
-		wiz2.rangeType.on("change", rangeType);
-		wiz2.rangeCount.on("keyup", rangeCount);
-		wiz3.rangeCount.on("keyup", rangeCount);
-		wiz3.rangeCount.on("keyup", rangeCount);
+		
 		wiz2.selects.on("click", () => {
 			wiz2.submit.attr({disabled: true});
 		});
@@ -310,20 +315,16 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 				wiz2.submit.attr({disabled: true});
 			}
 		});
-		wiz2.expand.on("change", e => {
-			data.expand = e.target.checked;
-		});
 		wiz2.submit.on("click", () => {
 			data.rangeType = wiz2.rangeType.val();
 			data.rangeCount = parseInt( wiz2.rangeCount.val() );
 			data.rangeTitle = getRangeTitle(wiz2.rangeType.val(), wiz2.rangeCount.val());
-			// wiz2.sensors.select2("data").forEach(i => data.sensors[i.id] = i.text);
-			
 			data.sensors = {};
 			wiz2.units.find("[data-sensor-id]").each((i, l) => {
 				let el = $(l);
 				let elData = el.data();
 				let sensorId = elData.sensorId;
+				let colorEl = el.find("[data-colorpick]");
 				data.sensors[sensorId] = {
 					id: sensorId,
 					name: elData.sensorName,
@@ -332,16 +333,19 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 				};
 			});
 			log(data);
-			
-			wiz2.toDisable.attr({disabled: true});
-			wiz2.units.find("[data-todisable]").attr({disabled: true});
-			wiz2.units.find("[data-colorpick]").spectrum("disable");
-			
-			inst.emit("submit", data, () => {
-				wiz2.toDisable.attr({disabled: false}); 
-				wiz2.units.find("[data-todisable]").attr({disabled: false});
-				wiz2.units.find("[data-colorpick]").spectrum("enable");
-				close();
+
+			let dis1 = wiz2.toDisable.attr({disabled: true});
+			let dis2 = wiz2.units.find("[data-todisable]").attr({disabled: true});
+			let dis3 = wiz2.units.find("[data-colorpick]").spectrum("disable");
+			inst.emit(`submit:${editMode ? "edit" : "create"}`, data, success => {
+				dis1.attr({disabled: false});
+				if (success) {
+					dis3.spectrum("destroy");
+					close();
+				} else {
+					dis2.attr({disabled: false});
+					dis3.spectrum("enable");
+				}
 			});
 		});
 		wiz3.submit.on("click", () => {
@@ -355,20 +359,59 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		wiz4.submit.on("click", () => {
 			inst.emit(data.type);
 		});
-		confirm.submit.on("click", () => {
-			confirm.toDisable.attr({disabled: true});
-			inst.emit("confirm_submit", confirmId, () => {
-				confirm.toDisable.attr({disabled: false}); 
-				close();
+		
+	}
+	
+	
+	function edit(o) {
+		editMode = true;
+		let t = o.type;
+		reset();
+		data = o;
+		if (t === 0) {
+			open(WIZ_2);
+			wiz1.radios.eq(o.type).prop({checked: true});
+			wiz2.rangeType.val(o.rangeType);
+			wiz2.rangeCount.val(o.rangeCount);
+			wiz2.rangeCount.attr("max", d.RANGE_COUNT_MAX[o.rangeType]);
+			
+			wiz2.device.append( $("<option></option>").val(o.device.id).text(o.device.name) ).trigger("change");
+			wiz2.service.attr({disabled: false}).append( $("<option></option>").val(o.service.id).text(o.service.name) ).trigger("change");
+			wiz2.sensors.attr({disabled: false});
+			
+			
+			Object.keys(o.sensors).forEach(i => {
+				let p = o.sensors[i];
+			// NOT_WORKIN	wiz2.sensors.append( $("<option></option>").val(p.id).text(p.name) ).trigger("change");
+				wiz2.units.append( temp.sensorUnit({name: p.name, id: p.id}) );
+				let el = wiz2.units.find("[data-colorpick]:last-child");
+				colorpick.init( el, "#"+p.color, () => wiz2.submit.attr({disabled: false}) );
+				wiz2.units.find(`[data-select] [value='${p.unit}']`).prop({checked: true});
 			});
-		});
+			let colorpicks = wiz2.units.find("[data-select]");
+			let enableSubmit = e => {
+				wiz2.submit.attr({disabled: false})
+				colorpicks.off("change", enableSubmit);
+				wiz2.rangeType.off("change", enableSubmit);
+				wiz2.rangeCount.off("change", enableSubmit);
+			};
+			colorpicks.one("change", enableSubmit);
+			wiz2.rangeType.one("change", enableSubmit);
+			wiz2.rangeCount.one("change", enableSubmit);
+			
+		} else if (t === 1) {
+		
+		} else if (t === 2) {
+		
+		} else if (t === 3) {
+		
+		}
 	}
 	
 	inst.alertMsg = alertMsg;
 	inst.init = init;
 	inst.start = start;
 	inst.edit = edit;
-	inst.confirm = confirm;
 	inst.close = close;
 	inst.isOpen = isOpen;
 	
