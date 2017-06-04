@@ -1,12 +1,14 @@
 <div class="uk-alert-{{type}}" uk-alert>
-    <a class="uk-alert-close" uk-close></a>
-    <p class=""> {{! uk-text-bold }}
-			<i class="
-				fa
-				{{#if process}}fa-refresh fa-fw fa-spin{{/if}}
-				{{#if success}}fa-check-circle{{/if}}
-				{{#if danger}}fa-exclamation-triangle{{/if}}
-				fa-lg
-				" aria-hidden="true">
-			</i> {{message}}</p>
+	{{#unless noClose}}
+	<a class="uk-alert-close" uk-close></a>
+	{{/unless}}
+	<p>
+		<i class="
+			fa
+			{{#if process}}fa-refresh fa-fw fa-spin{{/if}}
+			{{#if success}}fa-check-circle{{/if}}
+			{{#if danger}}fa-exclamation-triangle{{/if}}
+			fa-lg
+		" aria-hidden="true">
+		</i> {{message}}</p>
 </div>

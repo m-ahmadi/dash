@@ -22,7 +22,7 @@ define(["config", "uk"], (conf, uk) => {
 	}
 	function request() {
 		els.toDisable.attr({disabled: true});
-		els.process.append( temp.loginAlert({type: "primary", process: true, message: "Processing your request..."}) );
+		els.process.append( temp.loginAlert({type: "primary", process: true, message: "Processing your request...", noClose: true}) );
 		$.ajax({
 			url: conf.BASE + "user/login",
 			method: "POST",
@@ -35,8 +35,9 @@ define(["config", "uk"], (conf, uk) => {
 			Cookies.set("user", d);
 			callback();
 		})
-		.fail(x => {
-			let o = JSON.parse( x.responseText );
+		.fail((x, stat) => {
+			let resTxt = x.responseText;
+			o = resTxt ? JSON.parse(x.responseText) : {Msg: `${stat}: ` + x.state()};
 			els.process.empty();
 			alert({type: "danger", danger: true, message: `${o.Msg}.`});
 			els.toDisable.attr({disabled: false});
