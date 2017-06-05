@@ -77,8 +77,8 @@ define(["config", "uk"], (conf, uk) => {
 	function init() {
 		els = u.getEls(ROOT);
 		
-		els.username.on("keyup", keyup);
-		els.password.on("keyup", keyup);
+		els.username.on("keyup blur input change", keyup);
+		els.password.on("keyup blur input change", keyup);
 		els.submit.on("click", e => {
 			request();
 		});
