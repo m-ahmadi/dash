@@ -322,7 +322,8 @@ define([
 			els.title.text( makeTitle(w.type) );
 			els.rangeTitle.text( w.rangeTitle );
 			switch (w.type) {
-				case 0: editLineChart(chart, w.device.name, w.sensors); break;
+			//	case 0: editLineChart(chart, w.device.name, w.sensors); break;
+				case 0: chart = makeLineChart(els.body, w.device.name, w.sensors); break;
 				case 1: ; break;
 				case 2: ; break;
 				case 3: ; break;

@@ -333,7 +333,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 				};
 			});
 			log(data);
-
+			
 			let dis1 = wiz2.toDisable.attr({disabled: true});
 			let dis2 = wiz2.units.find("[data-todisable]").attr({disabled: true});
 			let dis3 = wiz2.units.find("[data-colorpick]").spectrum("disable");
@@ -389,12 +389,15 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 				wiz2.units.find(`[data-select] [value='${p.unit}']`).prop({checked: true});
 			});
 			let colorpicks = wiz2.units.find("[data-select]");
+			let delBtns = wiz2.units.find("[data-delete-sensor]");
 			let enableSubmit = e => {
 				wiz2.submit.attr({disabled: false})
 				colorpicks.off("change", enableSubmit);
 				wiz2.rangeType.off("change", enableSubmit);
 				wiz2.rangeCount.off("change", enableSubmit);
+				delBtns.off("click", enableSubmit);
 			};
+			delBtns.one("click", enableSubmit);
 			colorpicks.one("change", enableSubmit);
 			wiz2.rangeType.one("change", enableSubmit);
 			wiz2.rangeCount.one("change", enableSubmit);
