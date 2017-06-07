@@ -7,7 +7,7 @@
         "SASS": "style.scss",
         "CSS": "style.css",
         "APP": "app.js",
-        "LIB": "libs",
+        "LIB": "libs.min",
         "LINKS": "links.htm",
         "SCRIPTS": "scripts.htm"
     },
@@ -26,8 +26,8 @@
     "O": {
         "JS": "./dist/js/",
         "CSS": "./dist/css/",
-        "CLIB": "./dist/css/",
-        "JLIB": "./dist/js/lib/",
+        "CLIB": "./dist/css/libs.min.css",
+        "JLIB": "./dist/js/lib/libs.min.js",
         "HTML": "./dist/index.html",
         "STYLE": "./dist/css/style.css",
         "APP": "./dist/js/app.js",
@@ -39,12 +39,12 @@
         "html": "htmlbilder ./src/html/ -o ./dist/index.html -t main.handlebars -e .htm",
         "temp": "handlebars ./src/template/ -f ./dist/js/templates.js -e hbs -m",
         "js": "babel ./src/js/ -d ./dist/js/ -s",
-        "sass": "sass ./src/sass/style.scss:./dist/css/style.css --style expanded --sourcemap=auto",
+        "sass": "node-sass ./src/sass/style.scss > ./dist/css/style.css --output-style expanded --sourcemap --indent-type tab --indent-width 1",
         "w": {
             "html": "htmlbilder ./src/html/ -o ./dist/index.html -t main.handlebars -e .htm -w",
             "sass": "sass ./src/sass/style.scss:./dist/css/style.css --style expanded --sourcemap=auto --watch",
             "js": "babel ./src/js/ -d ./dist/js/ -s -w"
         },
-        "all": "htmlbilder ./src/html/ -o ./dist/index.html -t main.handlebars -e .htm && sass ./src/sass/style.scss:./dist/css/style.css --style expanded --sourcemap=auto && handlebars ./src/template/ -f ./dist/js/templates.js -e hbs -m && babel ./src/js/ -d ./dist/js/ -s"
+        "all": "htmlbilder ./src/html/ -o ./dist/index.html -t main.handlebars -e .htm && node-sass ./src/sass/style.scss > ./dist/css/style.css --output-style expanded --sourcemap --indent-type tab --indent-width 1 && handlebars ./src/template/ -f ./dist/js/templates.js -e hbs -m && babel ./src/js/ -d ./dist/js/ -s"
     }
 }

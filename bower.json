@@ -27,6 +27,8 @@
     "select2": "^4.0.3",
     "requirejs": "^2.3.3",
     "handlebars": "^4.0.10",
-    "spectrum": "^1.8.0"
+    "spectrum": "^1.8.0",
+    "font-awesome": "^4.7.0",
+    "uikit": "3.0.0-beta.24"
   }
 }
