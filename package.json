@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "server": "node scripts/server",
+    "release": "node scripts/release",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
