@@ -339,4 +339,4 @@ define(["config", "token", "./makeLineChart"], function (conf, token, makeLineCh
 
 	return manager;
 });
-//# sourceMappingURL=Widget.js.map
+//# sourceMappingURL=widget.js.map

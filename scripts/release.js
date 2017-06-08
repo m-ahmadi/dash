@@ -4,7 +4,7 @@ const DEFAULT = {
 const OUT_DIR = set("--outDir");
 const OUT_HTML = "index.html";
 
-const ASSETS = OUT_DIR+"/static";
+const ASSETS = OUT_DIR+"/statics";
 const ROOT = "dist/";
 const INPUT_HTML = ROOT+"index.html";
 const toMakeDirs = ["css", "fonts", "images", "js"];
