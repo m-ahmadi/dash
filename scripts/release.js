@@ -97,7 +97,7 @@ function start() {
 	change(ASSETS+"/js/config.js", "ROOT.*", 'ROOT: "/statics/",');
 	change(ASSETS+"/js/config.js", "BASE.*", 'BASE: "/",');
 	change(ASSETS+"/js/config.js", "ALT.*",  'ALT: "/",');
-	change(ASSETS+"/js/main.js", "baseUrl.*", 'baseUrl: "/static/js/",');
+	change(ASSETS+"/js/main.js", "baseUrl.*", 'baseUrl: "/statics/js/",');
 
 	console.log(
 		colors.yellow("Release build"), colors.green.bold("done."),

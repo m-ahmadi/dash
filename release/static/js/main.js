@@ -1,5 +1,5 @@
 require.config({
-	baseUrl: "/static/js/",
+	baseUrl: "/statics/js/",
 	paths: {
 		lib: "../lib"
 	}
