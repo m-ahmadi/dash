@@ -260,6 +260,7 @@ define([
 				chart = makeLineChart(els.body, w.device.name, w.sensors);
 				
 				extractor.on(""+w.id, d => {
+					console.log(d);
 					d.forEach((i, x) => {
 						chart.series[x].update({data: i});
 					});

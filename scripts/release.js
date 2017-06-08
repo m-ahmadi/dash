@@ -23,23 +23,7 @@ const dataMain = 'data-main="/statics/';
 // handle index.html
 let html = "";
 
-function mkdirSafe(p) {
-	if (p.indexOf("/") !== -1) {
-		let l = p.split("/");
-		let path = "";
-		l.forEach(i => {
-			path += `${i}/`;
-			mkdirIf(path);
-		});
-	} else {
-		mkdirIf(p);
-	}
-}
-function mkdirIf(path) {
-	if ( !fs.existsSync(path) ) {
-		fs.mkdirSync(path);
-	}
-}
+
 function change(filePath, ferom, to) {
 	let c = fs.readFileSync(filePath, "utf-8");
 	let result = c.replace(new RegExp(ferom), to);
@@ -58,6 +42,8 @@ function set(arg) {
 }
 
 function start() {
+	fs.emptyDirSync(OUT_DIR);
+	
 	const lr = new LineByLineReader(INPUT_HTML);
 	lr.on("error", err => { console.log( colors.red.bold("Something went wrong!") ); });
 	lr.on("line", line => {
@@ -85,11 +71,11 @@ function start() {
 	});
 
 	// handle copying folders
-	mkdirIf(OUT_DIR);
-	mkdirIf(ASSETS);
+	fs.ensureDirSync(OUT_DIR);
+	fs.ensureDirSync(ASSETS);
 	toMakeDirs.forEach(i => {
 		let p = `${ASSETS}/${i}`;
-		mkdirSafe(p);
+		fs.ensureDirSync(p);
 		fs.copySync(ROOT+i, p);
 	});
 
