@@ -64,7 +64,7 @@ define([
 		}
 		process.doing("Fetching widget list.");
 		$.ajax({
-			url: conf.ALT + "dashboard" + token(), // "widget/fetch",
+			url: conf.ALT + "load" + token(), // "widget/fetch",
 			method: "GET",
 			dataType: "json",
 			header: {"cache-control": "no-cache"}
