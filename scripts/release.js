@@ -17,9 +17,9 @@ const colors = require("colors/safe");
 const link = /<link {1}/;
 const script = /<script {1}/;
 const img = /<img {1}/;
-const href = 'href="/static/';
-const src = 'src="/static/';
-const dataMain = 'data-main="/static/';
+const href = 'href="/statics/';
+const src = 'src="/statics/';
+const dataMain = 'data-main="/statics/';
 // handle index.html
 let html = "";
 
