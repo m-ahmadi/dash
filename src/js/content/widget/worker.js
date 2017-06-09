@@ -9,27 +9,22 @@ function extract(data, reqId) {
 		result = [];
 	
 	len1 = arr.length;
-	for (i=len1; i <= len1; i-=1) {
+	for (i=0; i < len1; i+=1) {
 		result.push([]);
 		itm1 = arr[i];
-		if (itm1) {
-			
+		tmp = itm1.Data;
+		len2 = tmp.length;
 		
-			tmp = itm1.Data;
-			len2 = tmp.length;
-			
-			for (j=len2; j <= len2; j-=1) {
-				itm2 = tmp[j];
-				if (itm2) {
-					result[i].push( [format(itm2.Timestamp), itm2.Value] );
-				}
-				
-			}
-		
+		/* for (j=0; j < len2; j+=1) { // 5000
+			itm2 = tmp[j];
+			result[i].push( [format(itm2.Timestamp), itm2.Value] );
+		} */
+		for (j=len2; j > 0; j-=1) { // 3000
+			itm2 = tmp[j-1];
+			result[i].push( [format(itm2.Timestamp), itm2.Value] );
 		}
 	}
-	
-	postMessage({
+	self.postMessage({
 		reqId: reqId,
 		result: result
 	});

@@ -64,7 +64,7 @@ define([
 		}
 		process.doing("Fetching widget list.");
 		$.ajax({
-			url: conf.BASE + "dashboard/load" + token(), // "widget/fetch",
+			url: conf.ALT + "dashboard" + token(), // "widget/fetch", "dashboard/load"
 			method: "GET",
 			dataType: "json",
 			header: {"cache-control": "no-cache"}
@@ -109,7 +109,7 @@ define([
 	}
 	function save(done, fail, always) {
 		$.ajax({
-			url: conf.BASE + "dashboard/save" + token(), // "widget/add",
+			url: conf.ALT + "dashboard/save" + token(), // "widget/add",
 			method: "POST",
 			contentType: "application/json",
 			data: JSON.stringify(_WIDGETS_)

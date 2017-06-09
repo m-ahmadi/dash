@@ -30,7 +30,7 @@ define([
 	
 	
 	function init() {
-		worker = new Worker(conf.ROOT + "js/content/Widget/worker.js");
+		worker = new Worker(conf.ROOT + "js/content/widget/worker.js");
 		worker.onmessage = e => {
 			let d = e.data;
 			extractor.emit(d.reqId, d.result);
@@ -89,7 +89,7 @@ define([
 			},
 			legend: {
 				enabled: true
-            },
+            }
 			series: generateSeries(sensors)
 		});
 	}
@@ -260,7 +260,6 @@ define([
 				chart = makeLineChart(els.body, w.device.name, w.sensors);
 				
 				extractor.on(""+w.id, d => {
-					console.log(d);
 					d.forEach((i, x) => {
 						chart.series[x].update({data: i});
 					});
