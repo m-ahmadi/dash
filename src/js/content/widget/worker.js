@@ -19,8 +19,8 @@ function extract(data, reqId) {
 			itm2 = tmp[j];
 			result[i].push( [format(itm2.Timestamp), itm2.Value] );
 		} */
-		for (j=len2; j > 0; j-=1) { // 3000
-			itm2 = tmp[j-1];
+		for (j=len2-1; j >= 0; j-=1) { // 3000
+			itm2 = tmp[j];
 			result[i].push( [format(itm2.Timestamp), itm2.Value] );
 		}
 	}

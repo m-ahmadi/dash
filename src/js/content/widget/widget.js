@@ -89,7 +89,7 @@ define([
 			},
 			legend: {
 				enabled: true
-            }
+            },
 			series: generateSeries(sensors)
 		});
 	}
