@@ -1,20 +1,20 @@
 define([
 	"config",
 	"token",
+	"login",
 	"uk",
 	"./wizard",
 	"./confirm",
 	"./process",
-	"./login",
 	"./widget/widget"
 ], (
 	conf,
 	token,
+	login,
 	uk,
 	wizard,
 	confirm,
 	process,
-	login,
 	widget
 ) => {
 	const inst = u.extend( newPubSub() );

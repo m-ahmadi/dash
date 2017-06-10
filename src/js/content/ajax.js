@@ -1,4 +1,4 @@
-define(["./login"], (login) => {
+define([], () => {
 	
 	function main(o, done, fail, always) {
 		let x = $.ajax(o)

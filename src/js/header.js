@@ -1,4 +1,4 @@
-define([], () => {
+define(["login"], (login) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='header']";
 	const FORMAT = "MMMM Do YYYY, h:mm:ss a";

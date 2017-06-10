@@ -85,7 +85,15 @@ define([
 				}
 			},
 			chart: {
-				zoomType: "x"
+				zoomType: "x",
+				events: {
+					load: (a,b,c,d,e) => {
+						
+					},
+					selection: (a,b,c,d,e) => {
+						var a = 2;
+					}
+				}
 			},
 			legend: {
 				enabled: true
@@ -322,7 +330,6 @@ define([
 			els.title.text( makeTitle(w.type) );
 			els.rangeTitle.text( w.rangeTitle );
 			switch (w.type) {
-			//	case 0: editLineChart(chart, w.device.name, w.sensors); break;
 				case 0: chart = makeLineChart(els.body, w.device.name, w.sensors); break;
 				case 1: ; break;
 				case 2: ; break;
