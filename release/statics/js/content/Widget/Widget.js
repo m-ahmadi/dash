@@ -260,6 +260,7 @@ define(["config", "token", "./makeLineChart"], function (conf, token, makeLineCh
 				chart = makeLineChart(els.body, w.device.name, w.sensors);
 
 				extractor.on("" + w.id, function (d) {
+					console.log(d);
 					d.forEach(function (i, x) {
 						chart.series[x].update({ data: i });
 					});

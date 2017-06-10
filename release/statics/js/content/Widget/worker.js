@@ -15,15 +15,20 @@ function extract(data, reqId) {
 	    result = [];
 
 	len1 = arr.length;
-	for (i = 0; i < len1; i += 1) {
+	for (i = len1; i <= len1; i -= 1) {
 		result.push([]);
 		itm1 = arr[i];
+		if (itm1) {
 
-		tmp = itm1.Data;
-		len2 = tmp.length;
-		for (j = 0; j < len2; j += 1) {
-			itm2 = tmp[j];
-			result[i].push([format(itm2.Timestamp), itm2.Value]);
+			tmp = itm1.Data;
+			len2 = tmp.length;
+
+			for (j = len2; j <= len2; j -= 1) {
+				itm2 = tmp[j];
+				if (itm2) {
+					result[i].push([format(itm2.Timestamp), itm2.Value]);
+				}
+			}
 		}
 	}
 
