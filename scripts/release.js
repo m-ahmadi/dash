@@ -83,6 +83,7 @@ function start() {
 	change(ASSETS+"/js/config.js", "ROOT.*", 'ROOT: "/statics/",');
 	change(ASSETS+"/js/config.js", "BASE.*", 'BASE: "/",');
 	change(ASSETS+"/js/config.js", "ALT.*",  'ALT: "/",');
+	change(ASSETS+"/js/config.js", "LOAD.*", 'LOAD: "dashboard/load",');
 	change(ASSETS+"/js/main.js", "baseUrl.*", 'baseUrl: "/statics/js/",');
 
 	console.log(

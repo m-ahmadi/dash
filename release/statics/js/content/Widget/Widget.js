@@ -15,7 +15,7 @@ define(["config", "token", "./makeLineChart"], function (conf, token, makeLineCh
 	var worker = void 0;
 
 	function init() {
-		worker = new Worker(conf.ROOT + "js/content/Widget/worker.js");
+		worker = new Worker(conf.ROOT + "js/content/widget/worker.js");
 		worker.onmessage = function (e) {
 			var d = e.data;
 			extractor.emit(d.reqId, d.result);
@@ -260,7 +260,6 @@ define(["config", "token", "./makeLineChart"], function (conf, token, makeLineCh
 				chart = makeLineChart(els.body, w.device.name, w.sensors);
 
 				extractor.on("" + w.id, function (d) {
-					console.log(d);
 					d.forEach(function (i, x) {
 						chart.series[x].update({ data: i });
 					});
