@@ -17,4 +17,7 @@ highcharts/highstock
 highcharts/modules/exporting
 
 spectrum/spectrum
+
+switchery/dist/switchery
+
 @ handlebars/handlebars.runtime

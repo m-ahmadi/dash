@@ -41,7 +41,18 @@ define([
 	
 	let counter = 1;
 	
-	
+	function refreshAll() {
+		Object.keys(widgets).forEach(k => {
+			let widget = widgets[k];
+			setTimeout(widget.refresh, 500);
+		});
+	}
+	function autoRefresh() {
+		setTimeout(() => {
+			refreshAll();
+			autoRefresh();
+		}, 60000);
+	}
 	function isStatWrong(n) {
 		return n && (n === 403 || n === 404) ? true : false;
 	}
@@ -94,6 +105,7 @@ define([
 			});
 			process.log("Finished.", "success");
 			process.close();
+			//autoRefresh();
 		})
 		.fail(x => {
 			if ( isStatWrong(x.status) ) {
@@ -236,6 +248,18 @@ define([
 			scroll: false,
 			tolerance: "pointer"
 		//	placeholder: "ui-state-highlight"
+		});
+		
+		new Switchery(els.autoref[0], {
+			color: '#64bd63',
+			secondaryColor: '#dfdfdf',
+			jackColor: '#fff',
+			jackSecondaryColor: null,
+			className: 'switchery',
+			disabled: false,
+			disabledOpacity: 0.5,
+			speed: '0.4s',
+			size: 'default'
 		});
 		
 		els.add.on("click", () => {
