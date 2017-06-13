@@ -1,0 +1,18 @@
+#toolbar {
+
+	#autorefresh {
+		.success {
+			background: #7ac143;
+			color: white;
+		}
+		.danger {
+			background: #fb8b88;
+			color: white;
+		}
+		.custombtn {
+			border-radius: 50px;
+			padding: 2px 2px;
+			line-height: 1;
+		}
+	}
+}
