@@ -30,7 +30,7 @@ define([
 	
 	
 	function init() {
-		worker = new Worker(conf.ROOT + "js/content/widget/worker.js");
+		worker = new Worker(conf.ROOT + "js/widget/worker.js");
 		worker.onmessage = e => {
 			let d = e.data;
 			extractor.emit(d.reqId, d.result);
@@ -65,49 +65,12 @@ define([
 				color: "#"+ sensor.color,
 				data: [],
 				tooltip: {
-					valueDecimals: 2
+					// valueDecimals: 2
+					valueSuffix: " " + sensor.unit
 				}
 			});
 		});
 		return res;
-	}
-	function makeLineChart(container, title, sensors) {
-		return Highcharts.stockChart(container[0], {
-			rangeSelector: false,
-			exporting: false,
-			credits: false,
-			title: {
-				align: "left",
-				text: title || "",
-				style: {
-					color: "#717171",
-					fontSize: "14px"
-				}
-			},
-			chart: {
-				zoomType: "x",
-				events: {
-					load: (a,b,c,d,e) => {
-						
-					},
-					selection: (a,b,c,d,e) => {
-						var a = 2;
-					}
-				}
-			},
-			legend: {
-				enabled: true
-            },
-			series: generateSeries(sensors)
-		});
-	}
-	function editLineChart(chart, title, sensors) {
-		chart.update({
-			title: {
-				text: title
-			},
-			series: generateSeries(sensors)
-		});
 	}
 	function makeTitle(type) {
 		let title;
@@ -141,13 +104,54 @@ define([
 		let w = {},
 			root, els,
 			chart = {};
+		let startDate, endDate; // for customized ranges
+		let xhr;
 		
 		if (!container || !o) {
 			throw new TypeError("You must provide a container and a widget object.");
 		}
 		w = o;
 		
-		
+		function makeLineChart(container, title, sensors, onSelect) {
+			let series = generateSeries(sensors);
+			
+			return Highcharts.stockChart(container[0], {
+				rangeSelector: false,
+				exporting: false,
+				credits: false,
+				title: {
+					align: "left",
+					text: title || "",
+					style: {
+						color: "#717171",
+						fontSize: "14px"
+					}
+				},
+				chart: {
+					zoomType: "x"
+				},
+				navigator: {
+					adaptToUpdatedData: false
+				},
+				xAxis: {
+					events: {
+						setExtremes: e => {
+							let d = e.DOMEvent;
+							let trigger = e.trigger;
+							if ( (d && d.DOMType !== "mousemove") || trigger === "zoom" ) { // drag-end or zoom
+								startDate = moment(e.min).format(DATE_FORMAT);
+								endDate = moment(e.max).format(DATE_FORMAT);
+								loadGraphSensorData();
+							}
+						}
+					}
+				},
+				legend: {
+					enabled: true
+				},
+				series: series
+			});
+		}
 		function min() {
 			let el = els.body;
 			root.data("min", true);
@@ -217,14 +221,18 @@ define([
 			els.spinnerParent.html("&nbsp;");
 		}
 		function loadGraphSensorData() {
+			if (xhr) {
+				xhr.abort();
+				spinnerOff();
+			}
 			spinnerOn();
 			chart ? chart.showLoading() : undefined;
-			$.ajax({
+			xhr = $.ajax({
 				url: conf.BASE +"device/devicekpisensordata"+ token(),
 				method: "POST",
 				data: {
-					start_date: getDate(w.rangeType, w.rangeCount),
-					end_date: getDate(),
+					start_date: startDate || getDate(w.rangeType, w.rangeCount),
+					end_date: endDate || getDate(),
 					device_ids: jsonStr([w.device.id]),
 					service_ids: jsonStr([w.service.id]),
 					kpis: jsonStr( getSensors(w.sensors) )
@@ -238,7 +246,7 @@ define([
 				}
 				spinnerOff();
 				mark(true);
-				chart.hideLoading()
+				chart.hideLoading();
 			})
 			.fail(x => {
 				spinnerOff();
@@ -251,7 +259,7 @@ define([
 		}
 		function load() {
 			switch (w.type) {
-				case 0: loadGraphSensorData(w); break;
+				case 0: loadGraphSensorData(); break;
 				case 1: ; break;
 				case 2: ; break;
 				case 3: ; break;
@@ -262,15 +270,26 @@ define([
 			els = u.getEls(root);
 			
 			// when creating dom stuff.
-			 
 			const type = w.type;
 			if (type === 0) {
+				let firstTime = true;
 				chart = makeLineChart(els.body, w.device.name, w.sensors);
 				
 				extractor.on(""+w.id, d => {
+					
 					d.forEach((i, x) => {
-						chart.series[x].update({data: i});
+					//	chart.series[x].update({data: i});
+						chart.series[x].setData(i);
 					});
+					if (firstTime) {
+						chart.update({
+							navigator: {
+								series: d
+							}
+						});
+						firstTime = false;
+					}
+					
 				});
 			
 			} else if (type === 1) {

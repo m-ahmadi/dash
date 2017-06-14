@@ -1,5 +1,4 @@
 define(() => {
-
 	function init($el, defColor, onChange) {
 		$el.spectrum({
 			color: defColor || "#ECC",
