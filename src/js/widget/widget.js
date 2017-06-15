@@ -7,7 +7,6 @@ define([
 	const temp = Handlebars.templates;
 	const extractor = newPubSub();
 	
-	const BODY = "[data-container]";
 	const KLASS_X1 = [
 		"uk-width-1-1@s",
 		"uk-width-1-1@m",
@@ -284,7 +283,19 @@ define([
 					if (firstTime) {
 						chart.update({
 							navigator: {
-								series: d
+								series: {
+									data: d[0],
+									type: 'areaspline',
+									color: '#4572A7',
+									fillOpacity: 0.05,
+									dataGrouping: {
+										smoothed: true
+									},
+									lineWidth: 1,
+									marker: {
+										enabled: false
+									}
+								}
 							}
 						});
 						firstTime = false;
