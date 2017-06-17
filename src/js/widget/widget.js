@@ -59,6 +59,7 @@ define([
 		Object.keys(sensors).forEach(i => {
 			let sensor = sensors[i];
 			res.push({
+				id: ""+sensor.id,
 				type: "line",
 				name: sensor.name,
 				color: "#"+ sensor.color,
@@ -71,6 +72,31 @@ define([
 		});
 		return res;
 	}
+	function makeBarChart(container, title, series) {
+		return Highcharts.chart(container[0], {
+			chart: {
+				type: "column"
+			},
+			title: {
+				align: "left",
+				text: title || "",
+				style: {
+					color: "#717171",
+					fontSize: "14px"
+				}
+			},
+			yAxis: {
+				title: false
+			},
+			series: series,
+			rangeSelector: false,
+			exporting: false,
+			credits: false,
+			legend: {
+				enabled: true
+			}
+		});
+	}
 	function makeTitle(type) {
 		let title;
 		switch (type) {
@@ -81,12 +107,17 @@ define([
 		}
 		return title;
 	}
+	function buildFormdata(o) {
+		let res = new FormData();
+		Object.keys(o).forEach(k => {
+			res.append(k, o[k]);
+		});
+		return res;
+	}
 	function createPanel(parent, type, rangeTitle, id, expand, min) {
-		let body;
 		const ctx = {
 			title: makeTitle(type),
 			rangeTitle: rangeTitle,
-			body: body,
 			id: id,
 			xOne: expand === 1,
 			xTwo: expand === 2,
@@ -111,9 +142,7 @@ define([
 		}
 		w = o;
 		
-		function makeLineChart(container, title, sensors, onSelect) {
-			let series = generateSeries(sensors);
-			
+		function makeLineChart(container, title, sensors) {
 			return Highcharts.stockChart(container[0], {
 				rangeSelector: false,
 				exporting: false,
@@ -128,6 +157,15 @@ define([
 				},
 				chart: {
 					zoomType: "x"
+					/* resetZoomButton: { // works only with Highcharts.chart
+						relativeTo: "chart",
+						position: {
+							align: "right",
+							verticalAlign: "top",
+							x: 0,
+							y: 0
+						}
+					} */
 				},
 				navigator: {
 					adaptToUpdatedData: false
@@ -148,7 +186,7 @@ define([
 				legend: {
 					enabled: true
 				},
-				series: series
+				series: generateSeries(sensors)
 			});
 		}
 		function min() {
@@ -238,10 +276,12 @@ define([
 				}
 			})
 			.done(data => {
+				let forworker = {reqId: w.id, rawData: []};
 				if (!data) {
-					worker.postMessage({reqId: w.id, rawData: []});
+					worker.postMessage(forworker);
 				} else if (data.length) {
-					worker.postMessage({reqId: w.id, rawData: data});
+					forworker.rawData = data;
+					worker.postMessage(forworker);
 				}
 				spinnerOff();
 				mark(true);
@@ -256,10 +296,47 @@ define([
 			})
 			.always(() => els.refresh.attr({disabled: false}));
 		}
+		function loadStat() {
+			$.ajax({
+				url: conf.BASE +"stat/violation"+ token(),
+				method: "POST",
+				contentType: false,// "multipart/form-data",
+				processData: false,
+				data: buildFormdata({
+					start_date: getDate(w.rangeType, w.rangeCount),
+					end_date: getDate(),
+					groups: jsonStr( [w.group] ),
+					kpis: jsonStr( w.statKpis )
+				})
+			})
+			.done(data => {
+				let d = data[0];
+				let a = d.kpis_data;
+				let series = [];
+				a.forEach(i => {
+					series.push({
+						name: i.KPI,
+						data: [i.ratio]
+					});
+				});
+				
+				console.log(series);
+				chart = makeBarChart(els.container, d.group, series);
+				spinnerOff();
+				mark(true);
+				chart.hideLoading();
+			})
+			.fail(x => {
+				spinnerOff();
+				mark(false, true);
+				chart.hideLoading();
+				if (x.status === 403) manager.emit("login_error");
+			})
+		}
 		function load() {
 			switch (w.type) {
 				case 0: loadGraphSensorData(); break;
-				case 1: ; break;
+				case 1: loadStat(); break;
 				case 2: ; break;
 				case 3: ; break;
 			}
@@ -272,19 +349,23 @@ define([
 			const type = w.type;
 			if (type === 0) {
 				let firstTime = true;
-				chart = makeLineChart(els.body, w.device.name, w.sensors);
+				chart = makeLineChart(els.container, w.device.name, w.sensors);
+				chart.setSize();
 				
-				extractor.on(""+w.id, d => {
-					
-					d.forEach((i, x) => {
-					//	chart.series[x].update({data: i});
-						chart.series[x].setData(i);
+				extractor.on(""+w.id, o => {
+					Object.keys(o).forEach(k => {
+						chart.get(k).setData( o[k] );
 					});
+					/* d.forEach((i, x) => {
+					//	chart.series[x].update({data: i});
+						
+						chart.series[x].setData(i);
+					}); */
 					if (firstTime) {
 						chart.update({
 							navigator: {
 								series: {
-									data: d[0],
+									data: o[ Object.keys(o)[0] ],
 									type: 'areaspline',
 									color: '#4572A7',
 									fillOpacity: 0.05,
@@ -304,9 +385,11 @@ define([
 				});
 			
 			} else if (type === 1) {
-			
+				//chart = makeBarChart(els.container);
+				//chart.setSize();
 			} else if (type === 2) {
-			
+				chart = makeBarChart(els.container);
+				chart.setSize();
 			} else if (type === 3) {
 			
 			}
@@ -361,7 +444,7 @@ define([
 			els.rangeTitle.text( w.rangeTitle );
 			switch (w.type) {
 				case 0: chart = makeLineChart(els.body, w.device.name, w.sensors); break;
-				case 1: ; break;
+				case 1: chart = makeBarChart(els.body); break;
 				case 2: ; break;
 				case 3: ; break;
 			}

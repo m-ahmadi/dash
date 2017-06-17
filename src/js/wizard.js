@@ -6,9 +6,9 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 	const WIZ_2 = "[data-root='wiz2']";
 	const WIZ_3 = "[data-root='wiz3']";
 	const WIZ_4 = "[data-root='wiz4']";
-	const CONFIRM = "[data-root='delete']";
 	const temp = Handlebars.templates;
 	let wiz1, wiz2, wiz3, wiz4;
+	let firstGroupFetch = true;
 	const d = { // defaults
 		TYPE: 0,
 		MAP: 0,
@@ -52,10 +52,11 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 			rangeType: d.RANGE_TYPE,
 			rangeCount: d.RANGE_COUNT,
 			rangeTitle: getRangeTitle(this.rangeType, this.rangeCount),
-			map: d.MAP,
-			device: newEmpty(),
-			service: newEmpty(),
+			device: {},
+			service: {},
 			sensors: [],
+			group: "",
+			statKpis: [],
 			order: order,
 			expand: 0,
 			min: false
@@ -81,6 +82,26 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		wiz2.service.attr({disabled: true});
 		wiz2.sensors.attr({disabled: true});
 		wiz2.units.empty();
+	}
+	function wiz2Data(set) {
+		if (set) {
+			data.device = newEmpty();
+			data.service = newEmpty();
+			data.sensors = [];
+		} else {
+			data.device = {};
+			data.service = {};
+			data.sensors = [];
+		}
+	}
+	function wiz3Data(set) {
+		if (set) {
+			data.group = "";
+			data.statKpis = [];
+		} else {
+			data.group = "";
+			data.statKpis = conf.STAT_KPIS;
+		}
 	}
 	function uid() {
 		return Math.floor( Math.random() * 1000 );
@@ -109,19 +130,6 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		reset(childs);
 		open(WIZ_1);
 	}
-	function edit(type, e) {
-		if (!e) { throw new TypeError("You must provide a widget object.") }
-		data = e;
-		if (type === 0) {
-			open(WIZ_2);
-		} else if (type === 1) {
-			open(WIZ_3);
-		} else if (type === 2) {
-			open(WIZ_3);
-		} else if (type === 3) {
-			open(WIZ_4);
-		}
-	}
 	function alertMsg(w, msg) {
 		let set;
 		switch (w) {
@@ -142,28 +150,6 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		}
 		s+= count > 1 ? "s" : "";
 		return s;
-	}
-	function rangeType(e) {
-		const val = e.target.value;
-		const n1 = d.RANGE_COUNT_DEF[val];
-		const n2 = d.RANGE_COUNT_MAX[val];
-		wiz2.rangeCount.val(n1);
-		wiz2.rangeCount.attr("max", n2);
-	}
-	function rangeCount(e) {
-		const el = e.target;
-		const type = wiz2.rangeType.val();
-		const max = d.RANGE_COUNT_MAX[type];
-		const min = parseInt($(el).attr("min"), 10);
-		const val = el.value;
-		if (val) {
-			let num = parseInt(val, 10);
-			if (num > max) {
-				el.value = max;
-			} else if (num < min) {
-				el.value = min;
-			}
-		}
 	}
 	function getUrl(type) {
 		let route;
@@ -236,10 +222,13 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		.on("select2:select", e => {
 			const selected = e.params.data;
 			if (type === 2) {
-				wiz2.units.append( temp.sensorUnit({name: selected.text, id: selected.id}) );
-				const el = wiz2.units.find("[data-colorpick]:last-child");
-				colorpick.init( el, randColor( u.randInt(0, 6) ) );
-				
+				let units = wiz2.units;
+				if ( !units.find(`[data-sensor-id="${selected.id}"]`).length ) {
+					units.append( temp.sensorUnit({name: selected.text, id: selected.id}) );
+					const colorEl = units.find("[data-colorpick]:last-child");
+					colorpick.init( colorEl, randColor( u.randInt(0, 6) ) );
+				}
+				el.val(null).trigger("change");
 			} else {
 				data[key].id = parseInt(selected.id, 10);
 				data[key].name = selected.text;
@@ -247,7 +236,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 			if (toEnable) {
 				toEnable.attr({disabled: false});
 			}
-			if (toClear) {
+			if (toClear && type !== 2) {
 				toClear.val(null).trigger("change");
 				toDisable.attr({disabled: true});
 				toErase.empty();
@@ -258,15 +247,66 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 				data[key] = newEmpty();
 			}
 		})
-		.on("select2:unselect", e => {
-			if (type === 2) {
-				const id = e.params.data.id.toString();
-				wiz2.units.find(`[data-sensor-id=${id}]`).remove();
-				if (!el.val().length) {
-					wiz2.submit.attr({disabled: true});
-				}
+	}
+	
+	function groupSucc(arr) {
+		if (!wiz3) setTimeout(groupSucc, 1000);
+		wiz3.stat.empty();
+		arr.forEach(i => {
+			wiz3.groups.append( temp.groupOpt({name: i.name, value: i.id}) );
+		});
+	}
+	function groupFail() {
+		if (!wiz3) setTimeout(groupFail, 1000);
+		wiz3.btnParent.empty().append( temp.groupOptBtn() );
+		wiz3.stat.empty().append( temp.groupOptDanger() );
+	}
+	function fetchGroups() {
+		if (!firstGroupFetch) {
+			wiz3.btnParent.empty();
+			wiz3.stat.empty().append( temp.smallSpinner() );
+		}
+		$.ajax({
+			url: conf.BASE + "device/grouptree" + token(),
+			method: "GET",
+			data: "parent_only=true"
+		})
+		.done(d => {
+			let arr = [];
+			d.groups[0].Groups.forEach( i => arr.push({name: i.Name, id: i.ID}) );
+			groupSucc(arr);
+		})
+		.fail(x => {
+			if (x.status === 403) {
+				inst.emit( "login_error", () => open(WIZ_3) )
+			} else {
+				groupFail();
 			}
 		});
+		if (firstGroupFetch) firstGroupFetch = false;
+	}
+	
+	function rangeType(e) {
+		const val = e.target.value;
+		const n1 = d.RANGE_COUNT_DEF[val];
+		const n2 = d.RANGE_COUNT_MAX[val];
+		wiz2.rangeCount.val(n1);
+		wiz2.rangeCount.attr("max", n2);
+	}
+	function rangeCount(e) {
+		const el = e.target;
+		const type = wiz2.rangeType.val();
+		const max = d.RANGE_COUNT_MAX[type];
+		const min = parseInt($(el).attr("min"), 10);
+		const val = el.value;
+		if (val) {
+			let num = parseInt(val, 10);
+			if (num > max) {
+				el.value = max;
+			} else if (num < min) {
+				el.value = min;
+			}
+		}
 	}
 	function init() {
 		wiz1 = u.getEls(WIZ_1);
@@ -288,10 +328,10 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 			const type = parseInt(checked, 10);
 			data.type = type;
 			switch (type) {
-				case 0: open(WIZ_2); break;
-				case 1: open(WIZ_3); break;
-				case 2: open(WIZ_3); break;
-				case 3: open(WIZ_4); break; 
+				case 0: open(WIZ_2); wiz2Data(); break;
+				case 1: open(WIZ_3); wiz3Data(); break;
+				case 2: open(WIZ_3); wiz3Data(); break;
+				case 3: open(WIZ_4); break;
 			}
 		});
 		wiz2.prev.on( "click", () => open(WIZ_1) );
@@ -304,14 +344,9 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 		});
 		wiz2.units.on("click", "[data-delete-sensor]", e => {
 			const el = $(e.currentTarget);
-			const id = el.closest("[data-sensor-id]").data().sensorId.toString();
-			const sensors = wiz2.sensors;
-			const val = sensors.val();
-			const index = val.indexOf(id);
-			val.splice(index, 1);
-			sensors.val(val).trigger("change");
 			el.parent().parent().remove();
-			if (!sensors.val().length) {
+			
+			if (!wiz2.units.children().length) {
 				wiz2.submit.attr({disabled: true});
 			}
 		});
@@ -348,13 +383,31 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 				}
 			});
 		});
+		wiz3.btnParent.on("click", "[data-retry]", fetchGroups);
+		wiz3.groups.on("change", e => {
+			let v = e.target.value;
+			if (v) {
+				wiz3.submit.attr({disabled: false});
+				data.group = parseInt(v, 10);
+			} else {
+				wiz3.submit.attr({disabled: true});
+			}
+			
+		});
 		wiz3.submit.on("click", () => {
+			data.rangeTitle = getRangeTitle(wiz3.rangeType.val(), wiz3.rangeCount.val());
 			const t = data.type;
 			if (t === 1) {
 				// sensor_violation_ratio
 			} else if (t === 2) {
 				// sensor_violation_stat
 			}
+			let toDis = wiz3.toDisable; 
+			toDis.attr({disabled: true});
+			inst.emit(`submit:${editMode ? "edit" : "create"}`, data, success => {
+				toDis.attr({disabled: false});
+				if (success) close();
+			});
 		});
 		wiz4.submit.on("click", () => {
 			inst.emit(data.type);
@@ -364,6 +417,8 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 	
 	
 	function edit(o) {
+		if (!o) { throw new TypeError("You must provide a widget object.") }
+		debugger
 		editMode = true;
 		let t = o.type;
 		reset();
@@ -412,11 +467,13 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 	}
 	
 	inst.alertMsg = alertMsg;
-	inst.init = init;
+	
 	inst.start = start;
 	inst.edit = edit;
 	inst.close = close;
 	inst.isOpen = isOpen;
+	inst.init = init;
+	inst.beforeInit = fetchGroups;
 	
 	window.dool = () => {return data};
 	window.wizard = inst;

@@ -240,7 +240,7 @@ define([
 		toolbar.on("add", () => {
 			wizard.start( els.widgets.children().length );
 		});
-		toolbar.on("save", () => {
+		toolbar.on("save_all", () => {
 			confirm.open("save_all");
 		});
 		toolbar.on("delete_all", () => {
@@ -269,7 +269,7 @@ define([
 
 	
 	inst.beforeReady = () => {
-		
+		wizard.beforeInit();
 	};
 	inst.onReady = () => {
 		els = u.getEls(ROOT);
