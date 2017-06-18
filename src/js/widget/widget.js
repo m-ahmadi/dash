@@ -1,8 +1,7 @@
 define([
 	"config",
-	"token",
-	"./makeLineChart",
-], (conf, token, makeLineChart) => {
+	"token"
+], (conf, token) => {
 	const manager = u.extend( newPubSub() );
 	const temp = Handlebars.templates;
 	const extractor = newPubSub();

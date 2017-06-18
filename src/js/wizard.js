@@ -435,10 +435,16 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 			wiz2.sensors.attr({disabled: false});
 			
 			
-			Object.keys(o.sensors).forEach(i => {
-				let p = o.sensors[i];
+			Object.keys(o.sensors).forEach(k => {
+				let p = o.sensors[k];
 			// NOT_WORKIN	wiz2.sensors.append( $("<option></option>").val(p.id).text(p.name) ).trigger("change");
-				wiz2.units.append( temp.sensorUnit({name: p.name, id: p.id}) );
+				wiz2.units.append( temp.sensorUnit({
+					id: p.id,
+					name: p.name,
+					micro: p.unit === "Microsecond",
+					mili: p.unit === "Milisecond",
+					sec: p.unit === "Second"
+				}) );
 				let el = wiz2.units.find("[data-colorpick]:last-child");
 				colorpick.init( el, "#"+p.color, () => wiz2.submit.attr({disabled: false}) );
 				wiz2.units.find(`[data-select] [value='${p.unit}']`).prop({checked: true});

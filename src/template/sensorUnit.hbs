@@ -2,9 +2,9 @@
 	<td title="{{name}}">{{name}}</td>
 	<td>
 		<select class="uk-select uk-form-small" data-select data-todisable>
-			<option value="Microsecond">Microsecond</option>
-			<option value="Millisecond">Millisecond</option>
-			<option value="Second">Second</option>
+			<option value="Microsecond" {{#if micro}}selected{{/if}}>Microsecond</option>
+			<option value="Millisecond" {{#if mili}}selected{{/if}}>Millisecond</option>
+			<option value="Second"      {{#if sec}}selected{{/if}}>Second</option>
 		</select>
 	</td>
 	<td>
