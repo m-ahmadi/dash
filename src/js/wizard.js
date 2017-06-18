@@ -236,7 +236,7 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 			if (toEnable) {
 				toEnable.attr({disabled: false});
 			}
-			if (toClear && type !== 2) {
+			if (toClear) {
 				toClear.val(null).trigger("change");
 				toDisable.attr({disabled: true});
 				toErase.empty();
@@ -418,11 +418,11 @@ define(["config", "token", "uk", "./colorpick"], (conf, token, uk, colorpick) =>
 	
 	function edit(o) {
 		if (!o) { throw new TypeError("You must provide a widget object.") }
-		debugger
+		
 		editMode = true;
 		let t = o.type;
 		reset();
-		data = o;
+		data = JSON.parse(JSON.stringify(o)); // deep copy
 		if (t === 0) {
 			open(WIZ_2);
 			wiz1.radios.eq(o.type).prop({checked: true});
