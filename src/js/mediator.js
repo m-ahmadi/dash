@@ -6,7 +6,7 @@ define([
 	"uk",
 	"header",
 	"./toolbar",
-	"./wizard",
+	"./wizard/wizard",
 	"./confirm",
 	"./process",
 	"./widget/widget"
@@ -49,7 +49,7 @@ define([
 	function refreshAll() {
 		Object.keys(widgets).forEach(k => {
 			let widget = widgets[k];
-			setTimeout(widget.refresh, 500);
+			setTimeout(widget.refresh, 500); // (timeout+=400)
 		});
 	}
 	function autoRefresh(interval) {
