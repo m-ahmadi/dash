@@ -72,11 +72,15 @@ define(["uk", "config", "token", "./defaults", "./share"], (uk, conf, token, d, 
 	function get() {
 		let rangeTypeVal = els.rangeType.val();
 		let rangeCountVal = els.rangeCount.val();
+		let groups = els.groups;
 		return {
 			rangeType: rangeTypeVal,
 			rangeCount: parseInt(rangeCountVal, 10),
 			rangeTitle: share.getRangeTitle(rangeTypeVal, rangeCountVal),
-			group: parseInt(els.groups.val(), 10),
+			group: {
+				id: parseInt(groups.val(), 10),
+				name: groups.find(":selected").text()
+			},
 			statKpis: conf.STAT_KPIS
 		};
 	}

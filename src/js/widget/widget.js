@@ -53,7 +53,8 @@ define([
 		});
 		return a;
 	}
-	function generateSeries(sensors) {
+	function genSeries(sensors) {
+		// for line charts
 		let res = [];
 		Object.keys(sensors).forEach(i => {
 			let sensor = sensors[i];
@@ -71,7 +72,20 @@ define([
 		});
 		return res;
 	}
-	function makeBarChart(container, title, series) {
+	function genSeries2(sensors) {
+		// for bar charts
+		let res = [];
+		Object.keys(sensors).forEach(k => {
+			let sensor = sensors[k];
+			res.push({
+				id: sensor.id,
+				name: sensor.name,
+				data: []
+			});
+		});
+		return res;
+	}
+	function makeBarChart(container, title, sensors) {
 		return Highcharts.chart(container[0], {
 			chart: {
 				type: "column"
@@ -87,7 +101,7 @@ define([
 			yAxis: {
 				title: false
 			},
-			series: series,
+			series: genSeries2(sensors),
 			rangeSelector: false,
 			exporting: false,
 			credits: false,
@@ -185,7 +199,7 @@ define([
 				legend: {
 					enabled: true
 				},
-				series: generateSeries(sensors)
+				series: genSeries(sensors)
 			});
 		}
 		function min() {
@@ -269,8 +283,8 @@ define([
 				data: {
 					start_date: startDate || getDate(w.rangeType, w.rangeCount),
 					end_date: endDate || getDate(),
-					device_ids: jsonStr([w.device.id]),
-					service_ids: jsonStr([w.service.id]),
+					device_ids: jsonStr( [w.device.id] ),
+					service_ids: jsonStr( [w.service.id] ),
 					kpis: jsonStr( getSensors(w.sensors) )
 				}
 			})
@@ -304,23 +318,13 @@ define([
 				data: buildFormdata({
 					start_date: getDate(w.rangeType, w.rangeCount),
 					end_date: getDate(),
-					groups: jsonStr( [w.group] ),
-					kpis: jsonStr( w.statKpis )
+					groups: jsonStr( [w.group.id] ),
+					kpis: jsonStr( w.statKpis.map(v => {return v.name}) )
 				})
 			})
 			.done(data => {
-				let d = data[0];
-				let a = d.kpis_data;
-				let series = [];
-				a.forEach(i => {
-					series.push({
-						name: i.KPI,
-						data: [i.ratio]
-					});
-				});
-				
-				console.log(series);
-				chart = makeBarChart(els.container, d.group, series);
+				let target = data[0].kpis_data;
+				worker.postMessage(target);
 				spinnerOff();
 				mark(true);
 				chart.hideLoading();
@@ -336,7 +340,7 @@ define([
 			switch (w.type) {
 				case 0: loadGraphSensorData(); break;
 				case 1: loadStat(); break;
-				case 2: ; break;
+				case 2: loadStat(); break;
 				case 3: ; break;
 			}
 		}
@@ -351,43 +355,34 @@ define([
 				chart = makeLineChart(els.container, w.device.name, w.sensors);
 				chart.setSize();
 				
-				extractor.on(""+w.id, o => {
-					Object.keys(o).forEach(k => {
-						chart.get(k).setData( o[k] );
-					});
-					/* d.forEach((i, x) => {
-					//	chart.series[x].update({data: i});
-						
-						chart.series[x].setData(i);
-					}); */
-					if (firstTime) {
-						chart.update({
-							navigator: {
-								series: {
-									data: o[ Object.keys(o)[0] ],
-									type: 'areaspline',
-									color: '#4572A7',
-									fillOpacity: 0.05,
-									dataGrouping: {
-										smoothed: true
-									},
-									lineWidth: 1,
-									marker: {
-										enabled: false
-									}
+				extractor.on(`${w.id}_update_series`, e => {
+					Object.keys(e).forEach( k => chart.get(k).setData(e[k]) );
+				});
+				extractor.on(`${w.id}_update_navigator`, e => {
+					chart.update({
+						navigator: {
+							series: {
+								data: e,
+								type: 'areaspline',
+								color: '#4572A7',
+								fillOpacity: 0.05,
+								dataGrouping: {
+									smoothed: true
+								},
+								lineWidth: 1,
+								marker: {
+									enabled: false
 								}
 							}
-						});
-						firstTime = false;
-					}
-					
+						}
+					});
 				});
 			
 			} else if (type === 1) {
-				//chart = makeBarChart(els.container);
-				//chart.setSize();
+				chart = makeBarChart(els.container, w.group.name, w.statKpis);
+				chart.setSize();
 			} else if (type === 2) {
-				chart = makeBarChart(els.container);
+				chart = makeBarChart(els.container, w.group.name, w.statKpis);
 				chart.setSize();
 			} else if (type === 3) {
 			

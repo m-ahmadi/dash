@@ -1,7 +1,15 @@
 self.onmessage = e => {
 	var d = e.data;
-	extract(d.rawData, d.reqId);
+	switch (d.action) {
+		case "linechart_series":    extract(d.rawData, d.reqId); break;
+		case "linechart_navigator": ; break;
+		case "barchart_series":     ; break;
+	}
 };
+
+function () {
+	
+}
 
 function extract(data, reqId) {
 	var arr = data,
