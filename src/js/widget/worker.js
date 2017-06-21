@@ -1,17 +1,55 @@
 self.onmessage = e => {
 	var d = e.data;
+	var res;
 	switch (d.action) {
-		case "linechart_series":    extract(d.rawData, d.reqId); break;
-		case "linechart_navigator": ; break;
-		case "barchart_series":     ; break;
+		case "line_chart":
+		res = buildLineSeries(d.rawData); break;
+		
+		case "bar_chart":
+		res = buildBarSeries(d.rawData, d.statKpis); break;
+		
+		case "table":
+		res = buildTableData(d.rawData, d.statKpis); break;
 	}
+	self.postMessage({
+		reqId: d.reqId,
+		result: res
+	});
 };
 
-function () {
+function buildTableData(data) {
+	var o = data;
+	var viols = {};
 	
+	o.kpis_data.forEach(o => {
+		viols[o.KPI] = o.violation;
+	});
+	var result = {
+		total_link_count:                  o.total_links_count,
+		total_violation:                   o.total_violation,
+		total_packet_losss_ne_violation:   viols["packet_loss_ne"],
+		total_two_way_delay_max_violation: viols["two_way_delay_max"],
+		total_two_way_dv_max_violation:    viols["two_way_dv_max"]
+	};
+	
+	return result;
 }
 
-function extract(data, reqId) {
+function buildBarSeries(data, statKpis) {
+	var arr = data;
+	var result = [];
+	arr.forEach(i => {
+		let name = i.KPI;
+		result.push({
+			id: statKpis.filter(v => {return v.name = name})[0].id,
+			name: name,
+			data: [i.ratio]
+		});
+	});
+	return result;
+}
+
+function buildLineSeries(data) {
 	var arr = data,
 		len1, len2, itm1, itm2, tmp, i, j,
 		result = {},
@@ -35,10 +73,7 @@ function extract(data, reqId) {
 			res2.push( [format(itm2.Timestamp), itm2.Value] );
 		}
 	}
-	self.postMessage({
-		reqId: reqId,
-		result: result
-	});
+	return result;
 }
 
 function format(ts) {

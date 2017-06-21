@@ -80,6 +80,9 @@ define([
 			res.push({
 				id: sensor.id,
 				name: sensor.name,
+				tooltip: {
+					valueDecimals: 2
+				},
 				data: []
 			});
 		});
@@ -113,10 +116,10 @@ define([
 	function makeTitle(type) {
 		let title;
 		switch (type) {
-			case 0: title = "Graph Sensor";           break;
-			case 1: title = "Sensor Violation Ratio"; break;
-			case 2: title = "Sensor Violation Stats"; break;
-			case 3: title = "Map";                    break;
+			case 0: title = "Graph Sensor";    break;
+			case 1: title = "Violation Ratio"; break;
+			case 2: title = "Stat";           break;
+			case 3: title = "Map";             break;
 		}
 		return title;
 	}
@@ -144,11 +147,12 @@ define([
 	
 	function constructor(container, o) {
 		const inst = {};
-		let w = {},
-			root, els,
-			chart = {};
+		let w = {};
+		let	root, els;
+		let	chart;
 		let startDate, endDate; // for customized ranges
 		let xhr;
+		let updateNavigator = true;
 		
 		if (!container || !o) {
 			throw new TypeError("You must provide a container and a widget object.");
@@ -289,7 +293,7 @@ define([
 				}
 			})
 			.done(data => {
-				let forworker = {reqId: w.id, rawData: []};
+				let forworker = {action: "line_chart", reqId: w.id, rawData: []};
 				if (!data) {
 					worker.postMessage(forworker);
 				} else if (data.length) {
@@ -309,7 +313,9 @@ define([
 			})
 			.always(() => els.refresh.attr({disabled: false}));
 		}
-		function loadStat() {
+		function loadStat(statOnly) {
+			spinnerOn();
+			chart ? chart.showLoading() : undefined;
 			$.ajax({
 				url: conf.BASE +"stat/violation"+ token(),
 				method: "POST",
@@ -324,15 +330,21 @@ define([
 			})
 			.done(data => {
 				let target = data[0].kpis_data;
-				worker.postMessage(target);
+				let forworker = {
+					action: statOnly ? "table" : "bar_chart",
+					reqId: w.id,
+					rawData: statOnly ? data[0] : data[0].kpis_data,
+					statKpis: w.statKpis
+				};
+				worker.postMessage(forworker);
 				spinnerOff();
 				mark(true);
-				chart.hideLoading();
+				if (chart) chart.hideLoading();
 			})
 			.fail(x => {
 				spinnerOff();
 				mark(false, true);
-				chart.hideLoading();
+				if (chart) chart.hideLoading();
 				if (x.status === 403) manager.emit("login_error");
 			})
 		}
@@ -340,7 +352,7 @@ define([
 			switch (w.type) {
 				case 0: loadGraphSensorData(); break;
 				case 1: loadStat(); break;
-				case 2: loadStat(); break;
+				case 2: loadStat(true); break;
 				case 3: ; break;
 			}
 		}
@@ -351,18 +363,16 @@ define([
 			// when creating dom stuff.
 			const type = w.type;
 			if (type === 0) {
-				let firstTime = true;
 				chart = makeLineChart(els.container, w.device.name, w.sensors);
 				chart.setSize();
 				
-				extractor.on(`${w.id}_update_series`, e => {
-					Object.keys(e).forEach( k => chart.get(k).setData(e[k]) );
-				});
-				extractor.on(`${w.id}_update_navigator`, e => {
+				extractor.on(""+w.id, o => {
+					Object.keys(o).forEach( k => chart.get(k).setData(o[k]) );
+					if (!updateNavigator) return;
 					chart.update({
 						navigator: {
 							series: {
-								data: e,
+								data: o[ Object.keys(o)[0] ],
 								type: 'areaspline',
 								color: '#4572A7',
 								fillOpacity: 0.05,
@@ -376,14 +386,31 @@ define([
 							}
 						}
 					});
+					updateNavigator = false;
 				});
-			
 			} else if (type === 1) {
 				chart = makeBarChart(els.container, w.group.name, w.statKpis);
 				chart.setSize();
+				
+				extractor.on(""+w.id, d => {
+					d.forEach( i => chart.get(i.id).setData(i.data) );
+				});
 			} else if (type === 2) {
-				chart = makeBarChart(els.container, w.group.name, w.statKpis);
-				chart.setSize();
+				let body = els.body;
+				body.html( temp.statTable({title: w.group.name}) );
+				let tEls = u.getEls( body );
+				extractor.on(""+w.id, d => {
+					Object.keys(d).forEach(k => {
+						let el = tEls[k];
+						let n = d[k];
+						el.text(n);
+						switch (true) {
+							case (n < 10):         el.addClass("green-text"); break;
+							case (n > 10 && n< 30): el.addClass("orange-text"); break;
+							case (n > 30):         el.addClass("red-text"); break;
+						}
+					});
+				});
 			} else if (type === 3) {
 			
 			}
@@ -442,7 +469,7 @@ define([
 				case 2: ; break;
 				case 3: ; break;
 			}
-			
+			updateNavigator = true;
 			load();
 		};
 		

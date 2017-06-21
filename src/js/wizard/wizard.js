@@ -27,6 +27,7 @@ define([
 	function uid() {
 		return Math.floor( Math.random() * 1000 );
 	}
+	
 	function newData() {
 		let data = {
 			id:         id || uid(),
@@ -64,6 +65,7 @@ define([
 		editMode = false;
 		wiz1.start();
 	}
+	
 	function edit(o) {
 		let w = JSON.parse(JSON.stringify(o)); // deep copy
 		id = w.id;
@@ -98,8 +100,6 @@ define([
 		inst.emit("submit", d);
 	}
 	
-	
-	
 	function addCustomEvt() {
 		wiz1.on("next", type => {
 			switch (type) {
@@ -121,9 +121,11 @@ define([
 		});
 		wiz4.on("submit", emitSubmit);
 	}
+	
 	function beforeInit() {
 		wiz3.fetchGroups();
 	}
+	
 	function init() {
 		// reset();
 		wiz1.init();

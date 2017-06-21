@@ -44,9 +44,9 @@ define([
 		const key = KEYS[type];
 		el.select2({
 			width: "100%",
-			placeholder: type === 0 ? "Select a device" :
+			placeholder: type === 0 ? "Select a node" :
 						 type === 1 ? "Select a service" :
-						 type === 2 ? "Select sensors" : "",
+						 type === 2 ? "Select sensor(s)" : "",
 			ajax: {
 				method: type === 0 ? "GET" : "POST",
 				url: () => { return getUrl(type) + token() },
@@ -146,7 +146,8 @@ define([
 				id: sensor.id,
 				micro: unit === "Microsecond",
 				mili: unit === "Milisecond",
-				sec: unit === "Second"
+				sec: unit === "Second",
+				perc: unit === "Percent"
 			});
 			units.append(html);
 			const colorEl = units.find("[data-colorpick]:last-child");
