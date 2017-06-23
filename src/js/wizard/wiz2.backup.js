@@ -19,6 +19,11 @@ define([
 	
 	let els;
 	let c = { add: {}, edit: {} }; // event callbacks
+	const KEYS = [
+		"device",
+		"service",
+		"sensors"
+	];
 	
 	function randColor(brightness) {
 		// Six levels of brightness from 0 to 5, 0 being the darkest
@@ -29,14 +34,25 @@ define([
 		})
 		return "rgb(" + mixedrgb.join(",") + ")";
 	}
-	function initSelect2(el, type, callback) {
+	function getUrl(type) {
+		let route;
+		switch (type) {
+			case 0: route = "device/search"; break;
+			case 1: route = "device/service/search"; break;
+			case 2: route = "device/service/kpilist"; break;
+		}
+		return conf.BASE + route;
+	}
+	function initSelect2(el, type, toEnable, resKey, toClear, toDisable, toErase) {
+		const key = KEYS[type];
 		el.select2({
 			width: "100%",
 			placeholder: type === 0 ? "Select a node" :
-						 type === 1 ? "Select a service" : "",
+						 type === 1 ? "Select a service" :
+						 type === 2 ? "Select sensor(s)" : "",
 			ajax: {
 				method: type === 0 ? "GET" : "POST",
-				url: () => { return conf.BASE + (type === 0 ? "device/search" : "device/service/search") + token() },
+				url: () => { return getUrl(type) + token() },
 				dataType: "json",
 				delay: 250,
 				data: params => {
@@ -45,28 +61,31 @@ define([
 						o.search = params.term;
 					}
 					o.page = params.page || 1;
-					if (type === 1) {
+					if (type === 0) {
+						// nothing
+					} else if (type === 1) {
 						o.device_ids = JSON.stringify([ parseInt(els.device.val(), 10) ]);
+					} else if (type === 2) {
+						o.services = JSON.stringify([ parseInt(els.service.val(), 10) ]);
 					}
 					return o;
 				},
 				error: x => {
 					if (x.status === 403) {
 						el.select2("close");
-						inst.emit("login_error");
+						inst.emit("login_error", () => open(WIZ_2));
 					}
 				},
 				processResults: (data, params) => {
-					let key = type === 0 ? "devices" : "service";
-					let target = data[key];
+					let target = resKey ? data[resKey]: data;
+					let targetProp = resKey ? ["ID", "Name"] : ["id", "name"];
 					let res = [];
 					params.page = params.page || 1;
 					if (target) {
 						target.forEach((item) => {
 							res.push({
-								id: item.ID,
-								text: item.Name
-							//	text: type === 1 ? u.substrAfterLast(".", item.Name) : item.Name
+								id: item[ targetProp[0] ],
+								text: item[ targetProp[1] ]
 							});
 						});
 					}
@@ -79,103 +98,44 @@ define([
 				},
 				cache: false
 			},
-			multiple: false,
+			multiple: type === 2 ? true : false,
 			minimumInputLength: 0
 		})
 		.on("select2:select", e => {
-			let {service, sensors, units} = els;
-			units.empty();
-			sensors
-				.empty()
-				.val(null)
-				.change();
-			if (type === 0) {
-				service.attr({disabled: false});
-				service.val(null).trigger("change");
-			} else if (type === 1) {
-				callback(e.params.data.id);
+			const selected = e.params.data;
+			if (type === 2) {
+				let units = els.units;
+				addSensor({name: selected.text, id: selected.id});
+				el.val(null).trigger("change");
+			}
+			if (toEnable) {
+				toEnable.attr({disabled: false});
+			}
+			if (toClear) {
+				toClear.val(null).trigger("change");
+				toDisable.attr({disabled: true});
+				toErase.empty();
 			}
 		});
 	}
-	function loadSensorList() {
-		let {btnParent, stat} = els;
-		stat.html( temp.smallSpinner() );
-		if ( btnParent.children().length ) btnParent.empty();
-		$.ajax({
-			url: conf.BASE + "device/service/kpilist" + token(),
-			method: "POST",
-			data: {
-				services: JSON.stringify( [ parseInt(els.service.val(), 10) ] ) // 
-			}
-		})
-		.done(data => {
-			stat.empty();
-			let res = [];
-			data.forEach(i => {
-				res.push({
-					id: i.id,
-					text: i.name,
-					availableUnits: i.available_units
-				});
-			});
-			destroySensorS2();
-			initSensorS2(res);
-		})
-		.fail(x => {
-			btnParent.html( temp.sensorLoadBtn() );
-			stat.empty().html( temp.sensorLoadDanger() );
-			
-			if (x.status === 403) inst.emit("login_error");
-		});
-	}
-	function destroySensorS2() {
-		els.sensors
-			.select2("destroy")
-			.off();
-	}
-	function initSensorS2(data) {
-		let el = els.sensors;
-		let s2 = el.select2({
-			width: "100%",
-			placeholder: "Select sensor",
-			data: data || [],
-			minimumInputLength: 0,
-			disabled: data ? false : true,
-			multiple: true
-		});
-		if (data) {
-			s2.on("select2:select", onSensorSelect);
-		}
-		
-	}
-	function onSensorSelect(e) {
-		let d = e.params.data;
-		let sensor = {
-			id: d.id,
-			name: d.text,
-			availableUnits: d.availableUnits
-		};
-		addSensor(sensor);
-	}
-	function addSensor(sensor, onUnitChange, onColorChange) {
+
+	function addSensor(sensor, onColorChange) {
 		let units = els.units;
 		if ( !units.find(`[data-sensor-id="${sensor.id}"]`).length ) {
 			let unit = sensor.unit;
-			let html = temp.sensorRow({
+			let html = temp.sensorUnit({
 				name: sensor.name,
 				id: sensor.id,
-				availableUnits: sensor.availableUnits
+				micro: unit === "Microsecond",
+				mili: unit === "Milisecond",
+				sec: unit === "Second",
+				perc: unit === "Percent"
 			});
 			units.append(html);
-			let row = units.find(":last-child");
-			
 			const colorEl = units.find("[data-colorpick]:last-child");
 			colorpick.init( colorEl, sensor.color || randColor( u.randInt(0, 6) ), onColorChange );
 		}
 	}
-	
-	
-	
 	function get() {
 		let device = els.device;
 		let service = els.service;
@@ -266,9 +226,6 @@ define([
 	};
 	
 	function setForAdd() {
-		els.btnParent.empty();
-		els.stat.empty();
-		
 		els.selects.empty().val(null).trigger("change");
 		
 		els.rangeType
@@ -287,9 +244,6 @@ define([
 		els.units.empty();
 	}
 	function setForEdit(o) {
-		els.btnParent.empty();
-		els.stat.empty();
-		
 		let type = o.rangeType;
 		let count = o.rangeCount;
 		let curr = {
@@ -332,28 +286,28 @@ define([
 	}
 	function init() {
 		els = u.getEls(ROOT);
-		let {device, service, sensors, units, submit} = els;
 		
-		initSelect2(device, 0);
-		initSelect2(service, 1, loadSensorList);
-		initSensorS2();
+		const toClear = els.service.add(els.sensors);
+		const toDisable = els.sensors.add(els.submit);
+		const toErase = els.units;
+		initSelect2(els.device, 0, els.service, "devices", toClear, toDisable, toErase);
+		initSelect2(els.service, 1, els.sensors, "service", els.sensors, els.submit, toErase);
+		initSelect2(els.sensors, 2, els.submit, "");
 		
 		els.prev.on( "click", () => inst.emit("prev") );
 		
-		els.btnParent.on("click", "[data-retry]", loadSensorList);
-		
-		units.on("click", "[data-delete-sensor]", e => {
+		els.units.on("click", "[data-delete-sensor]", e => {
 			const el = $(e.currentTarget);
 			el.parent().parent().remove();
 			
-			if (!units.children().length) {
-				submit.attr({disabled: true});
+			if (!els.units.children().length) {
+				els.submit.attr({disabled: true});
 			}
 		});
-		submit.on("click", () => {
+		els.submit.on("click", () => {
 			let dis1 = els.toDisable.attr({disabled: true});
-			let dis2 = units.find("[data-todisable]").attr({disabled: true});
-			let dis3 = units.find("[data-colorpick]").spectrum("disable");
+			let dis2 = els.units.find("[data-todisable]").attr({disabled: true});
+			let dis3 = els.units.find("[data-colorpick]").spectrum("disable");
 			inst.emit("submit", get(), success => {
 				dis1.attr({disabled: false});
 				if (success) {
