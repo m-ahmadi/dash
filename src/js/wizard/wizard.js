@@ -5,7 +5,7 @@ define([
 	"./defaults",
 	"./share",
 	"./wiz1",
-	"./wiz2",
+	"./wiz2/wiz2",
 	"./wiz3",
 	"./wiz4"
 ], (

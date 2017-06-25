@@ -474,7 +474,6 @@ define([
 		};
 		
 		manager.emit("create_node", w.id, inst);
-		window.asad = inst;
 		return inst;
 	}
 	

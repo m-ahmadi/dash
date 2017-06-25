@@ -1,7 +1,7 @@
 define(() => {
-	function init($el, defColor, onChange) {
+	function init($el, color, onChange) {
 		$el.spectrum({
-			color: defColor || "#ECC",
+			color: color || "#ECC",
 			showInput: true,
 			showAlpha: true,
 			className: "full-spectrum",

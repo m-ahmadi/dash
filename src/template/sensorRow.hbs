@@ -1,24 +1,27 @@
-<tr data-sensor-id="{{id}}" data-sensor-name="{{name}}">
+<tr data-id="{{id}}">
 	<td title="{{name}}">{{name}}</td>
 	<td>
-		<select class="uk-select uk-form-small" data-select data-todisable>
-			{{#each availableUnits}}
-				<option value="{{this}}">{{this}}</option>
+		<select class="uk-select uk-form-small" data-el="select" data-els="toDisable">
+			{{#each units}}
+				<option value="{{this.name}}">{{this.name}}</option>
 			{{/each}}
 		</select>
 	</td>
 	<td>
-		<input type="text" data-colorpick />
+		<input type="text" data-el="colorpick" />
 	</td>
 	<td>
-		<button type="button" class="uk-button uk-button-danger uk-button-small small-btn" data-delete-sensor data-todisable>
+		<button type="button" class="uk-button uk-button-danger uk-button-small small-btn" data-el="remove" data-els="toDisable">
 			<span uk-icon="icon: close; ratio: 0.7" class="uk-icon"></span>
 		</button>
 	</td>
 </tr>
 
 
-<!-- <option value="Microsecond" {{#if micro}}selected{{/if}}>Microsecond</option>
+<!--
+{{#if this.selected}}selected{{/if}}
+
+<option value="Microsecond" {{#if micro}}selected{{/if}}>Microsecond</option>
 			<option value="Millisecond" {{#if mili}}selected{{/if}}>Millisecond</option>
 			<option value="Second"      {{#if sec}}selected{{/if}}>Second</option>
 			<option value="Percent"     {{#if perc}}selected{{/if}}>Percent</option> -->

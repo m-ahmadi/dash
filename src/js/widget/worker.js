@@ -62,15 +62,18 @@ function buildLineSeries(data) {
 		result[k] = [];
 		res2 = result[k];
 		tmp = itm1.Data;
-		len2 = tmp.length;
 		
-		/* for (j=0; j < len2; j+=1) { // 5000
-			itm2 = tmp[j];
-			res2.push( [format(itm2.Timestamp), itm2.Value] );
-		} */
-		for (j=len2-1; j >= 0; j-=1) { // 3000
-			itm2 = tmp[j];
-			res2.push( [format(itm2.Timestamp), itm2.Value] );
+		if (tmp) {
+			len2 = tmp.length;
+			
+			/* for (j=0; j < len2; j+=1) { // 5000
+				itm2 = tmp[j];
+				res2.push( [format(itm2.Timestamp), itm2.Value] );
+			} */
+			for (j=len2-1; j >= 0; j-=1) { // 3000
+				itm2 = tmp[j];
+				res2.push( [format(itm2.Timestamp), itm2.Value] );
+			}
 		}
 	}
 	return result;
