@@ -45,11 +45,13 @@ define([
 	
 	const ori = ["", "st","nd","rd","th","th","th","th","th","th"];
 	let counter = 1;
-	let timer;
+	let timer,
+		timeout = 0;
+	
 	function refreshAll() {
 		Object.keys(widgets).forEach(k => {
 			let widget = widgets[k];
-			setTimeout(widget.refresh, 500); // (timeout+=400)
+			setTimeout( widget.refresh, (timeout+=400) );
 		});
 	}
 	function autoRefresh(interval) {
@@ -147,6 +149,10 @@ define([
 		let avail = window.innerHeight - ( css("#heading", "height") + css("#footer", "height") );
 		el.css("min-height", avail);
 	}
+	function doAll(action) {
+		Object.keys(widgets).forEach( k => widgets[k][action]() );
+	}
+	
 	function addCustomEvt() {
 		wizard.on("submit:create", (e, fn) => {
 			processNote = uk.note.process(MSG[0], 0, "top-center");
@@ -237,34 +243,16 @@ define([
 			wizard.edit(e);
 		});
 		
-		toolbar.on("add", () => {
-			wizard.start( els.widgets.children().length );
-		});
-		toolbar.on("save_all", () => {
-			confirm.open("save_all");
-		});
-		toolbar.on("delete_all", () => {
-			confirm.open("delete_all");
-		});
-		toolbar.on("min_all", () => {
-			Object.keys(widgets).forEach( k => widgets[k].min() );
-		});
-		toolbar.on("max_all", () => {
-			Object.keys(widgets).forEach( k => widgets[k].max() );
-		});
-		toolbar.on("shrink_all", () => {
-			Object.keys(widgets).forEach( k => widgets[k].shrink() );
-		});
-		toolbar.on("expand_all", () => {
-			Object.keys(widgets).forEach( k => widgets[k].expand() );
-		});
-		toolbar.on("start_auto_refresh", interval => {
-			autoRefresh(interval);
-		});
-		toolbar.on("end_auto_refresh", () => {
-			clearTimeout(timer);
-		});
-
+		toolbar
+			.on("add", wizard.start, els.widgets.children().length)
+			.on("save_all", confirm.open, "save_all")
+			.on("delete_all", confirm.open, "delete_all")
+			.on("min_all", doAll, "min")
+			.on("max_all", doAll, "max")
+			.on("shrink_all", doAll, "shrink")
+			.on("expand_all", doAll, "expand")
+			.on("start_auto_refresh", autoRefresh)
+			.on("end_auto_refresh", clearTimeout, timer);
 	}
 
 	

@@ -7,6 +7,14 @@ define(["uk", "config", "token", "./defaults", "./share"], (uk, conf, token, d, 
 	let type;
 	let firstGroupFetch = true;
 	let c = { add: {}, edit: {} }; // event callbacks
+	let toggle = {
+		submit(b) {
+			els.submit.attr({disabled: !b});
+		},
+		toDisable(b) {
+			els.toDisable.attr({disabled: !b});
+		}
+	};
 	
 	function groupSucc(arr) {
 		if (!els) { setTimeout(groupSucc, 1000); return; }
@@ -166,7 +174,11 @@ define(["uk", "config", "token", "./defaults", "./share"], (uk, conf, token, d, 
 			statKpis: conf.STAT_KPIS
 		};
 	}
-	function init() {
+	function init
+	
+	inst.start = start;
+	inst.fetchGroups = fetchGroups;
+	inst.init = () => {
 		els = u.getEls(ROOT);
 		
 		els.prev.on( "click", () => inst.emit("prev", type) );
@@ -181,11 +193,7 @@ define(["uk", "config", "token", "./defaults", "./share"], (uk, conf, token, d, 
 				if (success) uk.closeModal(ROOT);
 			});
 		});
-	}
-	
-	inst.start = start;
-	inst.fetchGroups = fetchGroups;
-	inst.init = init;
+	};
 	
 	return inst;
 });

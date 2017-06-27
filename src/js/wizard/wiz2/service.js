@@ -57,12 +57,18 @@ define(["config", "token"], (conf, token) => {
 		});
 	}
 	
-	function init(el_) {
-		el = el_;
-		initSelect2();
-		
-	}
-	
+	inst.getData = () => {
+		return {
+			id: parseInt(el.val(), 10),
+			name: el.text()
+		};
+	};
+	inst.setValue = service => {
+		el
+			.append( $("<option></option>").val(service.id).text(service.name) )
+			.change();
+		return inst;
+	};
 	inst.clear = () => {
 		el.empty().val(null).change();
 		return inst;
@@ -75,8 +81,11 @@ define(["config", "token"], (conf, token) => {
 		el.attr({disabled: !b});
 		return inst;
 	};
-	
-	inst.init = init;
+	inst.init = el_ => {
+		el = el_;
+		initSelect2();
+		
+	};
 	
 	return inst;
 });

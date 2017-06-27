@@ -54,12 +54,19 @@ define(["config", "token"], (conf, token) => {
 			inst.emit("select", e.params.data.id);
 		});
 	}
-	function init(el_) {
-		el = el_;
-		
-		initSelect2();
-	}
 	
+	inst.getData = () => {
+		return {
+			id: parseInt(el.val(), 10),
+			name: el.text()
+		};
+	};
+	inst.setValue = device => {
+		el
+			.append( $("<option></option>").val(device.id).text(device.name) )
+			.change();
+		return inst;
+	};
 	inst.toggle = b => {
 		el.attr({disabled: !b});
 		return inst;
@@ -68,8 +75,12 @@ define(["config", "token"], (conf, token) => {
 		el.empty().val(null).change();
 		return inst;
 	};
-	
-	inst.init = init;
+	inst.init = el_ => {
+		el = el_;
+		
+		initSelect2();
+		return inst;
+	};
 	
 	return inst;
 });

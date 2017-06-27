@@ -14,43 +14,45 @@ define(["./colorpick"], (colorpick) => {
 		})
 		return "rgb(" + mixedrgb.join(",") + ")";
 	}
-	function onColorChange(color) {
-		inst.emit( "color_change", color.toHex() );
-	}
+	
 	function newRow(sensor) {
+		let id = sensor.id;
 		let units = sensor.units;
 		parent.append(temp.sensorRow({
 			name: sensor.name,
-			id: sensor.id,
+			id: id,
 			units: units
 		}));
 		let root = parent.children().last();
 		let els = u.getEls(root);
 		
 		let selectedUnit = units.filter(o => o.selected ? o.name : undefined)[0];
-		
 		if (selectedUnit) {
 			els.select.val(selectedUnit.name).change();
 		}
 		colorpick.init(els.colorpick, sensor.color || randColor( u.randInt(0, 6) ), onColorChange);
+		sensor.color = color();
 		
 		els.select.on("change", e => {
-			inst.emit("unit_change", e.target.value);
+			let newVal = e.target.value;
+			sensor.color = newVal;
+			inst.emit("unit_change", id, newVal);
 		});
 		els.remove.on("click", remove);
 		
+		function onColorChange(color) {
+			inst.emit( "color_change", id, color.toHex() );
+		}
 		function toggle(b) {
 			els.toDisable.attr({disabled: !b});
 			els.colorpick.spectrum(b ? "enable" : "disable");
 		}
 		function remove() {
-			let id = sensor.id;
 			els.colorpick.spectrum("destroy");
 			parent.find(`> tr[data-id="${id}"]`).remove();
-			
-			inst.emit("sensor_remove", id);
-			
 			delete rows[id];
+			
+			inst.emit("sensor_remove", sensor);
 			if ( u.isEmptyObj(rows) ) inst.emit("sensor_remove_all");
 		}
 		function getUnits() {
@@ -71,10 +73,8 @@ define(["./colorpick"], (colorpick) => {
 			return els.colorpick.spectrum("get").toHex();
 		}
 		
-		inst.emit("sensor_add", sensor);
-		
 		return {
-			id: sensor.id,
+			id: id,
 			name: sensor.name,
 			toggle, remove, getUnits, color
 		};
@@ -83,12 +83,12 @@ define(["./colorpick"], (colorpick) => {
 		let id = sensor.id;
 		if ( !rows[id] ) {
 			rows[id] = newRow(sensor);
+			inst.emit("sensor_add", id);
 		}
 	}
 	function getData() {
 		if ( u.isEmptyObj(rows) ) return;
 		let data = {};
-		
 		Object.keys(rows).forEach(k => {
 			let row = rows[k];
 			let id = row.id;
@@ -109,10 +109,13 @@ define(["./colorpick"], (colorpick) => {
 		
 	}
 	
-	inst.removeAll = () => doAll("remove");
+	inst.removeAll = () => {
+		doAll("remove");
+	};
 	inst.toggleAll = b => doAll("toggle", b);
 	inst.addRow = addRow;
 	inst.getData = getData;
 	inst.init = init;
+	
 	return inst;
 });

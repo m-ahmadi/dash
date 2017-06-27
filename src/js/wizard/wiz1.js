@@ -8,33 +8,32 @@ define(["uk", "./defaults"], (uk, d) => {
 		let checked = els.radios.filter(":checked").val();
 		return parseInt(checked, 10);
 	}
-	
 	function set(o) {
 		type = o ? o.type : d.TYPE;
 		els.radios.eq(type).prop({checked: true});
 	}
-	
 	function get() {
 		return checked();
 	}
-	
-	function start(o) {
-		set(o);
+	function open() {
 		uk.openModal(ROOT);
 	}
 	
-	function init() {
+	inst.open = open;
+	inst.set = set;
+	inst.get = get;
+	
+	inst.start = (o) => {
+		set(o);
+		open();
+	};
+	inst.init = () => {
 		els = u.getEls(ROOT);
 		
 		els.next.on("click", () => {
 			inst.emit( "next", checked() );
 		});
-	}
-	
-	inst.set = set;
-	inst.get = get;
-	inst.start = start;
-	inst.init = init;
+	};
 	
 	return inst;
 });

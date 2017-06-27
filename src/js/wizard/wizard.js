@@ -27,7 +27,6 @@ define([
 	function uid() {
 		return Math.floor( Math.random() * 1000 );
 	}
-	
 	function newData() {
 		let data = {
 			id:         id || uid(),
@@ -46,7 +45,6 @@ define([
 		};
 		return data;
 	}
-	
 	function merge(o) {
 		let data = newData();
 		
@@ -58,14 +56,12 @@ define([
 		
 		return data;
 	}
-	
 	function start(childs) {
 		id = undefined;
 		order = childs ? childs : 0;
 		editMode = false;
 		wiz1.start();
 	}
-	
 	function edit(o) {
 		let w = JSON.parse(JSON.stringify(o)); // deep copy
 		id = w.id;
@@ -95,9 +91,12 @@ define([
 			
 		}
 	}
-	
-	function emitSubmit(d) {
-		inst.emit("submit", d);
+	function emitLoginErr(cb) {
+		inst.emit("login_error", cb);
+	}
+	function emitSubmit(data, cb) {
+		let eStr = editMode ? "submit:edit" : "submit:create";
+		inst.emit(eStr, merge(data), cb);
 	}
 	
 	function addCustomEvt() {
@@ -109,48 +108,41 @@ define([
 				case 3: wiz4.start(); break;
 			}
 		});
-		wiz2.on( "prev", () => wiz1.start({type:0}) );
-		wiz3.on( "prev", t  => wiz1.start({type:t}) );
-		wiz4.on( "prev", () => wiz1.start({type:3}) );
+		wiz2.on("prev", () => {
+			
+			wiz1.open();
+		});
+		wiz3.on("prev", wiz1.open);
+		wiz4.on("prev", wiz1.open);
 		
-		wiz2.on("submit", (d, cb) => {
-			inst.emit(editMode ? "submit:edit" : "submit:create", merge(d), cb);
-		});
-		wiz3.on("submit", (d, cb) => {
-			inst.emit(editMode ? "submit:edit" : "submit:create", merge(d), cb);
-		});
+		wiz2
+			.on("submit", (data, cb) => {
+				let eStr = editMode ? "submit:edit" : "submit:create";
+				inst.emit(eStr, merge(data), cb);
+			})
+			.on("login_error", emitLoginErr, wiz2.open);
+		
+		wiz3
+			.on("submit", emitSubmit)
+			.on("login_error", emitLoginErr, wiz3.open);
+		
 		wiz4.on("submit", emitSubmit);
 	}
+
+	inst.start = start;
+	inst.edit = edit;
 	
-	function beforeInit() {
-		wiz3.fetchGroups();
-	}
-	
-	function init() {
-		// reset();
+	inst.init = () => {
 		wiz1.init();
 		wiz2.init();
 		wiz3.init();
 		wiz4.init();
 		
 		addCustomEvt();
-	}
+	};
+	inst.beforeInit = () => {
+		wiz3.fetchGroups();
+	};
 	
-	inst.start = start;
-	inst.edit = edit;
-	inst.init = init;
-	inst.beforeInit = beforeInit;
 	return inst;
 });
-
-/* 
-function alertMsg(w, msg) {
-	let set;
-	switch (w) {
-		case 2: set = wiz2; break;
-		case 3: set = wiz3; break;
-		case 4: set = wiz4; break;
-	}
-	set.toAppendAlert.append( temp.alert({message: msg}) );
-}
-*/

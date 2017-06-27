@@ -7,17 +7,6 @@ define(["config", "token"], (conf, token) => {
 	let els;
 	let serviceId;
 	
-	function filter(data, toFilter) {
-		return data.filter(o => toFilter.indexOf(o.id) === -1 );
-	}
-	function reOrder(data) {
-		let el = els.sensors;
-		el.empty();
-		data.forEach(i => {
-			el.append(`<option value='${i.id}' data-units='${jsonStr(i.units)}'>${i.text}</option>`);
-		});
-		el.change();
-	}
 	function load(toFilter) {
 		if (!serviceId) throw new Error("wizard/wiz2/sensors.load(): serviceId must be set before loading.");
 		let { btnParent, stat } = els;
@@ -37,7 +26,7 @@ define(["config", "token"], (conf, token) => {
 			data.forEach(i => {
 				res.push({
 					id: i.id,
-					text: i.name,
+					name: i.name,
 					units: i.available_units.map(v => {
 						return {
 							name: v,
@@ -59,7 +48,61 @@ define(["config", "token"], (conf, token) => {
 			if (x.status === 403) inst.emit("login_error");
 		});
 	}
-	function init(els_) {
+	function filter(arr, toFilter) {
+		return arr.filter(o => toFilter.indexOf(o.id) === -1 );
+	}
+	function reOrder(data) {
+		let el = els.sensors;
+		el.empty();
+		data.forEach( i => appendItem(i) );
+		el.change();
+	}
+	function appendItem(sensor) {
+		let newOpt = $("<option></option>")
+			.val(sensor.id)
+			.attr( "data-units", jsonStr(sensor.units) )
+			.text(sensor.name);
+		let color = sensor.color;
+		if (color) newOpt.attr("data-color", color);
+		els.sensors.append(newOpt);
+	}
+	function remove(id) {
+		els.sensors.find(`option[value='${id}']`).remove().change();
+		return inst;
+	}
+	function toggle(b) {
+		els.sensors.attr({disabled: !b});
+		return inst;
+	}
+	function clear() {
+		els.sensors.val(null).change();
+		return inst;
+	}
+	
+	inst.remove = remove;
+	inst.toggle = toggle;
+	inst.clear = clear;
+	inst.load = load;
+	
+	inst.add = (sensor) => {
+		appendItem(sensor);
+		els.sensors.change();
+		return inst;
+	};
+	inst.clearReloaders = () => {
+		els.btnParent.empty();
+		els.stat.empty();
+		return inst;
+	};
+	inst.setServiceId = id => {
+		serviceId = id;
+		return inst;
+	};
+	inst.removeAll = () => {
+		els.sensors.empty().val(null).change();
+		return inst;
+	};
+	inst.init = els_ => {
 		els = els_;
 		
 		els.btnParent.on("click", "[data-retry]", load);
@@ -74,49 +117,38 @@ define(["config", "token"], (conf, token) => {
 		})
 		.on("select2:select", e => {
 			clear();
-			let d = e.params.data;
+			let s = e.params.data;
+			let data = s.element.dataset;
+			let color = data.color;
 			let sensor = {
-				id: parseInt(d.id, 10),
-				name: d.text,
-				units: jsonParse(d.element.dataset.units)
+				id: parseInt(s.id, 10),
+				name: s.text,
+				units: jsonParse(data.units),
 			};
-			remove(d.id);
+			if (color) {
+				sensor.color = color;
+			}
+			remove(s.id);
 			inst.emit("select", sensor);
 		});
-	}
-	
-	function remove(id) {
-		els.sensors.find(`option[value='${id}']`).remove().change();
-		return inst;
-	}
-	function toggle(b) {
-		els.sensors.attr({disabled: !b});
-		return inst;
-	}
-	function clear() {
-		els.sensors.val(null).change();
-		return inst;
-	}
-	
-	inst.clearReloaders = () => {
-		els.btnParent.empty();
-		els.stat.empty();
-		return inst;
+		// we can use a normal select instead of select2.
+		// (only downside is searching in the input by typing will no longer be available.)
+		/* els.sensors.on("change", e => {
+			let data = $(e.target).data();
+			clear();
+			let color = data.color;
+			let sensor = {
+				id: parseInt(s.id, 10),
+				name: s.text,
+				units: jsonParse(data.units),
+			};
+			if (color) {
+				sensor.color = color;
+			}
+			remove(s.id);
+			inst.emit("select", sensor);
+		}); */
 	};
-	inst.setServiceId = id => {
-		serviceId = id;
-		return inst;
-	};
-	inst.removeAll = () => {
-		els.sensors.empty().val(null).change();
-		return inst;
-	};
-	
-	inst.remove = remove;
-	inst.toggle = toggle;
-	inst.clear = clear;
-	inst.load = load;
-	inst.init = init;
 	
 	return inst;
 });
