@@ -1,7 +1,7 @@
 define([
-	"config",
-	"token",
-	"uk",
+	"core/config",
+	"core/token",
+	"core/uk",
 	"../share",
 	"../defaults",
 	"./device",
@@ -114,34 +114,42 @@ define([
 		return data;
 	}
 	function setForAdd() {
-		sensors.clearReloaders();
-		
-		device.on("select", id => {
-			service
-				.clear()
-				.setDeviceId(id)
-				.toggle(true);
-			dataTable.removeAll();
-			sensors.removeAll();
-		});
-		service.on("select", id => {
-			dataTable.removeAll();
-			sensors
-				.removeAll()
-				.setServiceId(id)
-				.load();
-		});
-		sensors.on("select", sensor => {
-			dataTable.addRow(sensor);
-		});
+		device
+			.off()
+			.clear()
+			.on("select", id => {
+				service
+					.clear()
+					.setDeviceId(id)
+					.toggle(true);
+				dataTable.removeAll();
+				sensors.removeAll();
+			});
+		service
+			.off()
+			.clear()
+			.toggle(false)
+			.on("select", id => {
+				dataTable.removeAll();
+				sensors
+					.removeAll()
+					.setServiceId(id)
+					.load();
+			});
+		sensors
+			.off()
+			.clearReloaders()
+			.clear()
+			.toggle(false)
+			.on("select", sensor => {
+				dataTable.addRow(sensor);
+			});
 		
 		toggle.submit(false);
-		service.clear().toggle(false);
-		sensors.clear().toggle(false);
 		
-		dataTable.removeAll();
 		dataTable
 			.off()
+			.removeAll()
 			.once("sensor_add", toggle.submit, true)
 			.on("sensor_remove_all", () => {
 				toggle.submit(false);
@@ -164,7 +172,7 @@ define([
 		
 		toggle.submit(false);
 		dataTable.off().removeAll();
-		device.setValue(o.device);
+		device.clear().setValue(o.device);
 		service
 			.toggle(true)
 			.setValue(o.service);
@@ -245,6 +253,7 @@ define([
 	}
 	function open() {
 		toggle.modal(true);
+		return inst;
 	}
 	function close() {
 		toggle.modal(false);
@@ -254,9 +263,9 @@ define([
 	}
 	
 	inst.open = open;
-	inst.start = o => {
+	inst.set = o => {
 		o ? setForEdit(o) : setForAdd();
-		open();
+		return inst;
 	};
 	inst.init = () => {
 		els = u.getEls(ROOT);
@@ -267,7 +276,7 @@ define([
 		dataTable.init(els.table);
 		
 		els.prev.on("click", () => {
-			debugger
+			
 			inst.emit("prev");
 		});
 		els.submit.on("click", e => {
@@ -278,9 +287,8 @@ define([
 			inst.emit("submit", get(), success => {
 				if (success) {
 					close();
-				} else {
-					toggleAll(true);
 				}
+				toggleAll(true);
 			});
 		});
 		

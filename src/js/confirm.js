@@ -1,4 +1,4 @@
-define(["uk"], (uk) => {
+define(["core/uk"], (uk) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='confirm']";
 	let els, confirmId;

@@ -1,6 +1,6 @@
 define([
-	"config",
-	"token"
+	"core/config",
+	"core/token"
 ], (conf, token) => {
 	const manager = u.extend( newPubSub() );
 	const temp = Handlebars.templates;
@@ -65,8 +65,8 @@ define([
 				color: "#"+ sensor.color,
 				data: [],
 				tooltip: {
-					// valueDecimals: 2
-					valueSuffix: " " + sensor.unit
+					valueDecimals: 2,
+					valueSuffix: " " + sensor.units.filter(o => o.selected)[0].name
 				}
 			});
 		});

@@ -1,4 +1,4 @@
-define(["uk", "config", "token", "./defaults", "./share"], (uk, conf, token, d, share) => {
+define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, conf, token, d, share) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='wiz3']";
 	const temp = Handlebars.templates;
@@ -13,6 +13,9 @@ define(["uk", "config", "token", "./defaults", "./share"], (uk, conf, token, d, 
 		},
 		toDisable(b) {
 			els.toDisable.attr({disabled: !b});
+		},
+		modal(b) {
+			uk[b ? "openModal" : "closeModal"](ROOT);
 		}
 	};
 	
@@ -155,10 +158,6 @@ define(["uk", "config", "token", "./defaults", "./share"], (uk, conf, token, d, 
 			.val(groupId)
 			.change();
 	}
-	function start(o) {
-		o ? setForEdit(o) : setForAdd();
-		uk.openModal(ROOT);
-	}
 	function get() {
 		let rangeTypeVal = els.rangeType.val();
 		let rangeCountVal = els.rangeCount.val();
@@ -174,9 +173,16 @@ define(["uk", "config", "token", "./defaults", "./share"], (uk, conf, token, d, 
 			statKpis: conf.STAT_KPIS
 		};
 	}
-	function init
+	function close() {
+		toggle.modal(false);
+	}
 	
-	inst.start = start;
+	inst.open = () => {
+		toggle.modal(true);
+	};
+	inst.set = (o) => {
+		o ? setForEdit(o) : setForAdd();
+	};
 	inst.fetchGroups = fetchGroups;
 	inst.init = () => {
 		els = u.getEls(ROOT);
@@ -190,7 +196,7 @@ define(["uk", "config", "token", "./defaults", "./share"], (uk, conf, token, d, 
 			toDis.attr({disabled: true});
 			inst.emit("submit", get(), success => {
 				toDis.attr({disabled: false});
-				if (success) uk.closeModal(ROOT);
+				if (success) close();
 			});
 		});
 	};

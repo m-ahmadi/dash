@@ -1,4 +1,4 @@
-define(["config", "uk"], (conf, uk) => {
+define(["core/config", "core/uk"], (conf, uk) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='login']";
 	const MIN_USER_CHARS = 4;

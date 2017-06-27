@@ -1,9 +1,9 @@
 define([
 	"templates",
-	"config",
-	"token",
+	"core/config",
+	"core/token",
 	"login",
-	"uk",
+	"core/uk",
 	"header",
 	"./toolbar",
 	"./wizard/wizard",
@@ -244,7 +244,7 @@ define([
 		});
 		
 		toolbar
-			.on("add", wizard.start, els.widgets.children().length)
+			.on( "add", () => wizard.start( els.widgets.children().length ) )
 			.on("save_all", confirm.open, "save_all")
 			.on("delete_all", confirm.open, "delete_all")
 			.on("min_all", doAll, "min")

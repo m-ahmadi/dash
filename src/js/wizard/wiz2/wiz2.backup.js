@@ -1,7 +1,7 @@
 define([
-	"config",
-	"token",
-	"uk",
+	"core/config",
+	"core/token",
+	"core/uk",
 	"./share",
 	"./defaults",
 	"./colorpick"

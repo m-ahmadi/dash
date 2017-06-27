@@ -111,6 +111,7 @@ define(["./colorpick"], (colorpick) => {
 	
 	inst.removeAll = () => {
 		doAll("remove");
+		return inst;
 	};
 	inst.toggleAll = b => doAll("toggle", b);
 	inst.addRow = addRow;

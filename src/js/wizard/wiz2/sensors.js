@@ -1,4 +1,4 @@
-define(["config", "token"], (conf, token) => {
+define(["core/config", "core/token"], (conf, token) => {
 	const inst = u.extend( newPubSub() );
 	const temp = Handlebars.templates;
 	const jsonStr = JSON.stringify;
