@@ -130,6 +130,18 @@ define([
 		});
 		return res;
 	}
+	function updateTable(d, tEls) {
+		Object.keys(d).forEach(k => {
+			let el = tEls[k];
+			let n = d[k];
+			el.text(n);
+			switch (true) {
+				case (n < 10):          el.addClass("green-text");  break;
+				case (n > 10 && n< 30): el.addClass("orange-text"); break;
+				case (n > 30):          el.addClass("red-text");    break;
+			}
+		});
+	}
 	function createPanel(parent, type, rangeTitle, id, expand, min) {
 		const ctx = {
 			title: makeTitle(type),
@@ -153,6 +165,11 @@ define([
 		let startDate, endDate; // for customized ranges
 		let xhr;
 		let updateNavigator = true;
+		let toggle = {
+			refresh(b) {
+				els.refresh.attr({disabled: !b});
+			}
+		};
 		
 		if (!container || !o) {
 			throw new TypeError("You must provide a container and a widget object.");
@@ -274,7 +291,7 @@ define([
 		function spinnerOff() {
 			els.spinnerParent.html("&nbsp;");
 		}
-		function loadGraphSensorData() {
+		function loadGraphSensorData(cb) {
 			if (xhr) {
 				xhr.abort();
 				spinnerOff();
@@ -311,7 +328,7 @@ define([
 				// root.children().first().prepend( temp.alert({message: "Couldn't fetch widget data."}) );
 				if (x.status === 403) manager.emit("login_error");
 			})
-			.always(() => els.refresh.attr({disabled: false}));
+			.always( () => toggle.refresh(true) );
 		}
 		function loadStat(statOnly) {
 			spinnerOn();
@@ -347,13 +364,17 @@ define([
 				if (chart) chart.hideLoading();
 				if (x.status === 403) manager.emit("login_error");
 			})
+			.always( () => toggle.refresh(true) );
+		}
+		function loadMapData() {
+			
 		}
 		function load() {
 			switch (w.type) {
 				case 0: loadGraphSensorData(); break;
 				case 1: loadStat(); break;
 				case 2: loadStat(true); break;
-				case 3: ; break;
+				case 3: loadMapData(); break;
 			}
 		}
 		function init() {
@@ -399,20 +420,9 @@ define([
 				let body = els.body;
 				body.html( temp.statTable({title: w.group.name}) );
 				let tEls = u.getEls( body );
-				extractor.on(""+w.id, d => {
-					Object.keys(d).forEach(k => {
-						let el = tEls[k];
-						let n = d[k];
-						el.text(n);
-						switch (true) {
-							case (n < 10):         el.addClass("green-text"); break;
-							case (n > 10 && n< 30): el.addClass("orange-text"); break;
-							case (n > 30):         el.addClass("red-text"); break;
-						}
-					});
-				});
+				extractor.on(""+w.id, updateTable, tEls);
 			} else if (type === 3) {
-			
+				let body = els.body;
 			}
 			
 			els.menus.on("click", "[data-menu]", e => {
@@ -428,6 +438,7 @@ define([
 				expand();
 			});
 			els.shrink.on("click", () => {
+				
 				shrink();
 			});
 			els.remove.on("click", () => {
@@ -435,12 +446,12 @@ define([
 				manager.emit("delete", w.id);
 			});
 			els.refresh.on("click", e => {
-				$(e.target).attr({disabled: true});
+				if (e.target.disabled) return;
+				toggle.refresh(false);
 				load();
 			});
 			els.edit.on("click", () => {
 				els.menuBtn.mouseout();
-				
 				manager.emit("edit", w)
 			});
 		}
@@ -465,8 +476,14 @@ define([
 			els.rangeTitle.text( w.rangeTitle );
 			switch (w.type) {
 				case 0: chart = makeLineChart(els.body, w.device.name, w.sensors); break;
-				case 1: chart = makeBarChart(els.body); break;
-				case 2: ; break;
+				case 1: chart = makeBarChart(els.body, w.group.name, w.statKpis); break;
+				case 2:
+					els.body.html( temp.statTable({title: w.group.name}) );
+					let tEls = u.getEls( els.body );
+					extractor
+						.off(""+w.id, updateTable)
+						.on(""+w.id, updateTable, tEls);
+					break;
 				case 3: ; break;
 			}
 			updateNavigator = true;

@@ -44,6 +44,7 @@ define([
 	} */
 	
 	const ori = ["", "st","nd","rd","th","th","th","th","th","th"];
+	const WAIT_TIME = 400;
 	let counter = 1;
 	let timer,
 		timeout = 0;
@@ -51,7 +52,7 @@ define([
 	function refreshAll() {
 		Object.keys(widgets).forEach(k => {
 			let widget = widgets[k];
-			setTimeout( widget.refresh, (timeout+=400) );
+			setTimeout( widget.refresh, (timeout+=WAIT_TIME) );
 		});
 	}
 	function autoRefresh(interval) {
@@ -59,6 +60,9 @@ define([
 			refreshAll();
 			autoRefresh(interval);
 		}, interval);
+	}
+	function cancelTimeout() {
+		clearTimeout(timer);
 	}
 	function isStatWrong(n) {
 		return n && (n === 403 || n === 404) ? true : false;
@@ -252,7 +256,7 @@ define([
 			.on("shrink_all", doAll, "shrink")
 			.on("expand_all", doAll, "expand")
 			.on("start_auto_refresh", autoRefresh)
-			.on("end_auto_refresh", clearTimeout, timer);
+			.on("end_auto_refresh", cancelTimeout);
 	}
 
 	

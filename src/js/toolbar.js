@@ -61,6 +61,7 @@ define([], () => {
 				autorefOn = false;
 				emitEnd();
 				toDis.attr({disabled: true});
+				disableBtns();
 			}
 		});
 		els.gapCount.on("input keyup change", e => {
@@ -104,10 +105,12 @@ define([], () => {
 		
 		
 		
-		els.cancel.on("click", () => {
+		els.cancel.on("click", e => {
+			if (e.target.disabled) return;
 			disableBtns();
 		});
-		els.apply.on("click", () => {
+		els.apply.on("click", e => {
+			if (e.target.disabled) return; 
 			gapCount = parseGapCount();
 			gapType = els.gapType.val();
 			emitEnd();

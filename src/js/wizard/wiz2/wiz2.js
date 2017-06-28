@@ -30,6 +30,11 @@ define([
 	let toggle = {
 		submit(b) {
 			els.submit.attr({disabled: !b});
+			return this;
+		},
+		prev(b) {
+			els.prev.attr({disabled: !b});
+			return this;
 		},
 		toDisable(b) {
 			els.toDisable.attr({disabled: !b});
@@ -114,6 +119,8 @@ define([
 		return data;
 	}
 	function setForAdd() {
+		toggle.submit(false).prev(true);
+		
 		device
 			.off()
 			.clear()
@@ -145,8 +152,6 @@ define([
 				dataTable.addRow(sensor);
 			});
 		
-		toggle.submit(false);
-		
 		dataTable
 			.off()
 			.removeAll()
@@ -169,8 +174,8 @@ define([
 	}
 	function setForEdit(o) {
 		let sens = o.sensors;
+		toggle.submit(false).prev(false);
 		
-		toggle.submit(false);
 		dataTable.off().removeAll();
 		device.clear().setValue(o.device);
 		service
@@ -220,7 +225,7 @@ define([
 			.on("sensor_remove", sensor => {
 				sensors.add(sensor);
 				let rows = dataTable.getData();
-				toggle.submit( !sameKeys(rows, sens) );
+				if (rows) toggle.submit( !sameKeys(rows, sens) );
 			})
 			.on("sensor_add", sensorId => {
 				let rows = dataTable.getData();
@@ -250,6 +255,7 @@ define([
 			.on("change", curr, c.edit.countChange)
 			.val(count)
 			.change();
+		
 	}
 	function open() {
 		toggle.modal(true);
@@ -275,8 +281,8 @@ define([
 		sensors.init( {sensors: els.sensors, btnParent: els.btnParent, stat: els.stat} );
 		dataTable.init(els.table);
 		
-		els.prev.on("click", () => {
-			
+		els.prev.on("click", e => {
+			if (e.target.disabled) return;
 			inst.emit("prev");
 		});
 		els.submit.on("click", e => {

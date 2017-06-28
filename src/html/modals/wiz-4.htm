@@ -10,16 +10,44 @@
 			<h4 class="uk-text-muted">Provide details</h4>
 		</div>
 		<div class="uk-modal-body">
-			<form class="uk-form-stacked">
-					<label class="uk-form-label"><input class="uk-radio" type="radio" name="type" value="0" data-els="radios" checked /> DTA</label>
-					<label class="uk-form-label"><input class="uk-radio" type="radio" name="type" value="1" data-els="radios" /> Topology</label>
+			
+			<div data-el="alerts">
+				<div class="uk-alert-primary" uk-alert>
+					<p><i class="fa fa-refresh fa-fw fa-spin"></i> Fetching Group List</p>
+				</div>
+			</div>
+			
+			<form class="uk-form-horizontal">
+			
+				<div class="uk-margin-small uk-margin-medium-bottom">
+					<label class="uk-form-label uk-text-center">Groups:</label>
+					<div class="uk-form-controls">
+						<div data-el="groups"></div>
+					</div>
+				</div>
+				
+				<div class="uk-margin-small">
+					<label class="uk-form-label uk-text-center">Range:</label>
+					<div class="uk-form-controls">
+						<label>Last</label>
+						<input type="number" min="1" value="15" class="uk-input uk-width-1-4" data-el="rangeCount" data-els="toDisable"/>
+						<select class="uk-select uk-width-1-4" data-el="rangeType" data-els="toDisable">
+							<option value="m">Minute</option>
+							<option value="h">Hour</option>
+							<option value="d">Day</option>
+							<option value="w">Week</option>
+						</select>
+						<label>(s)</label>
+					</div>
+				</div>
 			</form>
+			
 		</div>
 		
 		<div class="uk-modal-footer uk-text-right">
-			<button class="uk-button uk-button-danger uk-modal-close uk-text-bold" type="button">Cancel</button>
-			<button class="uk-button uk-button-secondary uk-text-bold" type="button" data-el="prev">Prev</button>
-			<button class="uk-button uk-button-primary uk-text-bold" type="button" data-el="submit">Submit</button>
+			<button class="uk-button uk-button-danger uk-modal-close uk-text-bold" type="button" data-els="toDisable">Cancel</button>
+			<button class="uk-button uk-button-secondary uk-text-bold" type="button" data-el="prev" data-els="toDisable">Prev</button>
+			<button class="uk-button uk-button-primary uk-text-bold" type="button" data-el="submit" data-els="toDisable">Submit</button>
 		</div>
 	</div>
 </div>

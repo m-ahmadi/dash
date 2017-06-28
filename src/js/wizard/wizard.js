@@ -31,15 +31,15 @@ define([
 	function newData() {
 		let data = {
 			id:         id || uid(),
-			type:       undefined,
-			rangeType:  undefined,
-			rangeCount: undefined,
-			rangeTitle: undefined,
-			device:     undefined,
-			service:    undefined,
-			sensors:    undefined,
-			group:      undefined,
-			statKpis:   undefined,
+			type:       null,
+			rangeType:  null,
+			rangeCount: null,
+			rangeTitle: null,
+			device:     null,
+			service:    null,
+			sensors:    null,
+			group:      null,
+			statKpis:   null,
 			order:      order,
 			expand:     0,
 			min:        false
@@ -71,11 +71,12 @@ define([
 		w = JSON.parse( JSON.stringify(o) ); // deep copy
 		id = w.id;
 		order = w.order;
+		wiz1.set(w);
 		switch (w.type) {
 			case 0: wiz2.set(w).open(); break;
-			case 0: wiz3.set(w).open(); break;
-			case 0: wiz3.set(w).open(); break;
-			case 0: wiz4.set(w).open(); break;
+			case 1: wiz3.set(w).open(); break;
+			case 2: wiz3.set(w).open(); break;
+			case 3: wiz4.set(w).open(); break;
 		}
 	}
 	function emitLoginErr(cb) {
@@ -122,7 +123,13 @@ define([
 			.on("login_error", emitLoginErr, wiz2.open);
 		wiz3
 			.on("submit", emitSubmit)
-			.on("login_error", emitLoginErr, wiz3.open);
+			.on("login_error", (first) => {
+				if (!first) wiz3.open();
+			})
+			.on("group_fetch_succ", (groupsArr) => {
+				wiz4.setGroups(groupsArr).renderForm();
+			})
+			.on("group_fetch_fail", wiz4.fetchGroups)
 		
 		wiz4.on("submit", emitSubmit);
 	}

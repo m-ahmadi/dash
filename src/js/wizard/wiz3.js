@@ -7,6 +7,7 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 	let type;
 	let firstGroupFetch = true;
 	let c = { add: {}, edit: {} }; // event callbacks
+	
 	let toggle = {
 		submit(b) {
 			els.submit.attr({disabled: !b});
@@ -45,11 +46,13 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 			let arr = [];
 			d.groups[0].Groups.forEach( i => arr.push({name: i.Name, id: i.ID}) );
 			groupSucc(arr);
+			inst.emit("group_fetch_succ", arr);
 		})
 		.fail(x => {
 			if (x.status === 403) {
-				inst.emit( "login_error", () => open(WIZ_3) )
+				inst.emit("login_error", !firstGroupFetch);
 			} else {
+				inst.emit("group_fetch_fail");
 				groupFail();
 			}
 		});
@@ -94,8 +97,8 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 		let v = e.target.value;
 		let rc = els.rangeCount;
 		let count = parseInt(rc.val(), 10);
-		rc.attr("max", d.RANGE_COUNT_MAX[v]);
-		els.submit.attr({disabled: v === curr.type && count === curr.count});
+		rc.attr("max", d.RANGE_COUNT_MAX[v]).change();
+		toggle.submit( v !== curr.type || count !== curr.count );
 	};
 	c.edit.countChange = e => {
 		let curr = e.data;
@@ -111,7 +114,7 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 			} else if (num < min) {
 				el.val(min);
 			}
-			els.submit.attr({disabled: num === curr.count && type === curr.type}); 
+			toggle.submit(num !== curr.count || type !== curr.type);
 		} else {
 			el.val( d.RANGE_COUNT_DEF[type] );
 		}
@@ -179,9 +182,11 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 	
 	inst.open = () => {
 		toggle.modal(true);
+		return inst;
 	};
 	inst.set = (o) => {
 		o ? setForEdit(o) : setForAdd();
+		return inst;
 	};
 	inst.fetchGroups = fetchGroups;
 	inst.init = () => {
