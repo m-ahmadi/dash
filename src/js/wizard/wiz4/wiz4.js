@@ -1,4 +1,11 @@
-define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, conf, token, d, share) => {
+define([
+	"core/uk",
+	"core/config",
+	"core/token",
+	"../defaults",
+	"../share",
+	"./device"
+], (uk, conf, token, d, share) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='wiz4']";
 	const temp = Handlebars.templates;
@@ -171,7 +178,7 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 	};
 	inst.init = () => {
 		els = u.getEls(ROOT);
-		
+		device.init(els.);
 		els.prev.on( "click", () => inst.emit("prev") );
 		
 		els.submit.on("click", () => {

@@ -592,7 +592,7 @@ define([], () => {
 		}
 	};
 
-	
+	inst.getDat
 	inst.init = (container) => {
 		map.target = container;
 	};
