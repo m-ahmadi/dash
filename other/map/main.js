@@ -7,13 +7,12 @@ function buildFormdata(o) {
 }
 
 function processData(data, clear, self) {
-	if (!data)
-		return;
+	if (!data) return;
 	// var self = this;
 	// Add Devices
 	// TODO: can make function for this part
-	if (clear && self.deviceSource.getFeatures().length)
-		self.deviceSource.clear();
+	if (clear && self.deviceSource.getFeatures().length) self.deviceSource.clear();
+		
 	self.center = undefined;
 	self.coordinates = undefined;
 	self.lastDevicePosition = [0, 0];

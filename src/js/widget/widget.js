@@ -151,7 +151,8 @@ define([
 			xOne: expand === 1,
 			xTwo: expand === 2,
 			xThree: expand === 3,
-			min: min
+			min: min,
+			map: type === 3
 		};
 		const html = temp.panel(ctx);
 		parent.append(html);
@@ -259,6 +260,7 @@ define([
 			}
 			root.addClass(toAdd);
 			if (chart) chart.setSize();
+			if (map) map.container.updateSize();
 		}
 		function shrink() {
 			let curr = parseInt(root.attr("data-expand"), 10);
@@ -276,6 +278,7 @@ define([
 			}
 			root.addClass(toAdd);
 			if (chart) chart.setSize();
+			if (map) map.container.updateSize();
 		}
 		function mark(stat, keep) {
 			let par = els.spinnerParent;
@@ -369,7 +372,7 @@ define([
 			.always( () => toggle.refresh(true) );
 		}
 		function loadMapData() {
-			
+			map.getData();
 		}
 		function load() {
 			switch (w.type) {
@@ -424,7 +427,28 @@ define([
 				let tEls = u.getEls( body );
 				extractor.on(""+w.id, updateTable, tEls);
 			} else if (type === 3) {
-				//mapMaker els.container
+				els.body.prepend( temp.mapPopup() );
+				map = mapMaker.newMap();
+				map.target = els.container[0];
+				map.events
+					.on("login_error", () => {
+						manager.emit("login_error");
+					})
+					.on("data_start", spinnerOn)
+					.on("data_succ", () => {
+						spinnerOff();
+						mark(true);
+					})
+					.on("data_fail", () => {
+						spinnerOff();
+						mark(false);
+					})
+					.on("data_always"), toggle.refresh, true)
+					.on("detail_fail", () => {
+					
+					});
+				// map.toSend = w.saa;
+				map.init();
 			}
 			
 			els.menus.on("click", "[data-menu]", e => {

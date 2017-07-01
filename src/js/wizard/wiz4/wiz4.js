@@ -206,7 +206,7 @@ define([
 			rangeTitle: share.getRangeTitle(rangeTypeVal, rangeCountVal),
 			map: {
 				groups: null,
-				devices: dataTable.getData(),
+				devices: dataTable.getData() || null,
 				filter: els.filter.prop("checked")
 			}
 		};
@@ -222,6 +222,9 @@ define([
 		});
 		res.map.groups = groups;
 		return res;
+	}
+	function close() {
+		uk.closeModal(ROOT);
 	}
 	
 	inst.setGroups = setGroups;

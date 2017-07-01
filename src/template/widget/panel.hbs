@@ -20,12 +20,7 @@
 	{{/if}}
 	>
 	
-	<div class="
-			panel
-			uk-card
-			uk-card-default"
-		data-el="panel"
-		>
+	<div class="panel uk-card uk-card-default" data-el="panel">
 		<div class="uk-card-header">
 			<div class="uk-float-left">
 				<span class="uk-card-title uk-text-muted uk-text-small uk-text-bold">
@@ -64,7 +59,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="uk-card-body" data-el="body" {{#if min}}style="display:none;"{{/if}}>
+		<div class="uk-card-body {{#if map}}map-panel{{/if}}" data-el="body" {{#if min}}style="display:none;"{{/if}}>
 			<div data-el="container"></div>
 		</div>
 	</div>

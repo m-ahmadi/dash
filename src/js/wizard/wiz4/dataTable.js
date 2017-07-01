@@ -54,10 +54,6 @@ define([], () => {
 				id: id,
 				name: row.name
 			};
-			/* data.push({
-				id: id,
-				name: row.name
-			}); */
 		});
 		return data;
 	}
