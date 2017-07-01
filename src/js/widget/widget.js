@@ -1,9 +1,10 @@
 define([
 	"core/config",
-	"core/token"
-], (conf, token) => {
+	"core/token",
+	"./mapMaker"
+], (conf, token, mapMaker) => {
 	const manager = u.extend( newPubSub() );
-	const temp = Handlebars.templates;
+	const temp = u.getTemps("widget");
 	const extractor = newPubSub();
 	
 	const KLASS_X1 = [
@@ -163,6 +164,7 @@ define([
 		let	root, els;
 		let	chart;
 		let startDate, endDate; // for customized ranges
+		let map;
 		let xhr;
 		let updateNavigator = true;
 		let toggle = {
@@ -422,7 +424,7 @@ define([
 				let tEls = u.getEls( body );
 				extractor.on(""+w.id, updateTable, tEls);
 			} else if (type === 3) {
-				let body = els.body;
+				//mapMaker els.container
 			}
 			
 			els.menus.on("click", "[data-menu]", e => {

@@ -1,7 +1,6 @@
 define(["core/uk", "./defaults"], (uk, d) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='wiz1']";
-	const temp = Handlebars.templates;
 	let els;
 	
 	function checked() {

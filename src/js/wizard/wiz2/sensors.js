@@ -1,6 +1,6 @@
 define(["core/config", "core/token"], (conf, token) => {
 	const inst = u.extend( newPubSub() );
-	const temp = Handlebars.templates;
+	const temp = u.getTemps("wizard/wiz2");
 	const jsonStr = JSON.stringify;
 	const jsonParse = JSON.parse;
 	

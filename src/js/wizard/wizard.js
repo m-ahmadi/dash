@@ -7,7 +7,7 @@ define([
 	"./wiz1",
 	"./wiz2/wiz2",
 	"./wiz3",
-	"./wiz4"
+	"./wiz4/wiz4"
 ], (
 	conf,
 	token,
@@ -20,7 +20,6 @@ define([
 	wiz4
 ) => {
 	const inst = u.extend( newPubSub() );
-	const temp = Handlebars.templates;
 	
 	let id, order, addMode, shallow;
 	let w;

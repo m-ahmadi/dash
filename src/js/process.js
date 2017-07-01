@@ -1,7 +1,7 @@
 define(["core/uk"], (uk) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='process']";
-	const temp = Handlebars.templates;
+	const temp = u.getTemps("process");
 	let els;
 	let doingMsg = "";
 	let timer;
@@ -30,7 +30,7 @@ define(["core/uk"], (uk) => {
 		ctx.message = msg;
 		ctx.type = str;
 		ctx[str] = true;
-		els.logs.append( temp.procAlert(ctx) );
+		els.logs.append( temp.alert(ctx) );
 	}
 	function inc(steps) {
 		let n = parseFloat(els.bar.val(), 10);

@@ -6,7 +6,7 @@ define(["core/config", "core/token"], (conf, token) => {
 	function initSelect2() {
 		el.select2({
 			width: "100%",
-			placeholder: "Select a node",
+			placeholder: "Nodes",
 			ajax: {
 				method: "GET",
 				url: () => conf.BASE + "device/search" + token(),
@@ -51,35 +51,19 @@ define(["core/config", "core/token"], (conf, token) => {
 			minimumInputLength: 0
 		})
 		.on("select2:select", e => {
-			inst.emit("select", e.params.data.id);
+			el.val(null).change();
+			let selected = e.params.data;
+			let device = {
+				id: selected.id,
+				name: selected.text
+			};
+			inst.emit("select", device);
 		});
 	}
 	
-	inst.getData = () => {
-		return {
-			id: parseInt(el.val(), 10),
-			name: el.text()
-		};
-	};
-	inst.setValue = device => {
-		el
-			.append( $("<option></option>").val(device.id).text(device.name) )
-			.change();
-		return inst;
-	};
-	inst.toggle = b => {
-		el.attr({disabled: !b});
-		return inst;
-	};
-	inst.clear = () => {
-		el.empty().val(null).change();
-		return inst;
-	};
-	inst.init = el_ => {
-		el = el_;
-		
+	inst.init = root => {
+		el = root;
 		initSelect2();
-		return inst;
 	};
 	
 	return inst;

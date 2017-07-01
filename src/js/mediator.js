@@ -25,7 +25,6 @@ define([
 ) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='content']";
-	const temp = Handlebars.templates;
 	const MSG = [
 		"Processing your request...",
 		"Fetching your widgets..."

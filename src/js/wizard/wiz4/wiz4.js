@@ -4,18 +4,29 @@ define([
 	"core/token",
 	"../defaults",
 	"../share",
-	"./device"
-], (uk, conf, token, d, share) => {
+	"./device",
+	"./dataTable"
+], (uk, conf, token, d, share, device, dataTable) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='wiz4']";
-	const temp = Handlebars.templates;
+	const temp = u.getTemps("wizard/wiz4");
+	
 	let els;
 	let c = { add: {}, edit: {} };
 	let groups;
+	let firstGroupFetch = true;
+	let toggle = {
+		submit(b) {
+			els.submit.attr({disabled: !b});
+		}
+	};
 	
 	function fetchGroups() {
+		if (!firstGroupFetch) {
+			els.groups.html( temp.loading() );
+		}
 		$.ajax({
-			url: conf.BASE + "device/grouptree" + token(),
+			url: conf.BASE + "device/grouptree2" + token(),
 			method: "GET",
 			data: "parent_only=true"
 		})
@@ -24,32 +35,34 @@ define([
 			d.groups[0].Groups.forEach( i => arr.push({name: i.Name, id: i.ID}) );
 			setGroups(arr);
 			renderForm();
+			
 		})
 		.fail(x => {
 			if (x.status === 403) inst.emit("login_error");
-			setTimeout(fetchGroups, 400);
+			firstGroupFetch = false;
+			clearAlerts();
+			els.groups.html( temp.danger() );
 		});
 	}
+	function clearAlerts() {
+		els.groups.empty();
+	}
 	function setGroups(arr) {
+		arr.unshift({id: "all", name: "All"});
 		groups = arr;
 		return inst;
 	}
 	function renderForm() {
-		els.alerts.empty();
-		els.submit.attr({disabled: false});
-		els.groups.html( temp.groupChk({groups: groups}) );
-		u.getEls(els.groups, els);
+		if (!groups) throw new Error("renderForm(): groups must be set before calling."); 
+		clearAlerts();
+		els.groups.html( temp.formRow({groups: groups}) );
+		els.checkboxes = els.groups.find(":checkbox");
 		return inst;
 	}
 	
-	c.groupsChange = e => {
-		let curr = e.data;
-		let v = e.target.value;
-		if (curr) {
-			els.submit.attr({disabled: !v || parseInt(v, 10) === curr.groupId});
-		} else {
-			els.submit.attr({disabled: v ? false : true});
-		}
+	c.retry = () => {
+		clearAlerts();
+		fetchGroups();
 	};
 	c.add.typeChange = e => {
 		let val = e.target.value;
@@ -104,6 +117,53 @@ define([
 	};
 	
 	function setForAdd() {
+		let uncheckedAll = true, emptyTable = true;
+		let alter = () => {
+			toggle.submit(!uncheckedAll || !emptyTable);
+		};
+		toggle.submit(false);
+		els.checkboxes.prop({checked: false});
+		els.filter.prop({checked: false});
+		
+		els.groups
+			.off()
+			.on("click", "[data-retry]", c.retry)
+			.on("click", "input:checkbox", e => {
+				let el = e.target;
+				let v = el.value;
+				let checks = els.checkboxes;
+				if (v === "all") {
+					checks.prop({checked: el.checked});
+				} else {
+					checks.filter("[value='all']").prop({checked: false});
+				}
+				
+				uncheckedAll = checks.filter(":checked").length ? false : true;
+				alter();
+			});
+		
+		device
+			.off()
+			.on("select", device => {
+				dataTable.addRow(device);
+			});
+		
+		dataTable
+			.off()
+			.removeAll()
+			.once("add", () => {
+				emptyTable = false;
+				alter();
+			})
+			.on("remove_all", () => {
+				emptyTable = true;
+				alter();
+				dataTable.once("add", () => {
+					emptyTable = false;
+					alter();
+				});
+			});
+		
 		els.rangeType
 			.off("change")
 			.on("change", c.add.typeChange)
@@ -112,13 +172,11 @@ define([
 		els.rangeCount
 			.off("change")
 			.on("change", c.add.countChange);
-		els.groups
-			.off("change")
-			.on("change", c.groupsChange)
-			.val("")
-			.change();
 	}
 	function setForEdit(o) {
+		// dataTable.on();
+		
+		
 		let type = o.rangeType;
 		let count = o.rangeCount;
 		let groupId = o.group.id;
@@ -138,12 +196,6 @@ define([
 			.on("change", curr, c.edit.countChange)
 			.val(count)
 			.change();
-			
-		els.groups
-			.off("change")
-			.on("change", {groupId: groupId}, c.groupsChange)
-			.val(groupId)
-			.change();
 	}
 	function get() {
 		let rangeTypeVal = els.rangeType.val();
@@ -152,23 +204,30 @@ define([
 			rangeType: rangeTypeVal,
 			rangeCount: parseInt(rangeCountVal, 10),
 			rangeTitle: share.getRangeTitle(rangeTypeVal, rangeCountVal),
-			map: undefined
+			map: {
+				groups: null,
+				devices: dataTable.getData(),
+				filter: els.filter.prop("checked")
+			}
 		};
-		let groups = [];
+		let groups = {};
 		els.groups.find(":checkbox").each((x, l) => {
-			groups.push({
-				id: parseInt(l.value, 10),
+			let v = l.value;
+			let id = u.isNum(v) ? parseInt(v, 10) : v;
+			groups[id] = {
+				id: id,
 				name: l.name,
 				checked: l.checked ? true : false
-			});
+			};
 		});
-		res.map = groups;
+		res.map.groups = groups;
 		return res;
 	}
 	
 	inst.setGroups = setGroups;
 	inst.renderForm = renderForm;
 	inst.fetchGroups = fetchGroups;
+	
 	inst.set = (o) => {
 		o ? setForEdit(o) : setForAdd();
 		return inst;
@@ -178,10 +237,13 @@ define([
 	};
 	inst.init = () => {
 		els = u.getEls(ROOT);
-		device.init(els.);
+		device.init(els.device);
+		dataTable.init(els.table);
+		
 		els.prev.on( "click", () => inst.emit("prev") );
 		
-		els.submit.on("click", () => {
+		els.submit.on("click", e => {
+			if (e.target.disabled) return;
 			inst.emit("submit", get(), success => {
 				if (success) close();
 			});

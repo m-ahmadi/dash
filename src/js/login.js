@@ -1,10 +1,13 @@
 define(["core/config", "core/uk"], (conf, uk) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='login']";
+	const temp = u.getTemps("login/");
+	
 	const MIN_USER_CHARS = 4;
 	const MIN_PASS_CHARS = 4;
 	const ALERT_TIMEOUT = 4000;
-	const temp = Handlebars.templates;
+	
+	
 	const data = {
 		username: undefined,
 		password: undefined
@@ -14,7 +17,7 @@ define(["core/config", "core/uk"], (conf, uk) => {
 	
 	function alert(ctx, keep) {
 		let alerts = els.alerts;
-		alerts.append( temp.loginAlert(ctx) );
+		alerts.append( temp.alert(ctx) );
 		if (!keep) {
 			let el = alerts.find("[uk-alert]:last-child [uk-close]");
 			setTimeout(() => el.click(), ALERT_TIMEOUT);
@@ -22,7 +25,7 @@ define(["core/config", "core/uk"], (conf, uk) => {
 	}
 	function request() {
 		els.toDisable.attr({disabled: true});
-		els.process.append( temp.loginAlert({type: "primary", process: true, message: "Processing your request...", noClose: true}) );
+		els.process.append( temp.alert({type: "primary", process: true, message: "Processing your request...", noClose: true}) );
 		$.ajax({
 			url: conf.BASE + "user/login",
 			method: "POST",

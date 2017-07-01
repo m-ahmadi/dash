@@ -10,28 +10,32 @@
 			<h4 class="uk-text-muted">Provide details</h4>
 		</div>
 		<div class="uk-modal-body">
-			
-			<div data-el="alerts">
-				<div class="uk-alert-primary" uk-alert>
-					<p><i class="fa fa-refresh fa-fw fa-spin"></i> Fetching Group List</p>
-				</div>
-			</div>
-			
+		
 			<form class="uk-form-horizontal">
 				<div class="uk-margin-small uk-margin-medium-bottom">
-					<label class="uk-form-label uk-text-center">Filter by group(s):</label>
-					<div class="uk-form-controls">
-						<div data-el="groups"></div>
+					<label class="uk-form-label uk-text-center">Filter by Group(s):</label>
+					<div class="uk-form-controls" data-el="groups">
+						<div class="uk-alert-primary" uk-alert>
+							<p><i class="fa fa-refresh fa-fw fa-spin"></i> Fetching Group List</p>
+						</div>
 					</div>
 				</div>
 				
 				<div class="uk-margin-small">
-					<label class="uk-form-label uk-text-center">Filter by node(s):</label>
+					<label class="uk-form-label uk-text-center">Filter by Node(s):</label>
 					<div class="uk-form-controls">
 						<select class="uk-select" data-el="device" data-els="toDisable"></select>
 					</div>
 				</div>
 				
+				<div class="uk-margin-small">
+					<table class="uk-table uk-table-divider uk-table-hover uk-table-striped" data-el="table"></table>
+				</div>
+				
+				<div class="uk-margin-small">
+					<label><input class="uk-checkbox" type="checkbox" data-el="filter"> Filter by SLA Violated</label>
+				</div>
+
 				<div class="uk-margin-small">
 					<label class="uk-form-label uk-text-center">Range:</label>
 					<div class="uk-form-controls">

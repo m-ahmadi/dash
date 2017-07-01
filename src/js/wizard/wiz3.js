@@ -1,7 +1,7 @@
 define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, conf, token, d, share) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='wiz3']";
-	const temp = Handlebars.templates;
+	const temp = u.getTemps("wizard/wiz3");
 	
 	let els;
 	let type;
@@ -21,14 +21,14 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 	};
 	
 	function groupSucc(arr) {
-		if (!els) { setTimeout(groupSucc, 1000); return; }
+		// if (!els) { setTimeout(groupSucc, 1000); return; }
 		els.stat.empty();
 		arr.forEach(i => {
 			els.groups.append( temp.groupOpt({name: i.name, value: i.id}) );
 		});
 	}
 	function groupFail() {
-		if (!els) { setTimeout(groupFail, 1000); return; }
+		// if (!els) { setTimeout(groupFail, 1000); return; }
 		els.btnParent.empty().append( temp.groupOptBtn() );
 		els.stat.empty().append( temp.groupOptDanger() );
 	}

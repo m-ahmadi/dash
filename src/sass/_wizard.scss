@@ -20,6 +20,11 @@
 	.uk-form-label {
 		margin-top: 4px;
 	}
+	.small-btn {
+		padding: 0;
+		line-height: 0;
+		border-radius: 50px;
+	}
 	.uk-alert {
 		margin-top: 0;
 		margin-bottom: 2px;
@@ -28,5 +33,11 @@
 	.uk-alert-close {
 		top: 8px;
 		right: 15px;
+	}
+	.uk-table td {
+		padding: 4px 4px;
+	}
+	.retry-btn {
+		color: firebrick;
 	}
 }

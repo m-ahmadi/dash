@@ -21,7 +21,6 @@ define([
 ) => {
 	const inst = u.extend( newPubSub() );
 	const ROOT = "[data-root='wiz2']";
-	const temp = Handlebars.templates;
 	const jsonParse = JSON.parse;
 	const jsonStr = JSON.stringify;
 	

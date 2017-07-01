@@ -1,6 +1,6 @@
 define(["./colorpick"], (colorpick) => {
 	const inst = u.extend( newPubSub() );
-	const temp = Handlebars.templates;
+	const temp = u.getTemps("wizard/wiz2");
 	
 	let parent;
 	let rows = {};
