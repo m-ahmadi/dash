@@ -6,123 +6,6 @@ function buildFormdata(o) {
 	return res;
 }
 
-function processData(data, clear, self) {
-	if (!data) return;
-	// var self = this;
-	// Add Devices
-	// TODO: can make function for this part
-	if (clear && self.deviceSource.getFeatures().length) self.deviceSource.clear();
-		
-	self.center = undefined;
-	self.coordinates = undefined;
-	self.lastDevicePosition = [0, 0];
-	if (data.device) {
-		data.device.forEach(function(node) {
-			var isSeleced = false;
-			// if ([_SELECTED_DEVICES_IDS_].indexOf(node.id.toString()) !== -1) {
-			/* if ($($scope.console.deviceSelectElement).val().split(",").indexOf(node.id.toString()) !== -1) {
-			
-				self.center = ol.proj.transform([node.longtitude % 180, node.latitude % 90], 'EPSG:4326', 'EPSG:3857');
-				isSeleced = true;
-			} */
-			self.lastDevicePosition = ol.proj.transform([node.longtitude % 180, node.latitude % 90], 'EPSG:4326', 'EPSG:3857');
-			self.deviceSource.addFeature(new ol.Feature({
-				geometry: new ol.geom.Point(self.lastDevicePosition),
-				color: node.color,
-				name: node.name,
-				id: node.id,
-				location: node.location,
-				lat: node.latitude,
-				long: node.longtitude,
-				selected: isSeleced
-			}));
-		});
-	}
-	// Add Circuits
-	// TODO: can make function for this part
-	if (clear)
-		$.each(self.sources, function(key, source) {
-			if (source.getFeatures().length)
-				source.clear();
-		});
-	var sourceXY, destinationXY;
-	if (data.circuits) {
-		self.violatedServices.list = [];
-		data.circuits.forEach(function(link) {
-			data.device.forEach(function(node) {
-				if (node.id === link.source) {
-					sourceXY = ol.proj.transform([node.longtitude % 180, node.latitude % 90], 'EPSG:4326', 'EPSG:3857');
-					link.source_name = node.name;
-					filterViolatedServices();
-				}
-				if (node.id === link.destination) {
-					destinationXY = ol.proj.transform([node.longtitude % 180, node.latitude % 90], 'EPSG:4326', 'EPSG:3857');
-					link.destination_name = node.name;
-					// filterViolatedServices();
-				}
-
-				function filterViolatedServices() {
-					if (link.sla_violated) {
-						var color = {info: "blue", minor: "#f7bb38", major: "orange", critical: "red"}[link.sla_violated_type];
-						self.violatedServices.list.push({
-							id: link.id,
-							name: node.name,
-							latitude: node.latitude,
-							longtitude: node.longtitude,
-							type: link.sla_violated_type,
-							color: color
-						});
-					}
-				}
-			});
-			if (!sourceXY || !destinationXY)
-				return;
-			if (link.id == self.defaultCircuitID) {
-				var coordinates = {};
-				if (sourceXY[0] === destinationXY[0] && sourceXY[1] === destinationXY[1]) {
-					self.center = [sourceXY[0], sourceXY[1]];
-				} else {
-					if (sourceXY[0] < destinationXY[0]) {
-						coordinates.maxLong = destinationXY[0];
-						coordinates.minLong = sourceXY[0];
-					} else {
-						coordinates.maxLong = sourceXY[0];
-						coordinates.minLong = destinationXY[0];
-					}
-					if (sourceXY[1] < destinationXY[1]) {
-						coordinates.maxLat = destinationXY[1];
-						coordinates.minLat = sourceXY[1];
-					} else {
-						coordinates.maxLat = sourceXY[1];
-						coordinates.minLat = destinationXY[1];
-					}
-					self.coordinates = [coordinates.minLong, coordinates.minLat, coordinates.maxLong, coordinates.maxLat];
-				}
-			}
-			if (link.sla_violated) {
-				self.sources[link.sla_violated_type].addFeature(new ol.Feature({
-					geometry: new ol.geom.LineString([sourceXY, destinationXY]),
-					id: link.id,
-					source_name: link.source_name,
-					destination_name: link.destination_name,
-					alias: link.source_name + "::" + link.destination_name,
-					type: link.sla_violated_type
-				}));
-			} else {
-				self.sources.circuit.addFeature(new ol.Feature({
-					geometry: new ol.geom.LineString([sourceXY, destinationXY]),
-					id: link.id,
-					source_name: link.source_name,
-					destination_name: link.destination_name,
-					alias: link.source_name + "::" + link.destination_name,
-					type: "circuit"
-				}));
-			}
-		});
-		self.violatedServices.redraw(self);
-	}
-	if (!self.autoRefresh) self.setCenter.trigger(self);
-}
 
 function newMap() {
 	return {
@@ -197,7 +80,8 @@ function newMap() {
             var color = feature.get("color") || "green";
             return new ol.style.Style({
                 image: new ol.style.Icon({
-                    src: "/static/img/location-icon.svg",
+                    // src: "/static/img/location-icon.svg",
+                    src: "images/location-icon.svg",
                     color: color,
                     scale: feature.get("selected") ? 1.5 : 1,
                     opacity: 1,
@@ -598,8 +482,9 @@ function newMap() {
             $("#popup-content").on("click", ".devices li", getDevice);
 
             function getCircuit() {
-                circuitID = $(this).data("id");
-                $location.path('/device/circuit/view/' + circuitID);
+				return;
+                // circuitID = $(this).data("id");
+                // $location.path('/device/circuit/view/' + circuitID);
             }
             $("#popup-content").on("click", ".circuits li", getCircuit);
         },
@@ -685,16 +570,14 @@ function newMap() {
 			})
 			.done(data => {
 				if (page < data.total_pages) {
-					// self.addDataToMap(data, allowClear);
-					processData(data, allowClear, self);
+					self.addDataToMap(data, allowClear);
 					self.getData({
 						page: page += 1,
 						loop: true
 					});
 					return;
 				}
-				// self.addDataToMap(data, allowClear);
-				processData(data, allowClear, self);
+				self.addDataToMap(data, allowClear);
 			});
 
         },

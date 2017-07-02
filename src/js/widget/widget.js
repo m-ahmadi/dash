@@ -443,11 +443,11 @@ define([
 						spinnerOff();
 						mark(false);
 					})
-					.on("data_always"), toggle.refresh, true)
+					.on("data_always", toggle.refresh, true)
 					.on("detail_fail", () => {
 					
 					});
-				// map.toSend = w.saa;
+				map.toSend = w.map;
 				map.init();
 			}
 			

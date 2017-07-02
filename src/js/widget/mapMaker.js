@@ -566,18 +566,29 @@ define(["core/config", "core/token"], (conf, token) => {
 					}
 					self.addDataToMap(data, allowClear);
 				}); */
-				var THE_DATA = {
+				
+				/* var THE_DATA = {
 					group_ids: JSON.stringify([47, 78, 103, 200, 229, 230, 238, 239, 240, 7]),
 					device_ids: JSON.stringify([529, 1330557, 1643890, 1643889])
-				};
+				}; */
+				
+				let toSend = this.toSend;
+				let append = "&page";
+				if (toSend.violated) {
+					append += "&violated=true";
+					delete toSend.violated;
+				}
+				if (toSend.live) {
+					append += "&live=true";
+					delete toSend.live;
+				}
+				this.events.emit("data_start");
 				$.ajax({
-					url: conf.BASE + "device/map/data" + token() + "&page=1", // &violated=true &live=true
+					url: conf.BASE + "device/map/data" + token() + append, // &violated=true &live=true
 					method: "POST",
 					contentType: false,
 					processData: false,
-				//	data: buildFormdata(this.toSend),
-					data: buildFormdata(THE_DATA),
-					beforeSend: () => this.events.emit("data_start")
+					data: buildFormdata(toSend),
 				})
 				.done(data => {
 					this.events.emit("data_succ");
@@ -591,7 +602,6 @@ define(["core/config", "core/token"], (conf, token) => {
 						return;
 					}
 					self.addDataToMap(data, allowClear);
-					// processData(data, allowClear, self);
 				})
 				.fail(x => {
 					if (x.status === 403) {

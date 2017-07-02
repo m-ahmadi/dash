@@ -123,7 +123,8 @@ define([
 		};
 		toggle.submit(false);
 		els.checkboxes.prop({checked: false});
-		els.filter.prop({checked: false});
+		els.violated.prop({checked: false});
+		els.live.prop({checked: false});
 		
 		els.groups
 			.off()
@@ -207,7 +208,8 @@ define([
 			map: {
 				groups: null,
 				devices: dataTable.getData() || null,
-				filter: els.filter.prop("checked")
+				violated: els.violated.prop("checked"),
+				live: els.live.prop("checked")
 			}
 		};
 		let groups = {};

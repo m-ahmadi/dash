@@ -1,0 +1,122 @@
+@font-face {
+	font-family: 'OpenSans';
+	src: url('OpenSansRegular.eot');
+	src: url('OpenSansRegular.eot?#iefix') format('embedded-opentype'),
+		 url('OpenSansRegular.woff2')      format('woff2'),
+		 url('OpenSansRegular.woff')       format('woff'),
+		 url('OpenSansRegular.ttf')        format('truetype'),
+		 url('OpenSansRegular.svg#OpenSans') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-weight:inherit;font-style:inherit;font-size:100%;font-family:inherit;vertical-align:baseline;direction: ltr;}:focus{outline:0}ol,ul{list-style:none}table{border-collapse:separate;border-spacing:0}caption,th,td{font-weight:normal}
+body {
+	font-family: 'OpenSans';
+	font-size: 0.8em;
+}
+/****************************************************************************
+	d3map.css
+*/
+.ol-popup {
+    position: absolute;
+    min-width: 180px;
+    background-color: white;
+    -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+    filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    bottom: 12px;
+    left: -50px;
+}
+.ol-popup:after, .ol-popup:before {
+    top: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+.ol-popup:after {
+    border-top-color: white;
+    border-width: 10px;
+    left: 48px;
+    margin-left: -10px;
+}
+.ol-popup:before {
+    border-top-color: #cccccc;
+    border-width: 11px;
+    left: 48px;
+    margin-left: -11px;
+}
+.ol-popup-closer {
+    text-decoration: none;
+    position: absolute;
+    top: 2px;
+    right: 8px;
+}
+.ol-popup-closer:after {
+    content: "✖";
+}
+
+.ol-attribution {
+    display: none;
+}
+
+
+/****************************************************************************
+	main.css
+*/
+.leaflet-popup-content {
+  width: 251px;
+  margin: 0;
+}
+.leaflet-popup-content .colQuarter {
+  width: 24%;
+  float: left;
+  margin: 0 1% 0 0;
+}
+.leaflet-popup-content .line {
+  clear: both;
+}
+.leaflet-popup-content .left {
+  float: left;
+  display: block;
+}
+.leaflet-popup-content .right {
+  float: right;
+  display: block;
+}
+.leaflet-popup-content p {
+  margin: 3px 0;
+}
+
+#popup.ol-popup {
+  visibility: hidden;
+}
+#popup-content h3 {
+  padding-top: 10px;
+  padding-bottom: 5px;
+  font-size: 1em;
+  color: grey;
+}
+#popup-content h3:first-child {
+  padding-top: 0;
+}
+#popup-content ul {
+  border: 2px solid #f1f1f1;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 120px;
+}
+#popup-content li {
+  white-space: nowrap;
+  text-align: center;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+#popup-content li:nth-of-type(odd) {
+  background-color: #eef1f4;
+}
