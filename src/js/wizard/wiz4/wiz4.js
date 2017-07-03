@@ -141,21 +141,21 @@ define([
 		}
 		
 		dataTable.removeAll();
-		device.on("select", device => {
+		device.off().on("select", device => {
 			dataTable.addRow(device);
 		});
 		
 		els.violated.prop({checked: false});
 		els.live.prop({checked: false});
 		
-		els.rangeType
+		/* els.rangeType
 			.off("change")
 			.on("change", c.add.typeChange)
 			.val(d.RANGE_TYPE)
 			.change();
 		els.rangeCount
 			.off("change")
-			.on("change", c.add.countChange);
+			.on("change", c.add.countChange); */
 	}
 	function setForEdit(o) {
 		let m = o.map;
@@ -174,7 +174,7 @@ define([
 			Object.keys(devices).forEach( k => dataTable.addRow(devices[k]) );
 		}
 		
-		device.on("select", device => {
+		device.off().on("select", device => {
 			dataTable.addRow(device);
 		});
 		
@@ -182,7 +182,7 @@ define([
 		els.violated.prop({checked: m.violated});
 		els.live.prop({checked: m.live});
 		
-		let type = o.rangeType;
+		/* let type = o.rangeType;
 		let count = o.rangeCount;
 		let curr = {
 			type: type,
@@ -197,15 +197,15 @@ define([
 			.off("change")
 			.on("change", curr, c.edit.countChange)
 			.val(count)
-			.change();
+			.change(); */
 	}
 	function get() {
-		let rangeTypeVal = els.rangeType.val();
-		let rangeCountVal = els.rangeCount.val();
+		// let rangeTypeVal = els.rangeType.val();
+		// let rangeCountVal = els.rangeCount.val();
 		let res = {
-			rangeType: rangeTypeVal,
-			rangeCount: parseInt(rangeCountVal, 10),
-			rangeTitle: share.getRangeTitle(rangeTypeVal, rangeCountVal),
+			// rangeType: rangeTypeVal,
+			// rangeCount: parseInt(rangeCountVal, 10),
+			// rangeTitle: share.getRangeTitle(rangeTypeVal, rangeCountVal),
 			map: {
 				groups: null,
 				devices: dataTable.getData() || null,

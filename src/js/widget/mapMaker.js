@@ -580,7 +580,7 @@ define(["core/config", "core/token"], (conf, token) => {
 				let d = o.devices;
 				if (o.groups) data.group_ids = JSON.stringify( o.groups );
 				if (d) data.device_ids = JSON.stringify( Object.keys(d).map(k => d[k].id) );
-				let append = "&page";
+				let append = "&page=1";
 				append += o.violated ? "&violated=true" : "";
 				append += o.live     ? "&live=true"     : "";
 				this.events.emit("data_start");
@@ -656,11 +656,11 @@ define(["core/config", "core/token"], (conf, token) => {
 				self.layers.major.setZIndex(3);
 				self.layers.critical.setZIndex(4);
 			},
-			init: function() {
+			init: function(load) {
 				var self = this;
 				
 				self.makeMap();
-				self.getData();
+				if (load) self.getData();
 				self.setPointer();
 				self.zoomEvent();
 				self.addTooltip();

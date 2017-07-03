@@ -146,7 +146,7 @@ define([
 	function createPanel(parent, type, rangeTitle, id, expand, min) {
 		const ctx = {
 			title: makeTitle(type),
-			rangeTitle: rangeTitle,
+			rangeTitle: type === 3 ? undefined : rangeTitle,
 			id: id,
 			xOne: expand === 1,
 			xTwo: expand === 2,
@@ -448,7 +448,7 @@ define([
 					
 					});
 				map.toSend = w.map;
-				map.init();
+				map.init(false);
 			}
 			
 			els.menus.on("click", "[data-menu]", e => {
