@@ -572,23 +572,24 @@ define(["core/config", "core/token"], (conf, token) => {
 					device_ids: JSON.stringify([529, 1330557, 1643890, 1643889])
 				}; */
 				
-				let toSend = this.toSend;
+				
+				let o = this.toSend;
+				
+				
+				let data = {};
+				let d = o.devices;
+				if (o.groups) data.group_ids = JSON.stringify( o.groups );
+				if (d) data.device_ids = JSON.stringify( Object.keys(d).map(k => d[k].id) );
 				let append = "&page";
-				if (toSend.violated) {
-					append += "&violated=true";
-					delete toSend.violated;
-				}
-				if (toSend.live) {
-					append += "&live=true";
-					delete toSend.live;
-				}
+				append += o.violated ? "&violated=true" : "";
+				append += o.live     ? "&live=true"     : "";
 				this.events.emit("data_start");
 				$.ajax({
 					url: conf.BASE + "device/map/data" + token() + append, // &violated=true &live=true
 					method: "POST",
 					contentType: false,
 					processData: false,
-					data: buildFormdata(toSend),
+					data: buildFormdata(data),
 				})
 				.done(data => {
 					this.events.emit("data_succ");

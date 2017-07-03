@@ -21,6 +21,5 @@ spectrum/spectrum
 switchery/dist/switchery
 
 ol
-leaflet
 
 @ handlebars/handlebars.runtime

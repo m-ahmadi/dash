@@ -26,7 +26,7 @@ define([
 			els.groups.html( temp.loading() );
 		}
 		$.ajax({
-			url: conf.BASE + "device/grouptree2" + token(),
+			url: conf.BASE + "device/grouptree" + token(),
 			method: "GET",
 			data: "parent_only=true"
 		})
@@ -116,6 +116,9 @@ define([
 		}
 	};
 	
+	function setCheckboxes() {
+		
+	}
 	function setForAdd() {
 		let uncheckedAll = true, emptyTable = true;
 		let alter = () => {
@@ -175,12 +178,44 @@ define([
 			.on("change", c.add.countChange);
 	}
 	function setForEdit(o) {
-		// dataTable.on();
+		let m = o.map;
+		let g = m.groups;
+		
+		els.checkboxes
+			.prop({checked: false})
+			.each(function (x, l) {
+				this.checked = g.indexOf( parseInt(this.value, 10) ) !== -1;
+			});
+		debugger
+		if (g.indexOf(true) !== -1) els.checkboxes.filter("[value='all']").attr({checked: true});
+		
+		els.violated.prop({checked: false});
+		els.live.prop({checked: false});
+		
+		els.groups
+			.off()
+			.on("click", "[data-retry]", c.retry)
+			.on("click", "input:checkbox", e => {
+				let el = e.target;
+				let v = el.value;
+				let checks = els.checkboxes;
+				if (v === "all") {
+					checks.prop({checked: el.checked});
+				} else {
+					checks.filter("[value='all']").prop({checked: false});
+				}
+				
+				uncheckedAll = checks.filter(":checked").length ? false : true;
+				alter();
+			});
+		
+		dataTable
+			.off()
+			.removeAll()
 		
 		
 		let type = o.rangeType;
 		let count = o.rangeCount;
-		let groupId = o.group.id;
 		let curr = {
 			type: type,
 			count: count
@@ -212,15 +247,11 @@ define([
 				live: els.live.prop("checked")
 			}
 		};
-		let groups = {};
-		els.groups.find(":checkbox").each((x, l) => {
+		let groups = [];
+		els.groups.find(":checkbox:checked").each((x, l) => {
 			let v = l.value;
-			let id = u.isNum(v) ? parseInt(v, 10) : v;
-			groups[id] = {
-				id: id,
-				name: l.name,
-				checked: l.checked ? true : false
-			};
+			let id = v === "all" ? true : parseInt(v, 10);
+			if (id) groups.push(id);
 		});
 		res.map.groups = groups;
 		return res;

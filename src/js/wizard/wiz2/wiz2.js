@@ -215,7 +215,6 @@ define([
 		Object.keys(sens).forEach( k => dataTable.addRow(sens[k]) );
 		dataTable
 			.on("unit_change", (sensorId, newValue) => {
-				debugger
 				let sen = sens[sensorId];
 				if (sen) {
 					let curr = sen.units.filter(o => o.selected)[0].name;

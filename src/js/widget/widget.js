@@ -510,7 +510,10 @@ define([
 						.off(""+w.id, updateTable)
 						.on(""+w.id, updateTable, tEls);
 					break;
-				case 3: ; break;
+				case 3:
+					map.toSend = w.map;
+					map.refreshData();
+					break;
 			}
 			updateNavigator = true;
 			load();
