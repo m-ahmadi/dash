@@ -512,7 +512,7 @@ define([
 					break;
 				case 3:
 					map.toSend = w.map;
-					map.refreshData();
+					map.getData();
 					break;
 			}
 			updateNavigator = true;
