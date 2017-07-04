@@ -23,6 +23,7 @@ define([
 	
 	let id, order, addMode, shallow;
 	let w;
+	let prefetch = true;
 	
 	function uid() {
 		return Math.floor( Math.random() * 1000 );
@@ -86,7 +87,7 @@ define([
 		inst.emit(eStr, merge(data), cb);
 	}
 	function go(which) {
-		if (!shallow) {
+		if (!which.shallow) {
 			if (addMode) {
 				which.set();
 			} else {
@@ -95,14 +96,12 @@ define([
 		}
 		which.open();
 	}
-	function back() {
-		shallow = true;
+	function back(state) {
+		shallow = state;
 		wiz1.open();
 	}
 	function addCustomEvt() {
-		
 		wiz1.on("next", t => {
-			console.log("add mode: ", addMode, "\n shallow: ", shallow);
 			if (t === 0) {
 				go(wiz2);
 			} else if (t === 1) {
@@ -120,17 +119,20 @@ define([
 		wiz2
 			.on("submit", emitSubmit)
 			.on("login_error", emitLoginErr, wiz2.open);
+		
 		wiz3
 			.on("submit", emitSubmit)
-			.on("login_error", (first) => {
-				if (!first) wiz3.open();
-			})
+			.on("login_error", emitLoginErr, wiz3.open)
 			.on("group_fetch_succ", (groupsArr) => {
 				wiz4.setGroups(groupsArr).renderForm();
 			})
-			.on("group_fetch_fail", wiz4.fetchGroups)
+			.on("group_fetch_fail", () => {
+				wiz4.fetchGroups();
+			});
 		
-		wiz4.on("submit", emitSubmit);
+		wiz4
+			.on("submit", emitSubmit)
+			.on("login_error", emitLoginErr, wiz4.open);
 	}
 
 	inst.start = start;
@@ -144,8 +146,8 @@ define([
 		
 		addCustomEvt();
 	};
-	inst.beforeInit = () => {
-		wiz3.fetchGroups();
+	inst.fetchGroups = () => {
+		wiz3.fetchGroups(); 
 	};
 	
 	return inst;

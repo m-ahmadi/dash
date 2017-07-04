@@ -29,7 +29,7 @@ define([
 	
 	
 	function init() {
-		worker = new Worker(conf.ROOT + "js/widget/worker.js");
+		worker = new Worker(conf.ROOT + "js/worker.js");
 		worker.onmessage = e => {
 			let d = e.data;
 			extractor.emit(d.reqId, d.result);
@@ -136,11 +136,11 @@ define([
 			let el = tEls[k];
 			let n = d[k];
 			el.text(n);
-			switch (true) {
+			/* switch (true) {
 				case (n < 10):          el.addClass("green-text");  break;
 				case (n > 10 && n< 30): el.addClass("orange-text"); break;
 				case (n > 30):          el.addClass("red-text");    break;
-			}
+			} */
 		});
 	}
 	function createPanel(parent, type, rangeTitle, id, expand, min) {
@@ -232,7 +232,7 @@ define([
 			els.menus.find("[data-resize]").html( temp.btnMax() );
 			
 			!el.is(":animated") ? el.slideUp(400, () => {
-				//if (chart) chart.setSize();
+				// if (chart) chart.setSize();
 			}) : undefined;
 		}
 		function max() {
@@ -242,6 +242,7 @@ define([
 			
 			!el.is(":animated") ? el.slideDown(400, () => {
 				if (chart) chart.setSize();
+				if (map) map.container.updateSize();
 			}) : undefined;
 		}
 		function expand() {
@@ -260,7 +261,7 @@ define([
 			}
 			root.addClass(toAdd);
 			if (chart) chart.setSize();
-			if (map) map.container.updateSize();
+			if ( map && els.body.is(":visible") ) map.container.updateSize();
 		}
 		function shrink() {
 			let curr = parseInt(root.attr("data-expand"), 10);
@@ -278,7 +279,7 @@ define([
 			}
 			root.addClass(toAdd);
 			if (chart) chart.setSize();
-			if (map) map.container.updateSize();
+			if ( map && els.body.is(":visible") ) map.container.updateSize();
 		}
 		function mark(stat, keep) {
 			let par = els.spinnerParent;
@@ -478,7 +479,7 @@ define([
 			});
 			els.edit.on("click", () => {
 				els.menuBtn.mouseout();
-				manager.emit("edit", w)
+				manager.emit("edit", w);
 			});
 		}
 		

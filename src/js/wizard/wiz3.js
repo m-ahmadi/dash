@@ -4,13 +4,14 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 	const temp = u.getTemps("wizard/wiz3");
 	
 	let els;
-	let type;
 	let firstGroupFetch = true;
 	let c = { add: {}, edit: {} }; // event callbacks
-	
 	let toggle = {
 		submit(b) {
 			els.submit.attr({disabled: !b});
+		},
+		prev(b) {
+			els.prev.attr({disabled: !b});
 		},
 		toDisable(b) {
 			els.toDisable.attr({disabled: !b});
@@ -21,14 +22,14 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 	};
 	
 	function groupSucc(arr) {
-		// if (!els) { setTimeout(groupSucc, 1000); return; }
+		if (!els) { setTimeout(groupSucc, 1000); return; }
 		els.stat.empty();
 		arr.forEach(i => {
 			els.groups.append( temp.groupOpt({name: i.name, value: i.id}) );
 		});
 	}
 	function groupFail() {
-		// if (!els) { setTimeout(groupFail, 1000); return; }
+		if (!els) { setTimeout(groupFail, 1000); return; }
 		els.btnParent.empty().append( temp.groupOptBtn() );
 		els.stat.empty().append( temp.groupOptDanger() );
 	}
@@ -50,13 +51,13 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 		})
 		.fail(x => {
 			if (x.status === 403) {
-				inst.emit("login_error", !firstGroupFetch);
+				inst.emit("login_error");
 			} else {
 				inst.emit("group_fetch_fail");
-				groupFail();
 			}
+			groupFail();
 		});
-		if (firstGroupFetch) firstGroupFetch = false;
+		firstGroupFetch = false;
 	}
 	
 	c.groupChange = e => {
@@ -120,6 +121,8 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 		}
 	};
 	function setForAdd() {
+		inst.shallow = true;
+		toggle.prev(true);
 		els.rangeType
 			.off("change")
 			.on("change", c.add.typeChange)
@@ -135,6 +138,7 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 			.change();
 	}
 	function setForEdit(o) {
+		toggle.prev(false);
 		let type = o.rangeType;
 		let count = o.rangeCount;
 		let groupId = o.group.id;
@@ -177,6 +181,7 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 		};
 	}
 	function close() {
+		inst.shallow = false;
 		toggle.modal(false);
 	}
 	
@@ -192,11 +197,14 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 	inst.init = () => {
 		els = u.getEls(ROOT);
 		
-		els.prev.on( "click", () => inst.emit("prev", type) );
+		els.prev.on( "click", () => {
+			inst.emit("prev")
+		});
 		
 		els.btnParent.on("click", "[data-retry]", fetchGroups);
 		
-		els.submit.on("click", () => {
+		els.submit.on("click", e => {
+			if (e.target.disabled) return;
 			let toDis = els.toDisable; 
 			toDis.attr({disabled: true});
 			inst.emit("submit", get(), success => {

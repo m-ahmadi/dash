@@ -118,6 +118,7 @@ define([
 		return data;
 	}
 	function setForAdd() {
+		inst.shallow = true;
 		toggle.submit(false).prev(true);
 		
 		device
@@ -231,7 +232,8 @@ define([
 				toggle.submit( !sameKeys(rows, sens) );
 			})
 			.on("color_change", (sensorId, newValue) => {
-				toggle.submit(sens[sensorId].color !== newValue);
+				let sen = sens[sensorId];
+				if (sen) toggle.submit(sen.color !== newValue);
 			})
 			.on("sensor_remove_all", () => {
 				toggle.submit(false);
@@ -261,12 +263,14 @@ define([
 		return inst;
 	}
 	function close() {
+		inst.shallow = false;
 		toggle.modal(false);
 	}
 	function emitLoingErr() {
 		inst.emit("login_error");
 	}
 	
+	inst.shallow = false;
 	inst.open = open;
 	inst.set = o => {
 		o ? setForEdit(o) : setForAdd();

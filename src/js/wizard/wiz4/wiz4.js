@@ -15,11 +15,16 @@ define([
 	let c = { add: {}, edit: {} };
 	let groups;
 	let checkboxes = newPubSub();
-	
 	let firstGroupFetch = true;
 	let toggle = {
 		submit(b) {
 			els.submit.attr({disabled: !b});
+		},
+		prev(b) {
+			els.prev.attr({disabled: !b});
+		},
+		toDisable(b) {
+			els.toDisable.prop({disabled: !b});
 		}
 	};
 	
@@ -57,8 +62,10 @@ define([
 	function renderForm() {
 		if (!groups) throw new Error("renderForm(): groups must be set before calling."); 
 		clearAlerts();
-		els.groups.html( temp.formRow({groups: groups}) );
-		els.checkboxes = els.groups.find(":checkbox");
+		let g = els.groups;
+		g.html( temp.formRow({groups: groups}) );
+		els.checkboxes = g.find(":checkbox");
+		els.toDisable = els.toDisable.add( els.checkboxes );
 		checkboxes.emit("ready", els.checkboxes);
 		return inst;
 	}
@@ -128,10 +135,12 @@ define([
 		if (selected.indexOf('all') !== -1) {
 			checkboxes
 				.filter("[value='all']")
-				.attr({checked: true});
+				.prop({checked: true});
 		}
 	}
 	function setForAdd() {
+		inst.shallow = true;
+		toggle.prev(true);
 		if (els.checkboxes) {
 			els.checkboxes.prop({checked: false});
 		} else {
@@ -160,7 +169,7 @@ define([
 	function setForEdit(o) {
 		let m = o.map;
 		let devices = m.devices;
-		
+		toggle.prev(false);
 		if (els.checkboxes) {
 			setChk(els.checkboxes, m.groups);
 		} else {
@@ -216,16 +225,18 @@ define([
 		let groups = [];
 		els.groups.find(":checkbox:checked").each((x, l) => {
 			let v = l.value;
-			let id = v === "all" ? undefined : parseInt(v, 10);
+			let id = v === "all" ? v : parseInt(v, 10);
 			if (id) groups.push(id);
 		});
 		res.map.groups = groups;
 		return res;
 	}
 	function close() {
+		inst.shallow = false;
 		uk.closeModal(ROOT);
 	}
 	
+	inst.shallow = false;
 	inst.setGroups = setGroups;
 	inst.renderForm = renderForm;
 	inst.fetchGroups = fetchGroups;
@@ -242,7 +253,9 @@ define([
 		device.init(els.device);
 		dataTable.init(els.table);
 		
-		els.prev.on( "click", () => inst.emit("prev") );
+		els.prev.on( "click", () => {
+			inst.emit("prev");
+		});
 		els.groups
 			.on("click", "[data-retry]", c.retry)
 			.on("click", "input:checkbox", e => {
@@ -260,7 +273,11 @@ define([
 		
 		els.submit.on("click", e => {
 			if (e.target.disabled) return;
+			toggle.toDisable(false);
+			dataTable.toggleAll(false);
 			inst.emit("submit", get(), success => {
+				toggle.toDisable(true);
+				dataTable.toggleAll(true);
 				if (success) close();
 			});
 		});

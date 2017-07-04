@@ -82,13 +82,14 @@ define([
 		let timer;
 		if (counter === 1) {
 			process.open();
+			process.inc(10);
 		}
 		process.doing("Fetching widget list.");
 		$.ajax({
-			url: conf.ALT + conf.LOAD + token(), // "widget/fetch", "dashboard/load"
+			url: conf.ALT + conf.LOAD + token(),
 			method: "GET",
 			dataType: "json",
-			header: {"cache-control": "no-cache"}
+			cache: false
 		})
 		.done( data => {
 			if ( u.isEmptyObj(data) ) {
@@ -148,12 +149,24 @@ define([
 	}
 	function adjustHeight() {
 		let el = els.root;
-		let h = css(el, "min-height");
+		// let h = css(el, "min-height");
 		let avail = window.innerHeight - ( css("#heading", "height") + css("#footer", "height") );
 		el.css("min-height", avail);
 	}
 	function doAll(action) {
 		Object.keys(widgets).forEach( k => widgets[k][action]() );
+	}
+	function fetchTime() {
+		$.ajax({
+			url: conf.BASE + "time" + token(),
+			method: "GET"
+		})
+		.done(data => {
+			
+		})
+		.fail(x => {
+			
+		});
 	}
 	
 	function addCustomEvt() {
@@ -167,7 +180,7 @@ define([
 			}, () => {
 				fn(false);
 				processNote.close();
-				uk.note.error("Could not create your widget. Try again.");
+				uk.note.error("Could not create the widget. Try again.");
 			});
 		});
 		wizard.on("submit:edit", (e, fn) => {
@@ -180,7 +193,7 @@ define([
 			}, () => {
 				fn(false);
 				processNote.close();
-				uk.note.error("Could not create your widget. Try again.");
+				uk.note.error("Could not edit the widget. Try again.");
 			});
 		});
 		confirm.on("submit", (id, fn) => {
@@ -210,7 +223,7 @@ define([
 			}
 			
 			save(() => {
-				cb ? cb() : undefined;
+				if (cb) cb();
 				processNote.close();
 				fn();
 			}, () => {
@@ -260,7 +273,9 @@ define([
 
 	
 	inst.beforeReady = () => {
-		wizard.beforeInit();
+		if ( token(true) ) {
+			wizard.fetchGroups();
+		}
 	};
 	inst.onReady = () => {
 		els = u.getEls(ROOT);
@@ -285,22 +300,24 @@ define([
 			
 		});
 		
+		addCustomEvt();
 		header.init();
 		toolbar.init(els.toolbar);
 		wizard.init();
 		confirm.init();
 		process.init();
 		login.init();
-		addCustomEvt();
 		widget.init();
 		
 		if ( !token(true) ) {
-			login.start(fetchAll);
+			login.start(() => {
+				fetchAll();
+				wizard.fetchGroups();
+			});
 		} else {
 			fetchAll();
 		}
 	};
-	
-	window.ws = () => {return widgets};
+	window.ws = () => widgets;
 	return inst;
 });

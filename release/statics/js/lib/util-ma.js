@@ -46,6 +46,7 @@ if (typeof Array.prototype.forEach !== "function") {
         window.u = exported;
     }
 }((function () {
+    "use strict";
     function isObj(v) {
         return (
             v &&
@@ -232,6 +233,7 @@ if (typeof Array.prototype.forEach !== "function") {
         }
         return result;
     }
+    // jQuery:
     function noJq() {
         return typeof jQuery === "undefined"  &&  typeof $ === "undefined";
     }
@@ -243,11 +245,22 @@ if (typeof Array.prototype.forEach !== "function") {
         if ( noJq() ) { return; }
         return getCommentsInside(selector)[0].nodeValue.trim();
     }
+    function isValidSelector(selector) {
+        var el;
+        if ( !isStr(selector) ) return false;
+        try {
+            el = $(selector);
+        } catch (err) {
+            return false;
+        }
+        return true;
+    }
     function getEls(root, obj) {
-        if ( noJq() || (!root && !obj) ) { return; }
+        if ( noJq() || (!root && !obj) ) return;
         var o = {},
             el, els;
         if ( isStr(root) ) {
+            if ( !isValidSelector(root) ) { throw new TypeError("getEls(): Invalid jQuery selector."); }
             o.root = $(root);
             el = $(root+" [data-el]");
             els = $(root+" [data-els]");
@@ -261,19 +274,36 @@ if (typeof Array.prototype.forEach !== "function") {
             o[ j.data("el") ] = j;
         });
         els.each(function (i, domEl) {
-            var j = $(domEl);
-            var ks = j.data("els").split(" ");
-            ks.forEach(function (k) {
-                if (!o[k]) {
-                    o[k] = $(root+" [data-els~="+k+"]");
-                }
+            var j = $(domEl),
+                keys = j.data("els").split(" ");
+            keys.forEach(function (k) {
+                var p;
+                if ( !o[k] ) o[k] = $();
+                p = o[k];
+                o[k] = p.add(j);
             });
         });
         if (obj) {
-            obj = o;
+            Object.keys(o).forEach(k => {
+                if ( !obj[k] ) obj[k] = o[k];
+            });
         } else {
             return o;
         }
+    }
+    // Handlebars:
+    function getTemps(space, src) {
+        var o = src || Handlebars.templates,
+            f = substrAfterLast,
+            res = {};
+        Object.keys(o).forEach(function (k) {
+            if ( k.indexOf(space) !== -1 ) {
+                res[ f("/", k) ] = o[k];
+            } else if ( k.indexOf("/") === -1 ) {
+                res[k] = o[k];
+            }
+        });
+        return res;
     }
 
     return {
@@ -307,6 +337,9 @@ if (typeof Array.prototype.forEach !== "function") {
         // jQuery:
         getCommentsInside: getCommentsInside,
         getFirstCommentInside: getFirstCommentInside,
-        getEls: getEls
+        isValidSelector: isValidSelector,
+        getEls: getEls,
+        // Handlebars:
+        getTemps: getTemps
     };
 }())));

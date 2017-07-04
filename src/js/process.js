@@ -11,6 +11,7 @@ define(["core/uk"], (uk) => {
 		uk.openModal(ROOT);
 	}
 	function open() {
+		$("#overlay").remove();
 		clear();
 		reset();
 		uk.openModal(ROOT);

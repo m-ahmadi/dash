@@ -69,6 +69,7 @@ define(["core/config", "core/uk"], (conf, uk) => {
 		changeSubmitBtn();
 	}
 	function start(cb) {
+		$("#overlay").remove();
 		callback = cb;
 		uk.openModal(ROOT);
 		let inpust = els.username.add(els.password);
