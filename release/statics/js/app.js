@@ -1404,7 +1404,8 @@ define('wizard/wiz3',["core/uk", "core/config", "core/token", "./defaults", "./s
 	inst.init = function () {
 		els = u.getEls(ROOT);
 
-		els.prev.on("click", function () {
+		els.prev.on("click", function (e) {
+			if (e.target.disabled) return;
 			inst.emit("prev");
 		});
 
@@ -1820,7 +1821,8 @@ define('wizard/wiz4/wiz4',["core/uk", "core/config", "core/token", "../defaults"
 		device.init(els.device);
 		dataTable.init(els.table);
 
-		els.prev.on("click", function () {
+		els.prev.on("click", function (e) {
+			if (e.target.disabled) return;
 			inst.emit("prev");
 		});
 		els.groups.on("click", "[data-retry]", c.retry).on("click", "input:checkbox", function (e) {

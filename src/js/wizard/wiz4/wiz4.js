@@ -253,7 +253,8 @@ define([
 		device.init(els.device);
 		dataTable.init(els.table);
 		
-		els.prev.on( "click", () => {
+		els.prev.on( "click", e => {
+			if (e.target.disabled) return;
 			inst.emit("prev");
 		});
 		els.groups

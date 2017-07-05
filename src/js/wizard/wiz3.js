@@ -197,7 +197,8 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 	inst.init = () => {
 		els = u.getEls(ROOT);
 		
-		els.prev.on( "click", () => {
+		els.prev.on( "click", e => {
+			if (e.target.disabled) return;
 			inst.emit("prev")
 		});
 		
