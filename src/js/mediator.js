@@ -1,5 +1,4 @@
 define([
-	"templates",
 	"core/config",
 	"core/token",
 	"login",
@@ -11,7 +10,6 @@ define([
 	"./process",
 	"./widget/widget"
 ], (
-	undefined,
 	conf,
 	token,
 	login,
@@ -82,7 +80,7 @@ define([
 		let timer;
 		if (counter === 1) {
 			process.open();
-			process.inc(10);
+			process.inc( u.randInt(5, 15) );
 		}
 		process.doing("Fetching widget list.");
 		$.ajax({
@@ -154,19 +152,9 @@ define([
 		el.css("min-height", avail);
 	}
 	function doAll(action) {
-		Object.keys(widgets).forEach( k => widgets[k][action]() );
-	}
-	function fetchTime() {
-		$.ajax({
-			url: conf.BASE + "time" + token(),
-			method: "GET"
-		})
-		.done(data => {
-			
-		})
-		.fail(x => {
-			
-		});
+		if ( !u.isEmptyObj(widgets) ) {
+			Object.keys(widgets).forEach( k => widgets[k][action]() );
+		}
 	}
 	
 	function addCustomEvt() {
@@ -261,14 +249,26 @@ define([
 		
 		toolbar
 			.on( "add", () => wizard.start( els.widgets.children().length ) )
-			.on("save_all", confirm.open, "save_all")
-			.on("delete_all", confirm.open, "delete_all")
+			.on("save_all", () => {
+				if ( !u.isEmptyObj(widgets) ) {
+					confirm.open("save_all");
+				}
+			})
+			.on("delete_all", () => {
+				if ( !u.isEmptyObj(widgets) ) {
+					confirm.open("delete_all");
+				}
+			})
 			.on("min_all", doAll, "min")
 			.on("max_all", doAll, "max")
 			.on("shrink_all", doAll, "shrink")
 			.on("expand_all", doAll, "expand")
 			.on("start_auto_refresh", autoRefresh)
 			.on("end_auto_refresh", cancelTimeout);
+		header.on("time", offset => {
+			
+			widget.setGlobalTZ(offset);
+		});
 	}
 
 	
@@ -311,10 +311,12 @@ define([
 		
 		if ( !token(true) ) {
 			login.start(() => {
+				header.adjust();
 				fetchAll();
 				wizard.fetchGroups();
 			});
 		} else {
+			header.adjust();
 			fetchAll();
 		}
 	};

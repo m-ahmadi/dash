@@ -27,15 +27,23 @@ define([
 	const jsonParse = JSON.parse;
 	let worker;
 	
-	
 	function init() {
 		worker = new Worker(conf.ROOT + "js/worker.js");
 		worker.onmessage = e => {
 			let d = e.data;
 			extractor.emit(d.reqId, d.result);
 		};
+		setGlobalTZ();
 	}
 	
+	function setGlobalTZ(userOffset) {
+		let offset = userOffset || 16200;
+		Highcharts.setOptions({
+			global: {
+				timezoneOffset: -offset / 60
+			}
+		});
+	}
 	function getDate(type, count) {
 		if (type && count) {
 			return moment().subtract(count, type).format(DATE_FORMAT);
@@ -424,7 +432,7 @@ define([
 				});
 			} else if (type === 2) {
 				let body = els.body;
-				body.html( temp.statTable({title: w.group.name}) );
+				body.html( temp.statTable({title: w.group.name, root: conf.ROOT}) );
 				let tEls = u.getEls( body );
 				extractor.on(""+w.id, updateTable, tEls);
 			} else if (type === 3) {
@@ -505,7 +513,7 @@ define([
 				case 0: chart = makeLineChart(els.body, w.device.name, w.sensors); break;
 				case 1: chart = makeBarChart(els.body, w.group.name, w.statKpis); break;
 				case 2:
-					els.body.html( temp.statTable({title: w.group.name}) );
+					els.body.html( temp.statTable({title: w.group.name, root: conf.ROOT}) );
 					let tEls = u.getEls( els.body );
 					extractor
 						.off(""+w.id, updateTable)
@@ -524,6 +532,8 @@ define([
 		return inst;
 	}
 	
+	
+	manager.setGlobalTZ = setGlobalTZ ;
 	manager.create = constructor;
 	manager.init = init;
 	

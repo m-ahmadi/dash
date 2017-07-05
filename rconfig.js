@@ -1,6 +1,6 @@
 {
-    "baseUrl": "./src/js/",
+    "baseUrl": "./release/tmp/",
     "name": "main",
-    "out": "./dist/js/app.min.js",
+    "out": "./release/app.js",
     "optimize": "none"
 }

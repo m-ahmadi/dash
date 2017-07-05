@@ -13,9 +13,9 @@
 						</li>
 						<li class="col8" id="user">
 							<div class="main">
-								<a id="msg_count" href="/#/user/message/inbox/" class="uk-hidden">0</a>
-								<span data-el="name">Maryammm<!-- localUser.Name --></span>
-								<span data-el="username"><!--localUser.Username--></span>
+								<a id="msg_count" href="/#/user/message/inbox/" data-el="unreadMsg" class="uk-hidden">0</a>
+								<span data-el="name"></span> <!-- Maryammm localUser.Name  -->
+								<span data-el="username"></span> <!--localUser.Username-->
 								<div class="tri"></div>
 							</div>
 							<ul class="sub">
@@ -51,8 +51,8 @@
 						
 						<li><a href="/#/home/nodes">Nodes</a>
 							<ul class="sub">
-								<li><a href="/#/add/Node">Add Node</a></li>
-								<li><a href="/#/add/Group">Add Group</a></li>
+								<li data-el="adonly" class="uk-hidden"><a href="/#/add/Node">Add Node</a></li>
+								<li data-el="adonly" class="uk-hidden"><a href="/#/add/Group">Add Group</a></li>
 								<li><a href="/#/sensor/compare/view/node/">Comparison</a></li>
 								<li><a href="/#/sensor/top/">Top Sensor</a></li>
 							</ul>
@@ -70,15 +70,7 @@
 						</li>
 						
 						<li>
-							<a href="javascript:void(0)">Reports</a>
-							<ul class="sub">
-								<li><a href="/#/report/all">All Report</a></li>
-								<li><a href="/#/report/new">Create Report</a></li>
-							</ul>
-						</li>
-						
-						<li>
-							<a href="javascript:void(0)">Configuration</a>
+							<a data-el="adonly" class="uk-hidden" href="javascript:void(0)">Configuration</a>
 							<ul class="sub">
 								<li><a href="/#/sla/">SLA</a></li>
 								<li><a href="/#/users/list/">User</a></li>
@@ -87,9 +79,17 @@
 								<li><a href="/#/formula/">Formula</a></li>
 							</ul>
 						</li>
+						
+						<li>
+							<a href="javascript:void(0)">Reports</a>
+							<ul class="sub">
+								<li><a href="/#/report/all">All Report</a></li>
+								<li><a href="/#/report/new">Create Report</a></li>
+							</ul>
+						</li>
 					</ul>
 				</div>
-				<div class="col3 collast" id="header-datetime" data-el="now">May 30th 2017, 1:20:33 pm</div>
+				<div class="col3 collast" id="header-datetime" data-el="now"></div>
 				<div class="clear"></div>
 			</div>
 		</div>
