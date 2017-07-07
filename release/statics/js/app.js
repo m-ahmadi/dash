@@ -231,6 +231,7 @@ define('login',["core/config", "core/uk"], function (conf, uk) {
 		els.username.on("keyup blur input change", keyup);
 		els.password.on("keyup blur input change", keyup);
 		els.submit.on("click", function (e) {
+			if (e.target.disabled) return;
 			request();
 		});
 	}

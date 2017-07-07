@@ -84,6 +84,7 @@ define(["core/config", "core/uk"], (conf, uk) => {
 		els.username.on("keyup blur input change", keyup);
 		els.password.on("keyup blur input change", keyup);
 		els.submit.on("click", e => {
+			if (e.target.disabled) return;
 			request();
 		});
 	}
