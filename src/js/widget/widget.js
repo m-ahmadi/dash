@@ -311,7 +311,7 @@ define([
 				spinnerOff();
 			}
 			spinnerOn();
-			chart ? chart.showLoading() : undefined;
+			if (chart) chart.showLoading();
 			xhr = $.ajax({
 				url: conf.BASE +"device/devicekpisensordata"+ token(),
 				method: "POST",
@@ -346,7 +346,7 @@ define([
 		}
 		function loadStat(statOnly) {
 			spinnerOn();
-			chart ? chart.showLoading() : undefined;
+			if (chart) chart.showLoading();
 			$.ajax({
 				url: conf.BASE +"stat/violation"+ token(),
 				method: "POST",
@@ -503,7 +503,7 @@ define([
 		inst.shrink = shrink;
 		inst.remove = () => {
 			root.remove();
-			chart ? chart.destroy() : undefined;
+			if (chart) chart.destroy();
 		};
 		inst.update = obj => {
 			w = obj;
