@@ -61,9 +61,6 @@ define([
 	function cancelTimeout() {
 		clearTimeout(timer);
 	}
-	function isStatWrong(n) {
-		return n && (n === 403 || n === 404) ? true : false;
-	}
 	function fetchAllFail() {
 		if (counter > 1) {
 			process.doing(` (${counter}${ori[counter]} attempt)`, true);
@@ -76,6 +73,10 @@ define([
 		}
 		setTimeout(fetchAll, 1000);
 	}
+	function onNoWidgets() {
+		process.finish();
+		process.log("No widgets to fetch", "primary");
+	}
 	function fetchAll() {
 		let timer;
 		if (counter === 1) {
@@ -87,12 +88,11 @@ define([
 			url: conf.ALT + conf.LOAD + token(),
 			method: "GET",
 			dataType: "json",
-			cache: false
+			cashe: false
 		})
 		.done( data => {
 			if ( u.isEmptyObj(data) ) {
-				process.finish();
-				process.log("No widgets to fetch", "primary");
+				onNoWidgets();
 				return;
 			}
 			_WIDGETS_ = data;
@@ -116,11 +116,14 @@ define([
 			process.close();
 		})
 		.fail(x => {
-			if ( isStatWrong(x.status) ) {
+			let stat = x.status;
+			if ( stat === 403 ) {
 				login.start(() => {
 					process.resume();
 					fetchAllFail();
 				});
+			} else if ( stat === 404 ) {
+				onNoWidgets();
 			} else {
 				fetchAllFail();
 			}
@@ -135,7 +138,10 @@ define([
 			data: JSON.stringify(_WIDGETS_)
 		})
 		.done(done)
-		.fail( x => isStatWrong(x.status) ? login.start(fail) : fail() )
+		.fail( x => {
+			let stat = x.status;
+			stat === 403 ? login.start(fail) : fail();
+		})
 		.always(always);
 	}
 	function onLoginErr(cb) {
@@ -309,7 +315,7 @@ define([
 		login.init();
 		widget.init();
 		
-		if ( !token(true) ) {
+		if ( token(true) === false ) {
 			login.start(() => {
 				header.adjust();
 				fetchAll();
