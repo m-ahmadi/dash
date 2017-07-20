@@ -101,3 +101,4 @@ function format(ts) {
 	}
 	return n;
 }
+//# sourceMappingURL=worker.js.map

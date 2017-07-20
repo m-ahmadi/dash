@@ -1,0 +1,30 @@
+{
+  "name": "util-ma",
+  "description": "Some utility functions that I always use.",
+  "main": "index.js",
+  "authors": [
+    "Mohammad Ahmadi"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "utility function",
+    "convenience method"
+  ],
+  "homepage": "https://github.com/m-ahmadi/util",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "_release": "69bf473e0f",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "69bf473e0fc5aa5adf94c8e269320c9073366eeb"
+  },
+  "_source": "https://github.com/m-ahmadi/util.git",
+  "_target": "*",
+  "_originalSource": "util-ma"
+}

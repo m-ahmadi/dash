@@ -1,0 +1,21 @@
+{
+  "name": "util-ma",
+  "description": "Some utility functions that I always use.",
+  "main": "index.js",
+  "authors": [
+    "Mohammad Ahmadi"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "utility function",
+    "convenience method"
+  ],
+  "homepage": "https://github.com/m-ahmadi/util",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

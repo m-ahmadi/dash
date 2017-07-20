@@ -31,7 +31,6 @@
     "font-awesome": "^4.7.0",
     "uikit": "3.0.0-beta.24",
     "switchery": "^0.8.2",
-    "nouislider": "^10.0.0",
-    "leaflet": "Leaflet#^1.1.0"
+    "nouislider": "^10.0.0"
   }
 }

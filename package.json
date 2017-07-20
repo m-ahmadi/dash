@@ -19,6 +19,14 @@
     "express": "^4.15.3",
     "mongodb": "^2.2.26",
     "mysql": "^2.13.0",
-    "sway": "github:m-ahmadi/sway"
+    "babel-cli": "^6.24.1",
+    "babel-preset-env": "^1.6.0",
+    "gulp": "latest",
+    "gulp-cli": "latest",
+    "gulp-livereload": "latest",
+    "gulp-shell": "latest",
+    "handlebars": "latest",
+    "htmlbilder": "latest",
+    "requirejs": "latest"
   }
 }
