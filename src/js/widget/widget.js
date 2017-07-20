@@ -28,7 +28,7 @@ define([
 	let worker;
 	
 	function init() {
-		worker = new Worker(conf.ROOT + "js/worker.js");
+		worker = new Worker(conf.ROOT + "js/workers/worker.js");
 		worker.onmessage = e => {
 			let d = e.data;
 			extractor.emit(d.reqId, d.result);

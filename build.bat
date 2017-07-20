@@ -13,6 +13,7 @@ cmd /c printf %ROOT% > %INP%/html/links/root.htm
 cmd /c printf %ROOT% > %INP%/html/scripts/root.htm
 cmd /c printf %ROOT% > %INP%/html/scripts/app/root.htm
 cmd /c printf "main.js" > %INP%/html/scripts/app/filename.htm
+cmd /c printf "define(() => '%ROOT%');" > %INP%/js/core/root.js
 
 cmd /c htmlbilder %INP%/html/ -o %OUT%/index.html
 cmd /c handlebars %INP%/templates/template/ -f %OUT%/lib/templates.js -e hbs -m -o
