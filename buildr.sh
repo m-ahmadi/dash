@@ -3,7 +3,7 @@ PATH=$PATH:./node_modules/.bin
 INP=./src
 OUT=./release/statics
 HOUT=./release
-ROOT=/static/
+ROOT=/statics/
 FL=app.js
 
 rm -rf $OUT

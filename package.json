@@ -2,10 +2,8 @@
   "name": "dash",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "server": "node scripts/server",
-    "release": "node scripts/release",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -14,19 +12,20 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
-    "express": "^4.15.3",
-    "mongodb": "^2.2.26",
-    "mysql": "^2.13.0",
-    "babel-cli": "^6.24.1",
-    "babel-preset-env": "^1.6.0",
+    "express": "latest",
+    "mongodb": "latest",
+    "mysql": "latest",
+    "babel-cli": "latest",
+    "babel-preset-env": "latest",
     "gulp": "latest",
     "gulp-cli": "latest",
     "gulp-livereload": "latest",
     "gulp-shell": "latest",
     "handlebars": "latest",
     "htmlbilder": "latest",
-    "requirejs": "latest"
+    "requirejs": "latest",
+    "node-sass": "latest"
   }
 }

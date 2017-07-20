@@ -1,4 +1,4 @@
-REM @echo off
+@echo off
 path=%PATH%;./node_modules/.bin/
 set INP=./src
 set OUT=./release/statics
