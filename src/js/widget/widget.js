@@ -63,9 +63,9 @@ define([
 		return a;
 	}
 	function genSeries(sensors) {
-		// for line charts
+		// for line charts	
 		let res = [];
-		Object.keys(sensors).forEach(i => {
+		Object.keys(sensors).forEach((i, x) => {
 			let sensor = sensors[i];
 			res.push({
 				id: ""+sensor.id,
@@ -76,7 +76,35 @@ define([
 				tooltip: {
 					valueDecimals: 2,
 					valueSuffix: " " + sensor.units.filter(o => o.selected)[0].name
-				}
+				},
+				yAxis: x
+			});
+		});
+		return res;
+	}
+	function genLinechartYAxis(sensors) {
+		let res = [];
+		Object.keys(sensors).forEach(i => {
+			let sensor = sensors[i];
+			let unit = sensor.units.filter(o => o.selected)[0].name;
+			res.push({
+			//	gridLineWidth: 0,
+				minRange: 0.1,
+				opposite: unit !== "Percentage",
+				alignTicks: false,
+				title: {
+					text: `<b>${unit}</b>`,
+					style: {
+					//	color: "#000"
+						color: "#"+ sensor.color
+					}
+				},
+				labels: {
+					format: '{value}',
+					style: {
+						color: sensor.color
+					}
+				},
 			});
 		});
 		return res;
@@ -110,8 +138,21 @@ define([
 					fontSize: "14px"
 				}
 			},
+			xAxis: {
+				labels: false,
+			},
 			yAxis: {
 				title: false
+			},
+			tooltip: {
+				formatter: function () {
+					// <span style='color:{this.color}'>\u25CF</span>
+					return `
+						${this.series.name}:
+						<b>${ u.toDecimalPlace(this.y, 2) }</b>
+					`;
+				},
+				changeDecimals: 2,
 			},
 			series: genSeries2(sensors),
 			rangeSelector: false,
@@ -188,6 +229,7 @@ define([
 		w = o;
 		
 		function makeLineChart(container, title, sensors) {
+			let newSensors = genLinechartYAxis(sensors);
 			return Highcharts.stockChart(container[0], {
 				rangeSelector: false,
 				exporting: false,
@@ -228,6 +270,7 @@ define([
 						}
 					}
 				},
+				yAxis: genLinechartYAxis(sensors),
 				legend: {
 					enabled: true
 				},
@@ -473,7 +516,6 @@ define([
 				expand();
 			});
 			els.shrink.on("click", () => {
-				
 				shrink();
 			});
 			els.remove.on("click", () => {

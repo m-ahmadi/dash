@@ -41,7 +41,7 @@ function buildBarSeries(data, statKpis) {
 	arr.forEach(i => {
 		let name = i.KPI;
 		result.push({
-			id: statKpis.filter(v => {return v.name = name})[0].id,
+			id: statKpis.filter(v => {return v.name === name})[0].id,
 			name: name,
 			data: [i.ratio]
 		});
