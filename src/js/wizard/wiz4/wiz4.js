@@ -165,6 +165,19 @@ define([
 		els.rangeCount
 			.off("change")
 			.on("change", c.add.countChange); */
+		
+		els.submit
+			.off()
+			.on("click", e => {
+				if (e.target.disabled) return;
+				toggle.toDisable(false);
+				dataTable.toggleAll(false);
+				inst.emit("submit", get(), success => {
+					toggle.toDisable(true);
+					dataTable.toggleAll(true);
+					if (success) close();
+				});
+			});
 	}
 	function setForEdit(o) {
 		let m = o.map;
@@ -207,11 +220,24 @@ define([
 			.on("change", curr, c.edit.countChange)
 			.val(count)
 			.change(); */
+		
+		els.submit
+			.off()
+			.on("click", e => {
+				if (e.target.disabled) return;
+				toggle.toDisable(false);
+				dataTable.toggleAll(false);
+				inst.emit("submit", get(o), success => {
+					toggle.toDisable(true);
+					dataTable.toggleAll(true);
+					if (success) close();
+				});
+			});
 	}
-	function get() {
+	function get(o) {
 		// let rangeTypeVal = els.rangeType.val();
 		// let rangeCountVal = els.rangeCount.val();
-		let res = {
+		let data = {
 			// rangeType: rangeTypeVal,
 			// rangeCount: parseInt(rangeCountVal, 10),
 			// rangeTitle: share.getRangeTitle(rangeTypeVal, rangeCountVal),
@@ -228,8 +254,14 @@ define([
 			let id = v === "all" ? v : parseInt(v, 10);
 			if (id) groups.push(id);
 		});
-		res.map.groups = groups;
-		return res;
+		data.map.groups = groups;
+		
+		if (o) {
+			Object.keys(data).forEach( k => o[k] = data[k] );
+			return o;
+		}
+		
+		return data;
 	}
 	function close() {
 		inst.shallow = false;
@@ -270,18 +302,6 @@ define([
 				}
 				
 			});
-		
-		
-		els.submit.on("click", e => {
-			if (e.target.disabled) return;
-			toggle.toDisable(false);
-			dataTable.toggleAll(false);
-			inst.emit("submit", get(), success => {
-				toggle.toDisable(true);
-				dataTable.toggleAll(true);
-				if (success) close();
-			});
-		});
 	};
 	
 	window.w4 = () => els;

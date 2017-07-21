@@ -136,6 +136,18 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 			.on("change", c.groupChange)
 			.val("")
 			.change();
+			
+		els.submit
+			.off()
+			.on("click", e => {
+				if (e.target.disabled) return;
+				let toDis = els.toDisable; 
+				toDis.attr({disabled: true});
+				inst.emit("submit", get(), success => {
+					toDis.attr({disabled: false});
+					if (success) close();
+				});
+			});
 	}
 	function setForEdit(o) {
 		toggle.prev(false);
@@ -164,12 +176,25 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 			.on("change", {groupId: groupId}, c.groupChange)
 			.val(groupId)
 			.change();
+		
+		els.submit
+			.off()
+			.on("click", e => {
+				if (e.target.disabled) return;
+				let toDis = els.toDisable; 
+				toDis.attr({disabled: true});
+				inst.emit("submit", get(o), success => {
+					toDis.attr({disabled: false});
+					if (success) close();
+				});
+			});
 	}
-	function get() {
+	function get(o) {
 		let rangeTypeVal = els.rangeType.val();
 		let rangeCountVal = els.rangeCount.val();
 		let groups = els.groups;
-		return {
+		
+		let data = {
 			rangeType: rangeTypeVal,
 			rangeCount: parseInt(rangeCountVal, 10),
 			rangeTitle: share.getRangeTitle(rangeTypeVal, rangeCountVal),
@@ -179,6 +204,13 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 			},
 			statKpis: conf.STAT_KPIS
 		};
+		
+		if (o) {
+			Object.keys(data).forEach( k => o[k] = data[k] );
+			return o;
+		}
+		
+		return data;
 	}
 	function close() {
 		inst.shallow = false;
@@ -203,16 +235,6 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 		});
 		
 		els.btnParent.on("click", "[data-retry]", fetchGroups);
-		
-		els.submit.on("click", e => {
-			if (e.target.disabled) return;
-			let toDis = els.toDisable; 
-			toDis.attr({disabled: true});
-			inst.emit("submit", get(), success => {
-				toDis.attr({disabled: false});
-				if (success) close();
-			});
-		});
 	};
 	
 	return inst;

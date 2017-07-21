@@ -102,7 +102,7 @@ define([
 			el.val( d.RANGE_COUNT_DEF[type] );
 		}
 	};
-	function get() {
+	function get(o) {
 		let rangeTypeVal = els.rangeType.val();
 		let rangeCountVal = els.rangeCount.val();
 		
@@ -115,6 +115,10 @@ define([
 			rangeTitle: share.getRangeTitle( rangeTypeVal, rangeCountVal ),
 		};
 		
+		if (o) {
+			Object.keys(data).forEach( k => o[k] = data[k] );
+			return o;
+		}
 		return data;
 	}
 	function setForAdd() {
@@ -171,6 +175,19 @@ define([
 			.on("change", c.add.countChange)
 			.val(d.RANGE_COUNT)
 			.change();
+		
+		els.submit
+			.off()
+			.on("click", e => {
+				if (e.target.disabled) return;
+				let toggleAll = toggle.toDisable;
+				
+				toggleAll(false);
+				inst.emit("submit", get(), success => {
+					if (success) close();
+					toggleAll(true);
+				});
+			});
 	}
 	function setForEdit(o) {
 		let sens = o.sensors;
@@ -257,6 +274,18 @@ define([
 			.val(count)
 			.change();
 		
+		els.submit
+			.off()
+			.on("click", e => {
+				if (e.target.disabled) return;
+				let toggleAll = toggle.toDisable;
+				
+				toggleAll(false);
+				inst.emit("submit", get(o), success => {
+					if (success) close();
+					toggleAll(true);
+				});
+			});
 	}
 	function open() {
 		toggle.modal(true);
@@ -287,18 +316,6 @@ define([
 		els.prev.on("click", e => {
 			if (e.target.disabled) return;
 			inst.emit("prev");
-		});
-		els.submit.on("click", e => {
-			if (e.target.disabled) return;
-			let toggleAll = toggle.toDisable;
-			
-			toggleAll(false);
-			inst.emit("submit", get(), success => {
-				if (success) {
-					close();
-				}
-				toggleAll(true);
-			});
 		});
 		
 		device.on("login_error", emitLoingErr);

@@ -313,6 +313,7 @@ define([
 			root.addClass(toAdd);
 			if (chart) chart.setSize();
 			if ( map && els.body.is(":visible") ) map.container.updateSize();
+			let x = w;
 		}
 		function shrink() {
 			let curr = parseInt(root.attr("data-expand"), 10);
@@ -331,6 +332,7 @@ define([
 			root.addClass(toAdd);
 			if (chart) chart.setSize();
 			if ( map && els.body.is(":visible") ) map.container.updateSize();
+			let x = w;
 		}
 		function mark(stat, keep) {
 			let par = els.spinnerParent;
