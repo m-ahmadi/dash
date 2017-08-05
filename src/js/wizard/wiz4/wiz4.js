@@ -167,6 +167,7 @@ define([
 			.on("change", c.add.countChange); */
 		
 		els.submit
+			.text("Save")
 			.off()
 			.on("click", e => {
 				if (e.target.disabled) return;
@@ -222,6 +223,7 @@ define([
 			.change(); */
 		
 		els.submit
+			.text("Apply")
 			.off()
 			.on("click", e => {
 				if (e.target.disabled) return;

@@ -14,18 +14,22 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "express": "latest",
-    "mongodb": "latest",
-    "mysql": "latest",
     "babel-cli": "latest",
     "babel-preset-env": "latest",
+    "express": "latest",
     "gulp": "latest",
     "gulp-cli": "latest",
     "gulp-livereload": "latest",
     "gulp-shell": "latest",
     "handlebars": "latest",
-    "htmlbilder": "latest",
-    "requirejs": "latest",
-    "node-sass": "latest"
+    "htmlbilder": "^0.1.6",
+    "mongodb": "latest",
+    "mysql": "latest",
+    "node-sass": "latest",
+    "requirejs": "latest"
+  },
+  "dependencies": {
+    "npm": "^5.3.0",
+    "util-ma": "^1.1.12"
   }
 }

@@ -100,7 +100,10 @@ define([
 					}
 				},
 				labels: {
-					format: '{value}',
+				//	format: "{value}",
+					function () {
+						return this.value;
+					},
 					style: {
 						color: sensor.color
 					}
@@ -453,8 +456,8 @@ define([
 						navigator: {
 							series: {
 								data: o[ Object.keys(o)[0] ],
-								type: 'areaspline',
-								color: '#4572A7',
+								type: "areaspline",
+								color: "#4572A7",
 								fillOpacity: 0.05,
 								dataGrouping: {
 									smoothed: true

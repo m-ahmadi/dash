@@ -138,6 +138,7 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 			.change();
 			
 		els.submit
+			.text("Save")
 			.off()
 			.on("click", e => {
 				if (e.target.disabled) return;
@@ -178,6 +179,7 @@ define(["core/uk", "core/config", "core/token", "./defaults", "./share"], (uk, c
 			.change();
 		
 		els.submit
+			.text("Apply")
 			.off()
 			.on("click", e => {
 				if (e.target.disabled) return;
