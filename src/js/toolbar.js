@@ -11,9 +11,10 @@ define([], () => {
 	const MIN_SECONDS = 15;
 	const MAX_SECONDS = 300;
 	
-	
 	function gap(count, type) {
-		return type === "s" ? count * 1000 : type === "m" ? count * 60000 : DEFAULT_GAP;
+		return type === "s"
+			? count * 1000 : type === "m" ? count * 60000
+			: DEFAULT_GAP;
 	}
 	function parseGapCount() {
 		return parseInt(els.gapCount.val(), 10);
@@ -61,6 +62,8 @@ define([], () => {
 				autorefOn = false;
 				emitEnd();
 				toDis.attr({disabled: true});
+				els.gapCount.val(gapCount);
+				els.gapType.val(gapType);
 				disableBtns();
 			}
 		});
@@ -107,10 +110,12 @@ define([], () => {
 		
 		els.cancel.on("click", e => {
 			if (e.target.disabled) return;
+			els.gapCount.val(gapCount);
+			els.gapType.val(gapType);
 			disableBtns();
 		});
 		els.apply.on("click", e => {
-			if (e.target.disabled) return; 
+			if (e.target.disabled) return;
 			gapCount = parseGapCount();
 			gapType = els.gapType.val();
 			emitEnd();
