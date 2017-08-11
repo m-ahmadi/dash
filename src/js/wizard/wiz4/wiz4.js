@@ -156,6 +156,7 @@ define([
 		
 		els.violated.prop({checked: false});
 		els.live.prop({checked: false});
+		els.violatedServices.prop({checked: false});
 		
 		/* els.rangeType
 			.off("change")
@@ -204,6 +205,7 @@ define([
 		
 		els.violated.prop({checked: m.violated});
 		els.live.prop({checked: m.live});
+		els.violatedServices.prop({checked: m.violatedServices});
 		
 		/* let type = o.rangeType;
 		let count = o.rangeCount;
@@ -247,7 +249,8 @@ define([
 				groups: null,
 				devices: dataTable.getData() || null,
 				violated: els.violated.prop("checked"),
-				live: els.live.prop("checked")
+				live: els.live.prop("checked"),
+				violatedServices: els.violatedServices.prop("checked")
 			}
 		};
 		let groups = [];
