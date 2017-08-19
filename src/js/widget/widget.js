@@ -67,6 +67,7 @@ define([
 		let res = [];
 		Object.keys(sensors).forEach((i, x) => {
 			let sensor = sensors[i];
+			let unit = sensor.units.filter(o => o.selected)[0].name;
 			res.push({
 				id: ""+sensor.id,
 				type: "line",
@@ -75,18 +76,41 @@ define([
 				data: [],
 				tooltip: {
 					valueDecimals: 2,
-					valueSuffix: " " + sensor.units.filter(o => o.selected)[0].name
+					valueSuffix: " " + unit
 				},
 				yAxis: x
 			});
 		});
 		return res;
 	}
+	function yAxisLabelFormatter(value, unit) {
+		const N = 1000000;
+		let res;
+		switch (unit) {
+			case "Mb/s": res = "Mb"; break;
+			case "MB/s": res = "MB"; break;
+			case "KB/s": res = "KB"; break;
+			case "Kb/s": res = "Kb"; break;
+			case "B/s":  res = "B";  break;
+		}
+		return (value / N) + res;
+	}
+	function isUnitByty(unit) {
+		return  unit === "Mb/s" ||
+				unit === "MB/s" ||
+				unit === "KB/s" ||
+				unit === "Kb/s" ||
+				unit === "B/s"
+				? true
+				: false;
+	}
 	function genLinechartYAxis(sensors) {
 		let res = [];
+		let prevUnit;
 		Object.keys(sensors).forEach(i => {
 			let sensor = sensors[i];
 			let unit = sensor.units.filter(o => o.selected)[0].name;
+			prevUnit = unit;
 			res.push({
 			//	gridLineWidth: 0,
 				minRange: 0.1,
@@ -101,8 +125,10 @@ define([
 				},
 				labels: {
 				//	format: "{value}",
-					function () {
-						return this.value;
+					formatter: function () {
+						return isUnitByty(unit)
+							? yAxisLabelFormatter(this.value, unit)
+							: this.value;
 					},
 					style: {
 						color: sensor.color
@@ -232,7 +258,6 @@ define([
 		w = o;
 		
 		function makeLineChart(container, title, sensors) {
-			let newSensors = genLinechartYAxis(sensors);
 			return Highcharts.stockChart(container[0], {
 				rangeSelector: false,
 				exporting: false,
