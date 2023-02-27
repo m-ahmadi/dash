@@ -29,7 +29,7 @@
     "requirejs": "latest"
   },
   "dependencies": {
-    "npm": "^5.3.0",
+    "npm": "^9.5.1",
     "util-ma": "^1.1.12"
   }
 }
